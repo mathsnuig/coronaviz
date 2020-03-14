@@ -32,3 +32,7 @@ date,ncase,ndeath,nrecov,gender,area,age
 11/03/2020,1,0,0,female,south,NA
 11/03/2020,2,0,0,unknown,north,NA
 11/03/2020,0,0,1,unknown,south,NA
+12/03/2020,27,0,0,unknown,unknown,NA
+12/03/2020,2,0,0,unknown,north,NA
+13/03/2020,20,0,0,unknown,unknown,NA
+13/03/2020,9,0,0,unknown,north,NA

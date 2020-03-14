@@ -65,9 +65,9 @@ sidebar <- dashboardSidebar(disable=FALSE,
                             
 
                             sidebarMenu(id = 'tabs', 
+                                        menuItem("Time", icon = icon("line-chart"), tabName = "time"),
                                         menuItem("Map", icon = icon("map"), tabName = "map"),
-                                        menuItem("Time series", icon = icon("line-chart"), tabName = "time"),
-                                        menuItem("Data store", icon = icon("eye"), tabName = "data")
+                                        menuItem("Data", icon = icon("eye"), tabName = "data")
                             )
                             
                             
@@ -82,35 +82,28 @@ body <- dashboardBody(
     tabItems(
   
         # Map Tab #
-        tabItem("map", 
+        tabItem("map",    
                 fluidRow(
-                  box(width = 12, 
-                      infoBoxOutput("CasesBox"),
-                      infoBoxOutput("MortBox"),
-                      infoBoxOutput("RecovBox")
-                  ),                
-                fluidRow(
-                  box(title = "Map using Mater, Galway and Cork Hospitals as locations", 
+                  box(title = "Map using Belfast, Cork, Dublin and Galway Hospitals as locations (location annoncement stopped on March 12th)", 
                       width = 12,
                       leafletOutput("map", width = "70%", height = 750)
                     )
                   )
 
-                    
-                )
         ),
         
         # Time series Tab #
-        tabItem("time", 
+        tabItem("time",  
                 fluidRow(
-                    box(width = 12, title = "Cumulative cases", 
+                  box(width = 12, 
+                      infoBoxOutput("CasesBox"),
+                      infoBoxOutput("MortBox"),
+                      infoBoxOutput("RecovBox"))
+                  ),            
+                fluidRow(
+                    box(width = 12, title = "Cumulative and new cases per day", 
                         plotlyOutput("cumulcases", width = "70%", height = 500)
                     )
-                ),
-                fluidRow(
-                  box(width = 12, title = "Number of new cases per day, by gender", 
-                      plotlyOutput("timeseries", width = "70%", height = 500)
-                  )
                 )
         ),
         
@@ -238,12 +231,13 @@ server <- function(input, output) {
       g = dataRaw() %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
         group_by(date) %>%
-        summarise(ncases = sum(ncase)) %>%
+        summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
         na.omit() %>%
-        mutate(ncases = cumsum(ncases)) %>%
-        ggplot(aes(x=date,y=ncases)) + 
-        geom_line() + geom_point() + theme(legend.position="none") + labs(y="Total cases")
-      ggplotly(g)
+        mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
+        ggplot(aes(x=date,y=ccases,label=Date,label1=Total_cases,label2=New_cases)) + 
+        geom_line() + geom_point() + geom_col(aes(x=date,y=ncases)) +
+        theme(legend.position="none") + labs(y="Cases")
+      ggplotly(g, tooltip = c("Date","Total_cases","New_cases"))
       
     })
     
@@ -252,12 +246,10 @@ server <- function(input, output) {
   
             g = dataRaw() %>%
               mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-              mutate_at(vars(gender), funs(as.character(.))) %>%
-              bind_rows(mutate(., gender = "All")) %>%
-              group_by(date,gender) %>%
+              group_by(date) %>%
               summarise(ncases = sum(ncase)) %>%
               na.omit() %>%
-              ggplot(aes(x=date,y=ncases,color=gender)) + 
+              ggplot(aes(x=date,y=ncases)) + 
               geom_line() + geom_point() + theme(legend.position="none") + labs(y="New cases")
         ggplotly(g)
         
