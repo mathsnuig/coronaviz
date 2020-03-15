@@ -75,13 +75,14 @@ sidebar <- dashboardSidebar(disable=FALSE,
 body <- dashboardBody(
     
   
-    # Motion Tab #
+    # tabs
     tabItems(
   
         # Map Tab #
         tabItem("map",    
                 fluidRow(
-                  box(title = "Map using Belfast, Cork, Dublin, Letterkenny and Galway Hospitals as locations (no locations for 47 cases announced March 12/13th)", 
+                  box(title = "Map of cases on the island of Ireland using Belfast, Cork, Dublin, Letterkenny and Galway as locations", 
+                      footer = "Note: no locations for 47 cases announced March 12/13th",
                       width = 12,
                       leafletOutput("map", width = "70%", height = 600)
                     )
@@ -91,14 +92,16 @@ body <- dashboardBody(
         
         # Time series Tab #
         tabItem("time",  
+                fluidRow(h5("Data from Ireland (Dept. of Health) and NI (NHS) combined")),
                 fluidRow(
                   box(width = 12, 
                       infoBoxOutput("CasesBox"),
                       infoBoxOutput("MortBox"),
                       infoBoxOutput("RecovBox"))
-                  ),            
+                  ),     
+                
                 fluidRow(
-                    box(width = 12, title = "Cumulative and new cases per day", 
+                    box(width = 12, title = "Cumulative and new cases on island of Ireland per day", 
                         plotlyOutput("cumulcases", width = "80%", height = 400)
                     )
                 )
@@ -117,18 +120,20 @@ body <- dashboardBody(
                   )
                 ),
                 fluidRow(
-                  box(width = 12, title = "Compare Ireland with other countries scaled to our population, with time shifted", 
-                      plotlyOutput("irelandcompare", width = "90%", height = 500)
+                  box(width = 12, 
+                      title = "Compare (island of) Ireland cases with other countries scaled by population, with time shifted", 
+                      plotlyOutput("irelandcompare", width = "90%", height = 500),
+                      h5("Data from Dept. of Health (Ireland), NHS (NI) and WHO")
                   )
                 )
         ),
         
         # Data view Tab #
         tabItem("data",
-                fluidRow(box(width = 12, title = "Data table",
+                fluidRow(box(width = 12, title = "Data from Deptartment of Health (Ireland), NHS (NI) and WHO",
                              column(10, DTOutput("dattable"))
                 )
-                )
+              )
         )
     ) # end of tabItems
     
@@ -190,7 +195,7 @@ server <- function(input, output) {
             addCircleMarkers(lng= ~long, 
                              lat= ~lat, 
                              layerId = ~area,
-                             radius = ~ncases*1.5)
+                             radius = ~ncases*2)
     })
     
     # Show a popup at the given location
