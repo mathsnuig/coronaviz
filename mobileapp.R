@@ -2,6 +2,7 @@ library(shiny)
 library(shinydashboard)
 library(shinythemes)
 library(shinyjs)
+library(shinyMobile)
 library(readr)
 library(leaflet)
 library(leaflet.extras)
@@ -11,135 +12,71 @@ library(ggplot2)
 library(DT)
 library(googleVis)
 
-# Any JS functions
-jsCode = 'shinyjs.clear_warning = function(){document.getElementById("note_save_confirm").innerHTML = "";}'
+                            
+           
+ui = f7Page(
+  title = "Coronavirus Ireland",
+  f7TabLayout(
+      navbar = f7Navbar(
+        title = "",
+        # enable both panels
+        left_panel = FALSE,
+        right_panel = FALSE
+      ),
+    # f7Tabs is a special toolbar with included navigation
+    f7Tabs(
+      animated = TRUE,
+      id = "tabs",
+      # Map tab
+      f7Tab(
+        tabName = "map",
+        icon = f7Icon("map"),
+        active = TRUE,
+        # Tab 1 content
+        h5("Map of cases on the island of Ireland using Belfast, Cork, Dublin, Letterkenny and Galway as locations"), 
+        h5("Note: no locations for 47 cases announced March 12/13th"),
+        leafletOutput("map", width = "90%", height = 600)
 
-# Loading Spinner Settings
-options(spinner.color="#ffd700", spinner.type = 2, spinner.color.background = 'white' )
-
-
-# Header
-header <- dashboardHeader(disable = TRUE)
-
-# Sidebar
-sidebar <- dashboardSidebar(disable=FALSE,width='150px',
-                            # Custom CSS to hide the default logout panel
-                            tags$head(tags$style(HTML('.shiny-server-account { display: none; }'))),
-                            tags$head(tags$style(HTML('.box.box-solid.box-primary>.box-header{ background-color: #D2D6DE; }'))),
-                            tags$head(tags$style(HTML('.box.box-solid.box-primary{ border: 1px solid #D2D6DE;'))),
-                            tags$head(tags$style(HTML('.box.box-primary{ border-top-color: #D2D6DE;}'))),
-                            tags$head(tags$style(HTML('.box.box-solid.box-primary>.box-header>.box-title{ color: #242D32;}'))),
-                            
-                            tags$head(tags$style(HTML('.content-wrapper{ background-color: #c8c9c7; }'))),
-                            tags$head(tags$style(HTML('.content-wrapper{ background-color: #ECF1F5; }'))),
-                            ###
-                            tags$head(tags$style(HTML('.irs-bar{ background: #ffd700; border-top: #ffd700; border-bottom: #ffd700;}'))),
-                            tags$head(tags$style(HTML('.irs-bar-edge{ background: #ffd700; border: #ffd700;}'))),
-                            tags$head(tags$style(HTML('.irs-single{ background: #888B8D;}'))),
-                            tags$head(tags$style(HTML('.nav-tabs-custom>.nav-tabs>li.active{ border-top-color: #888B8D;}'))),
-                            
-                            # Hide error messages while calculating predictions/plots
-                            tags$style(type="text/css",
-                                       ".shiny-output-error { visibility: hidden; }",
-                                       ".shiny-output-error:before { visibility: hidden; }"
-                            ),
-                            # Add icons
-                            tags$link(rel="stylesheet", href="https://fonts.googleapis.com/icon?family=Material+Icons"),
-                            tags$link(rel = 'stylesheet', href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"),
-                            #Lato Font
-                            tags$link(rel = 'stylesheet', href = 'https://fonts.googleapis.com/css?family=Lato'),
-                            # JavaScript
-                            tags$head(tags$script(src="script.js")),
-                            # CSS
-                            tags$head(tags$link(rel = "stylesheet", type = "text/css", href = "style_sheet.css")),
-                            # Extend JS
-                            useShinyjs(),
-                            extendShinyjs(text = jsCode, functions = 'clear_warning'),
-                            
-                            tags$head(tags$style(HTML('.skin-black .wrapper {background-color: 	#ECF1F5;}'))),
-                            
-                            #### ####
-                            
-                            sidebarMenu(id = 'tabs', 
-                                        menuItem("Time", icon = icon("line-chart"), tabName = "time"),
-                                        menuItem("Compare", icon = icon("globe"), tabName = "compare"),
-                                        menuItem("Map", icon = icon("map"), tabName = "map"),
-                                        menuItem("Data", icon = icon("eye"), tabName = "data")
-                            )
-                            
-                            
-                            
+      ),
+      # Time tab
+      f7Tab(
+        tabName = "time",
+        icon = f7Icon("graph_square"),
+        active = FALSE,
+        # Tab 2 content
+        h5("Cumulative and new case data from Ireland (Dept. of Health) and NI (NHS) combined"),
+        infoBoxOutput("CasesBox"),
+        infoBoxOutput("MortBox"),
+        infoBoxOutput("RecovBox"),
+        plotlyOutput("cumulcases", width = "90%", height = 400)
+        
+      ),
+      # Compare tab
+      f7Tab(
+        tabName = "compare",
+        icon = f7Icon("calendar"),
+        active = FALSE,
+        # Tab 3 content
+        h5("Compare (island) of Ireland trajectory with other countries scaled by population"),
+        f7SmartSelect("place", "Country to compare", 
+                      choices = c("france", "germany", "italy", "spain", "uk"), 
+                      selected = "italy"),
+        h5("Decide how many days behind/ahead Ireland is to your selected country"),
+        f7Slider("days","Decide the time difference",min = -5,max=30,value=13,scale = TRUE,step = 1),
+        plotlyOutput("irelandcompare", width = "90%", height = 500)
+      ),
+      # Data tab
+      f7Tab(
+        tabName = "data",
+        icon = f7Icon("list_number"),
+        active = FALSE,
+        # Tab 4 content
+        DTOutput("dattable", width = "90%")
+      )
+    )
+  )
 )
-
-# Body
-body <- dashboardBody(
-  
-    # tabs
-    tabItems(
-  
-        # Map Tab #
-        tabItem("map",    
-                fluidRow(
-                  box(title = "Map of cases on the island of Ireland using Belfast, Cork, Dublin, Letterkenny and Galway as locations", 
-                      footer = "Note: no locations for 47 cases announced March 12/13th",
-                      width = 12,
-                      leafletOutput("map", width = "70%", height = 600)
-                    )
-                  )
-
-        ),
-        
-        # Time series Tab #
-        tabItem("time",  
-                fluidRow(h5("Data from Ireland (Dept. of Health) and NI (NHS) combined")),
-                fluidRow(
-                  box(width = 12, 
-                      infoBoxOutput("CasesBox"),
-                      infoBoxOutput("MortBox"),
-                      infoBoxOutput("RecovBox"))
-                  ),     
-                
-                fluidRow(
-                    box(width = 12, title = "Cumulative and new cases on island of Ireland per day", 
-                        plotlyOutput("cumulcases", width = "80%", height = 400)
-                    )
-                )
-        ),
-        
-        # Country comparison Tab #
-        tabItem("compare", 
-                
-                fluidRow(
-                  column(width=6,
-                         selectInput("place", "Country to compare", 
-                                     choices = c("france", "germany", "italy", "spain", "uk"), 
-                                     selected = "italy")),
-                  column(width=6,
-                         sliderInput("days","Decide the time difference",min = -5,max=30,value=13)
-                  )
-                ),
-                fluidRow(
-                  box(width = 12, 
-                      title = "Compare (island of) Ireland cases with other countries scaled by population, with time shifted", 
-                      plotlyOutput("irelandcompare", width = "90%", height = 500),
-                      h5("Data from Dept. of Health (Ireland), NHS (NI) and WHO")
-                  )
-                )
-        ),
-        
-        # Data view Tab #
-        tabItem("data",
-                fluidRow(box(width = 12, title = "Data from Department of Health (Ireland), NHS (NI) and WHO",
-                             column(10, DTOutput("dattable"))
-                )
-              )
-        )
-    ) # end of tabItems
-    
-)# end of body
-
-
-
+ 
 # Define server logic required to draw a leaflet
 server <- function(input, output) {
     
@@ -201,7 +138,7 @@ server <- function(input, output) {
             addCircleMarkers(lng= ~long, 
                              lat= ~lat, 
                              layerId = ~area,
-                             radius = ~ncases*2)
+                             radius = ~ncases)
     })
     
     # Show a popup at the given location
@@ -283,20 +220,6 @@ server <- function(input, output) {
       
     })
     
-    # #### Plotly cases per day
-    # output$timeseries <- renderPlotly({
-    # 
-    #         g = dataIreland() %>%
-    #           mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-    #           group_by(date) %>%
-    #           summarise(ncases = sum(ncase)) %>%
-    #           na.omit() %>%
-    #           ggplot(aes(x=date,y=ncases)) + 
-    #           geom_line() + geom_point() + theme(legend.position="none") + labs(y="New cases")
-    #     ggplotly(g)
-    #     
-    # })
-    
 
     ################### Comparison plots ############
     ##### Plotly Ireland v other countries
@@ -342,7 +265,7 @@ server <- function(input, output) {
 
 # Run the application 
 shinyApp(
-    ui = dashboardPage(header, sidebar, body, skin = 'black'),
+    ui = ui,
     server = server
 )
 
