@@ -65,6 +65,8 @@ sidebar <- dashboardSidebar(disable=FALSE,width='150px',
                                         menuItem("Compare", icon = icon("globe"), tabName = "compare"),
                                         menuItem("Map", icon = icon("map"), tabName = "map"),
                                         menuItem("Data", icon = icon("eye"), tabName = "data")
+                                        #,
+                                        #checkboxInput("partitiion",label = "Partition")
                             )
                             
                             
@@ -90,8 +92,14 @@ body <- dashboardBody(
         ),
         
         # Time series Tab #
-        tabItem("time",  
-                fluidRow(h5("Data from Ireland (Dept. of Health) and NI (NHS) combined")),
+        tabItem("time", 
+                fluidRow(h3(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
+                                   "HSE Coronavirus information", 
+                                   target="_blank"))),
+                fluidRow(h3(paste0("Data from Ireland ("),
+                            tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
+                                  "Department of Health", target="_blank"),
+                            paste0(") and Northern Ireland (NHS) combined"))),
                 fluidRow(
                   box(width = 12, 
                       infoBoxOutput("CasesBox"),
@@ -102,12 +110,17 @@ body <- dashboardBody(
                     box(width = 12, title = "Cumulative and new cases on island of Ireland per day", 
                         plotlyOutput("cumulcases", width = "80%", height = 400)
                     )
-                )
+                ),
+                fluidRow(h3(paste0("Dr. Andrew Simpkin (NUI Galway)"),
+                            tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1", target="_blank"),
+                            paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
+                            tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer", target="_blank")))
         ),
         
         # Country comparison Tab #
         tabItem("compare", 
-                
+                fluidRow(h3("Number of cases from other countries are scaled to reflect the Irish population")),
+                fluidRow(h5("e.g. ROI+NI (6.712 million people) is about 11% of Italy's population (60.48m), so 100 cases in Italy is like having 11 cases in Ireland")),
                 fluidRow(
                   column(width=6,
                          selectInput("place", "Country to compare", 
@@ -121,7 +134,7 @@ body <- dashboardBody(
                   box(width = 12, 
                       title = "Compare (island of) Ireland cases with other countries scaled by population, with time shifted", 
                       plotlyOutput("irelandcompare", width = "90%", height = 500),
-                      h5("Data from Dept. of Health (Ireland), NHS (NI) and WHO")
+                      h3("Data from Dept. of Health (Ireland), NHS (NI) and WHO")
                   )
                 )
         ),
@@ -150,8 +163,13 @@ server <- function(input, output) {
                                country=="germany"~82.79,
                                country=="italy"~60.48,
                                country=="spain"~46.66,
-                               country=="uk"~66.44))
-      
+                               country=="uk"~66.44)) 
+      # if(input$partition == TRUE){
+      #   res <- res %>%
+      #     filter(area!= "north") %>%
+      #     mutate(pop = case_when(country=="ireland"~4.83))
+      # }
+      # res
     })
     
     # irish data only
@@ -246,18 +264,6 @@ server <- function(input, output) {
       )
     })
     
-    
-    ## mort box
-    output$RecovBox <- renderInfoBox({
-      dat <- dataIreland()
-      infoBox(
-        "Recovered", paste0(sum(dat$nrecov,na.rm=TRUE)), icon = icon("list"),
-        color = "green"
-      )
-    })
-    
-    
-    
     #################### Data Table  ###################
     output$dattable <- renderDT({
       
@@ -331,7 +337,7 @@ server <- function(input, output) {
         na.omit() %>%
         mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
         ggplot(aes(x=date,y=ccases,color=country,fill=country,label=Date,label1=Country,label2=Total_cases)) +
-        geom_line() + geom_point() + labs(y="Cases") + theme_bw() + 
+        geom_line() + geom_point() + labs(y="Cases (scaled to Ireland)") + theme_bw() + 
         ggtitle(paste0("Mean daily difference is ",round(mean(comp$diff,na.rm=TRUE),0), " cases"))
       ggplotly(g, tooltip = c("Country","Date","Total_cases","New_cases"))
       

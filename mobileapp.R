@@ -33,10 +33,21 @@ ui = f7Page(
         icon = f7Icon("map"),
         active = TRUE,
         # Tab 1 content
-        h5("Map of cases on the island of Ireland using Belfast, Cork, Dublin, Letterkenny and Galway as locations"), 
+        h4(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
+                  "HSE Coronavirus information", 
+                  target="_blank")),
+        h5(paste0("Data from Ireland ("),
+           tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/",
+                  "Department of Health", target="_blank"),
+           paste0(") and Northern Ireland (NHS) combined")),
+        h4("Map of cases on the island of Ireland using Belfast, Cork, Dublin, Letterkenny and Galway as locations"), 
         h5("Note: no locations for 47 cases announced March 12/13th"),
-        leafletOutput("map", width = "90%", height = 600)
-
+        leafletOutput("map", width = "90%", height = 600),
+        h4(paste0("Dr. Andrew Simpkin (NUI Galway)"),
+                  tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
+           paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
+                  tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
+        
       ),
       # Time tab
       f7Tab(
@@ -44,7 +55,10 @@ ui = f7Page(
         icon = f7Icon("graph_square"),
         active = FALSE,
         # Tab 2 content
-        h5("Cumulative and new case data from Ireland (Dept. of Health) and NI (NHS) combined"),
+        h4(paste0("Cumulative and new case data from Ireland ("),
+           tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/",
+                  "Department of Health", target="_blank"),
+           paste0(") and Northern Ireland (NHS) combined")),
         infoBoxOutput("CasesBox"),
         infoBoxOutput("MortBox"),
         plotlyOutput("cumulcases", width = "90%", height = 400)
@@ -56,7 +70,9 @@ ui = f7Page(
         icon = f7Icon("calendar"),
         active = FALSE,
         # Tab 3 content
-        h5("Compare (island) of Ireland trajectory with other countries scaled by population"),
+        h5("Compare (island) of Ireland trajectory with other countries (scaled by population)"),
+        h6("Number of cases from other countries are scaled to reflect the Irish population"),
+        h6("e.g. ROI+NI (6.712 million people) is about 11% of Italy's population (60.48m), so 100 cases in Italy is like having 11 cases in Ireland"),
         f7SmartSelect("place", "Country to compare", 
                       choices = c("france", "germany", "italy", "spain", "uk"), 
                       selected = "italy"),
@@ -191,17 +207,6 @@ server <- function(input, output) {
     })
     
     
-    ## mort box
-    output$RecovBox <- renderInfoBox({
-      dat <- dataIreland()
-      infoBox(
-        "Recovered", paste0(sum(dat$nrecov,na.rm=TRUE)), icon = icon("list"),
-        color = "green"
-      )
-    })
-    
-    
-    
     #################### Data Table  ###################
     output$dattable <- renderDT({
       
@@ -261,7 +266,7 @@ server <- function(input, output) {
         na.omit() %>%
         mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
         ggplot(aes(x=date,y=ccases,color=country,fill=country,label=Date,label1=Country,label2=Total_cases)) +
-        geom_line() + geom_point() + labs(y="Cases") + theme_bw() + 
+        geom_line() + geom_point() + labs(y="Cases (scaled to Ireland)") + theme_bw() + 
         ggtitle(paste0("Mean daily difference is ",round(mean(comp$diff,na.rm=TRUE),0), " cases"))
       ggplotly(g, tooltip = c("Country","Date","Total_cases","New_cases"))
       
