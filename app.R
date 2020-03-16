@@ -95,8 +95,7 @@ body <- dashboardBody(
                 fluidRow(
                   box(width = 12, 
                       infoBoxOutput("CasesBox"),
-                      infoBoxOutput("MortBox"),
-                      infoBoxOutput("RecovBox"))
+                      infoBoxOutput("MortBox"))
                   ),     
                 
                 fluidRow(
@@ -201,7 +200,7 @@ server <- function(input, output) {
             addCircleMarkers(lng= ~long, 
                              lat= ~lat, 
                              layerId = ~area,
-                             radius = ~ncases*2)
+                             radius = ~ncases)
     })
     
     # Show a popup at the given location

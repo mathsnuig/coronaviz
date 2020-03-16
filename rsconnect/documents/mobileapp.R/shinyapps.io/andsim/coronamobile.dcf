@@ -1,0 +1,13 @@
+name: coronamobile
+title: coronamobile
+username:
+account: andsim
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1952262
+bundleId: 2885972
+url: https://andsim.shinyapps.io/coronamobile/
+when: 1584351853.029
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: app.R

@@ -47,7 +47,6 @@ ui = f7Page(
         h5("Cumulative and new case data from Ireland (Dept. of Health) and NI (NHS) combined"),
         infoBoxOutput("CasesBox"),
         infoBoxOutput("MortBox"),
-        infoBoxOutput("RecovBox"),
         plotlyOutput("cumulcases", width = "90%", height = 400)
         
       ),
@@ -105,6 +104,7 @@ server <- function(input, output) {
     # irish area data
     dataArea <- reactive({        
     dataIreland() %>% 
+        filter(area != "unknown") %>%
             mutate(long = case_when(area=="east" ~ -6.2690,
                                     area=="west" ~ -9.0650,
                                     area=="south" ~ -8.5110,
@@ -127,18 +127,24 @@ server <- function(input, output) {
     
     # Create the map
     output$map <- renderLeaflet({
+      labs <- lapply(seq(nrow(dataArea())), function(i) {
+        paste0( '<p>', dataArea()[i, "ncases"],' cases </p><p>', 
+                dataArea()[i, "ndeaths"], ' deaths </p>' ) 
+      })
+      
         dataArea() %>%
             leaflet() %>%
             addTiles(
                 urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
                 attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>'
             ) %>%
-            setView(lng = -8, lat = 53.5, zoom = 7) %>%
+            setView(lng = -8, lat = 53.5, zoom = 6) %>%
             clearShapes() %>%
             addCircleMarkers(lng= ~long, 
                              lat= ~lat, 
                              layerId = ~area,
-                             radius = ~ncases)
+                             radius = ~ncases/2,
+                             label = lapply(labs, htmltools::HTML))
     })
     
     # Show a popup at the given location
