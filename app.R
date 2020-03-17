@@ -22,7 +22,7 @@ options(spinner.color="#ffd700", spinner.type = 2, spinner.color.background = 'w
 header <- dashboardHeader(disable = TRUE)
 
 # Sidebar
-sidebar <- dashboardSidebar(disable=FALSE,width='150px',
+sidebar <- dashboardSidebar(disable=FALSE,width='190px',
                             # Custom CSS to hide the default logout panel
                             tags$head(tags$style(HTML('.shiny-server-account { display: none; }'))),
                             tags$head(tags$style(HTML('.box.box-solid.box-primary>.box-header{ background-color: #D2D6DE; }'))),
@@ -61,6 +61,9 @@ sidebar <- dashboardSidebar(disable=FALSE,width='150px',
                             #### ####
                             
                             sidebarMenu(id = 'tabs', 
+                                        selectInput("partition", "Area", 
+                                                    choices = c("Republic of Ireland", "Island of Ireland"),
+                                                    selected = "Island of Ireland"),
                                         menuItem("Time", icon = icon("line-chart"), tabName = "time"),
                                         menuItem("Compare", icon = icon("globe"), tabName = "compare"),
                                         menuItem("Map", icon = icon("map"), tabName = "map"),
@@ -80,12 +83,26 @@ body <- dashboardBody(
     tabItems(
   
         # Map Tab #
-        tabItem("map",    
+        tabItem("map",   
+                h3(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
+                          "HSE Coronavirus information", 
+                          target="_blank")),
+                h3(paste0("Data from Ireland ("),
+                   tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
+                          "Department of Health", target="_blank"),
+                   paste0("), Northern Ireland ("),
+                   tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
+                          "NHS", target="_blank"),
+                   paste0(") and WHO")),
                 fluidRow(
-                  box(title = "Map of cases on the island of Ireland using Belfast, Cork, Dublin, Letterkenny and Galway as locations", 
+                  box(title = "Map of cases using Belfast, Cork, Dublin, Letterkenny and Galway as locations", 
                       footer = "Note: no locations for 47 cases announced March 12/13th",
                       width = 12,
-                      leafletOutput("map", width = "70%", height = 600)
+                      leafletOutput("map", width = "70%", height = 600),
+                      h4(paste0("Developed by Dr. Andrew Simpkin (NUI Galway)"),
+                         tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
+                         paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
+                         tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
                     )
                   )
 
@@ -93,34 +110,45 @@ body <- dashboardBody(
         
         # Time series Tab #
         tabItem("time", 
-                fluidRow(h3(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
+                h3(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
                                    "HSE Coronavirus information", 
-                                   target="_blank"))),
-                fluidRow(h3(paste0("Data from Ireland ("),
-                            tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
-                                  "Department of Health", target="_blank"),
-                            paste0(") and Northern Ireland (NHS) combined"))),
-                fluidRow(
-                  box(width = 12, 
-                      infoBoxOutput("CasesBox"),
-                      infoBoxOutput("MortBox"))
-                  ),     
+                                   target="_blank")),
+                h3(paste0("Data from Ireland ("),
+                   tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
+                          "Department of Health", target="_blank"),
+                   paste0("), Northern Ireland ("),
+                   tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
+                          "NHS", target="_blank"),
+                   paste0(") and WHO")),
+                valueBoxOutput("CasesBox"),
+                valueBoxOutput("MortBox"),
                 
                 fluidRow(
-                    box(width = 12, title = "Cumulative and new cases on island of Ireland per day", 
-                        plotlyOutput("cumulcases", width = "80%", height = 400)
+                    box(width = 12, title = "Cumulative and new cases per day", 
+                        plotlyOutput("cumulcases", width = "80%", height = 400),
+                        plotlyOutput("cumularea", width = "80%", height = 400),
+                        plotlyOutput("cumulgender", width = "80%", height = 400)
                     )
                 ),
-                fluidRow(h3(paste0("Dr. Andrew Simpkin (NUI Galway)"),
+                h3(paste0("Developed by Dr. Andrew Simpkin (NUI Galway)"),
                             tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1", target="_blank"),
                             paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
-                            tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer", target="_blank")))
+                            tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer", target="_blank"))
         ),
         
         # Country comparison Tab #
         tabItem("compare", 
-                fluidRow(h3("Number of cases from other countries are scaled to reflect the Irish population")),
-                fluidRow(h5("e.g. ROI+NI (6.712 million people) is about 11% of Italy's population (60.48m), so 100 cases in Italy is like having 11 cases in Ireland")),
+                h3(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
+                          "HSE Coronavirus information", 
+                          target="_blank")),
+                h3(paste0("Data from Ireland ("),
+                   tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
+                          "Department of Health", target="_blank"),
+                   paste0("), Northern Ireland ("),
+                   tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
+                          "NHS", target="_blank"),
+                   paste0(") and WHO")),
+                h3("Number of cases from other countries are scaled to reflect the Irish population. For example: ROI+NI (6.712 million people) is about 11% of Italy's population (60.48m), so 100 cases in Italy is like having 11 cases in Ireland"),
                 fluidRow(
                   column(width=6,
                          selectInput("place", "Country to compare", 
@@ -132,20 +160,39 @@ body <- dashboardBody(
                 ),
                 fluidRow(
                   box(width = 12, 
-                      title = "Compare (island of) Ireland cases with other countries scaled by population, with time shifted", 
+                      title = "Compare cases with other countries scaled by population, with time shifted", 
                       plotlyOutput("irelandcompare", width = "90%", height = 500),
-                      h3("Data from Dept. of Health (Ireland), NHS (NI) and WHO")
+                      h4(paste0("Developed by Dr. Andrew Simpkin (NUI Galway)"),
+                         tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
+                         paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
+                         tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
                   )
                 )
         ),
         
         # Data view Tab #
         tabItem("data",
-                fluidRow(box(width = 12, title = "Data from Department of Health (Ireland), NHS (NI) and WHO",
+                h3(paste0("Data from Ireland ("),
+                   tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
+                          "Department of Health", target="_blank"),
+                   paste0("), Northern Ireland ("),
+                   tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
+                                 "NHS", target="_blank"),
+                   paste0(") and WHO")),
+                fluidRow(box(width = 12, title = "Raw data",
                              column(10, DTOutput("dattable"))
-                )
+                )),
+                fluidRow(box(width = 12, title = "Total cases by Area (Missing area for 47 cases)",
+                             column(10, DTOutput("areatable"))
+                )),
+                fluidRow(box(width = 12, title = "Total cases by Gender (ROI only and 47 with no gender information)",
+                             column(10, DTOutput("gendertable"))
+                )),
+                h4(paste0("Developed by Dr. Andrew Simpkin (NUI Galway)"),
+                   tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
+                   paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
+                   tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
               )
-        )
     ) # end of tabItems
     
 )# end of body
@@ -157,19 +204,31 @@ server <- function(input, output) {
     
     # read in all data
     dataRaw <- reactive({
-      read.csv("data/corona_island.csv") %>% 
+      dat1 <- read.csv("data/corona_island.csv") %>% 
         mutate(pop = case_when(country=="ireland"~6.712,
                                country=="france"~66.99,
                                country=="germany"~82.79,
                                country=="italy"~60.48,
                                country=="spain"~46.66,
                                country=="uk"~66.44)) 
-      # if(input$partition == TRUE){
-      #   res <- res %>%
-      #     filter(area!= "north") %>%
-      #     mutate(pop = case_when(country=="ireland"~4.83))
-      # }
-      # res
+
+      dat2 <- read.csv("data/corona_island.csv") %>% 
+        mutate(pop = case_when(country=="ireland"~4.88,
+                               country=="france"~66.99,
+                               country=="germany"~82.79,
+                               country=="italy"~60.48,
+                               country=="spain"~46.66,
+                               country=="uk"~66.44))%>%
+          filter(area!="north")
+      
+      if(input$partition == "Island of Ireland") return(dat1)
+      if(input$partition == "Republic of Ireland") return(dat2)
+      
+    })
+    
+    # gender data
+    dataGender <- reactive({
+      read.csv("data/corona_island_gender.csv")
     })
     
     # irish data only
@@ -218,7 +277,7 @@ server <- function(input, output) {
             addCircleMarkers(lng= ~long, 
                              lat= ~lat, 
                              layerId = ~area,
-                             radius = ~ncases)
+                             radius = ~ncases/2)
     })
     
     # Show a popup at the given location
@@ -247,19 +306,18 @@ server <- function(input, output) {
     
     ################### Info boxes ##########
     ## Info box
-    output$CasesBox <- renderInfoBox({
+    output$CasesBox <- renderValueBox({
       dat <- dataIreland()
-      infoBox(
-        "Number of cases", paste0(sum(dat$ncase,na.rm=TRUE)), icon = icon("list"),
+      valueBox(paste0(sum(dat$ncase,na.rm=TRUE)), "Confirmed cases",
         color = "purple"
       )
     })
     
     ## mort box
-    output$MortBox <- renderInfoBox({
+    output$MortBox <- renderValueBox({
       dat <- dataIreland()
-      infoBox(
-        "Number of deaths", paste0(sum(dat$ndeath,na.rm=TRUE)), icon = icon("list"),
+      valueBox(
+        paste0(sum(dat$ndeath,na.rm=TRUE)), "Total deaths",
         color = "red"
       )
     })
@@ -270,6 +328,40 @@ server <- function(input, output) {
       dataRaw() %>% mutate(date = as.Date(date,format = "%d/%m/%Y"))
     
       })
+    
+    output$areatable <- renderDT({
+      
+      dataIreland() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        group_by(date,area) %>%
+        summarise(New_cases = sum(ncase)) %>%
+        na.omit() %>%
+        group_by(area) %>%
+        mutate(Total_cases = cumsum(New_cases)) %>%
+        filter(date == max(date), area!="unknown") %>%
+        select(date,area,Total_cases) %>%
+        group_by(date) %>%
+        mutate(Total_cases= Total_cases,
+               Percentage = round(100*Total_cases/sum(Total_cases),0))
+      
+    })
+    
+    output$gendertable <- renderDT({
+      
+      dataGender() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        group_by(date,gender) %>%
+        summarise(New_cases = sum(ncase)) %>%
+        na.omit() %>%
+        group_by(gender) %>%
+        mutate(Total_cases= cumsum(New_cases)) %>%
+        filter(date == max(date), gender != "unknown") %>%
+        select(date,gender,Total_cases) %>%
+        group_by(date) %>%
+        mutate(Total_cases= Total_cases,
+               Percentage = round(100*Total_cases/sum(Total_cases),0))
+      
+    })
     
     ################### Time series plots ##############
     #### Plotly cases per day
@@ -288,20 +380,38 @@ server <- function(input, output) {
       
     })
     
-    # #### Plotly cases per day
-    # output$timeseries <- renderPlotly({
-    # 
-    #         g = dataIreland() %>%
-    #           mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-    #           group_by(date) %>%
-    #           summarise(ncases = sum(ncase)) %>%
-    #           na.omit() %>%
-    #           ggplot(aes(x=date,y=ncases)) + 
-    #           geom_line() + geom_point() + theme(legend.position="none") + labs(y="New cases")
-    #     ggplotly(g)
-    #     
-    # })
+    # #### Plotly cases per day by area
+    output$cumularea <- renderPlotly({
+      
+      g = dataIreland() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        group_by(date,area) %>%
+        summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
+        na.omit() %>%
+        group_by(area) %>%
+        mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
+        ggplot(aes(x=date,y=ccases,color=area,label=Date,label1=Total_cases,label2=New_cases, label3=area)) + 
+        geom_line() + geom_point() + labs(y="Cases", title = "Cumulative cases by area")
+      ggplotly(g, tooltip = c("Date", "area", "Total_cases","New_cases"))
+      
+    })
+
     
+    # #### Plotly cases per day by gender
+    output$cumulgender <- renderPlotly({
+      
+      g = dataGender() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        group_by(date,gender) %>%
+        summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
+        na.omit() %>%
+        group_by(gender) %>%
+        mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
+        ggplot(aes(x=date,y=ccases,color=gender,label=Date,label1=Total_cases,label2=New_cases)) + 
+        geom_line() + geom_point() + labs(y="Cases", title = "Cumulative cases by gender (ROI only)")
+      ggplotly(g, tooltip = c("Date", "gender", "Total_cases","New_cases"))
+      
+    })    
 
     ################### Comparison plots ############
     ##### Plotly Ireland v other countries

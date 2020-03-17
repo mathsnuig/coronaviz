@@ -145,8 +145,13 @@ date,ncase,ndeath,gender,area,country
 16/03/2020,41,0,unknown,east,ireland
 16/03/2020,11,0,unknown,south,ireland
 16/03/2020,2,0,unknown,northwest,ireland
-16/03/2020,,NA,unknown,unknown,uk
+16/03/2020,152,NA,unknown,unknown,uk
 16/03/2020,1210,NA,unknown,unknown,france
-16/03/2020,,NA,unknown,unknown,germany
-16/03/2020,,NA,unknown,unknown,italy
-16/03/2020,,NA,unknown,unknown,spain
+16/03/2020,1459,NA,unknown,unknown,germany
+16/03/2020,3233,NA,unknown,unknown,italy
+16/03/2020,1954,NA,unknown,unknown,spain
+17/03/2020,10,0,unknown,north,ireland
+17/03/2020,48,0,unknown,east,ireland
+17/03/2020,13,0,unknown,south,ireland
+17/03/2020,5,0,unknown,northwest,ireland
+17/03/2020,3,0,unknown,west,ireland
