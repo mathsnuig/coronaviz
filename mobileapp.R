@@ -44,6 +44,8 @@ ui = f7Page(
            tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
                   "NHS", target="_blank"),
            paste0(") and WHO")),
+        infoBoxOutput("CasesBox"),
+        infoBoxOutput("MortBox"),
         h4("Map of cases using Belfast, Cork, Dublin, Letterkenny and Galway as locations
            Note: no locations for 47 cases announced March 12/13th"),
         leafletOutput("map", width = "90%", height = 600),
@@ -69,8 +71,6 @@ ui = f7Page(
            tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
                   "NHS", target="_blank"),
            paste0(") and WHO")),
-        infoBoxOutput("CasesBox"),
-        infoBoxOutput("MortBox"),
         plotlyOutput("cumulcases", width = "90%", height = 400),
         plotlyOutput("cumularea", width = "90%", height = 400),
         plotlyOutput("cumulgender", width = "90%", height = 400)
@@ -84,7 +84,7 @@ ui = f7Page(
         # Tab 3 content
         h4("Compare (island of) Ireland trajectory with other countries (scaled by population). 
            Number of cases from other countries are scaled to reflect the Irish population. 
-           For example, ROI+NI (6.712 million people) is about 11% of Italy's population (60.48m), so 100 cases in Italy is like having 11 cases in Ireland"),
+           For example, ROI+NI (6.712 million people) is about 11% of Italy's population (60.48m), so 100 cases in Italy is equivalent to 11 cases in Ireland"),
         f7SmartSelect("place", "Country to compare", 
                       choices = c("france", "germany", "italy", "spain", "uk"), 
                       selected = "italy"),
@@ -98,8 +98,11 @@ ui = f7Page(
         icon = f7Icon("list_number"),
         active = FALSE,
         # Tab 4 content
+        h4(tags$caption("Raw data")),
         DTOutput("dattable", width = "80%"),
+        h4(tags$caption("Total cases by Area (Missing area for 47 cases)")),
         DTOutput("areatable", width = "80%"),
+        h4(tags$caption("Total cases by Gender (ROI only and 47 with no gender information)")),
         DTOutput("gendertable", width = "80%")
       )
     )

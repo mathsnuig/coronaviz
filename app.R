@@ -98,13 +98,13 @@ body <- dashboardBody(
                   box(title = "Map of cases using Belfast, Cork, Dublin, Letterkenny and Galway as locations", 
                       footer = "Note: no locations for 47 cases announced March 12/13th",
                       width = 12,
-                      leafletOutput("map", width = "70%", height = 600),
-                      h4(paste0("Developed by Dr. Andrew Simpkin (NUI Galway)"),
-                         tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
-                         paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
-                         tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
+                      leafletOutput("map", width = "70%", height = 600)
                     )
-                  )
+                  ),
+                h3(paste0("Developed by Dr. Andrew Simpkin (NUI Galway)"),
+                   tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
+                   paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
+                   tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
 
         ),
         
@@ -148,7 +148,7 @@ body <- dashboardBody(
                    tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
                           "NHS", target="_blank"),
                    paste0(") and WHO")),
-                h3("Number of cases from other countries are scaled to reflect the Irish population. For example: ROI+NI (6.712 million people) is about 11% of Italy's population (60.48m), so 100 cases in Italy is like having 11 cases in Ireland"),
+                h3("Number of cases from other countries are scaled to reflect the Irish population. For example: ROI+NI (6.712 million people) is about 11% of Italy's population (60.48m), so 100 cases in Italy is equivalent to 11 cases in Ireland"),
                 fluidRow(
                   column(width=6,
                          selectInput("place", "Country to compare", 
@@ -161,13 +161,13 @@ body <- dashboardBody(
                 fluidRow(
                   box(width = 12, 
                       title = "Compare cases with other countries scaled by population, with time shifted", 
-                      plotlyOutput("irelandcompare", width = "90%", height = 500),
-                      h4(paste0("Developed by Dr. Andrew Simpkin (NUI Galway)"),
-                         tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
-                         paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
-                         tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
+                      plotlyOutput("irelandcompare", width = "90%", height = 500) 
                   )
-                )
+                ),
+                h3(paste0("Developed by Dr. Andrew Simpkin (NUI Galway)"),
+                   tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
+                   paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
+                   tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
         ),
         
         # Data view Tab #
@@ -188,7 +188,7 @@ body <- dashboardBody(
                 fluidRow(box(width = 12, title = "Total cases by Gender (ROI only and 47 with no gender information)",
                              column(10, DTOutput("gendertable"))
                 )),
-                h4(paste0("Developed by Dr. Andrew Simpkin (NUI Galway)"),
+                h3(paste0("Developed by Dr. Andrew Simpkin (NUI Galway)"),
                    tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
                    paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
                    tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
