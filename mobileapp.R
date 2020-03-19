@@ -28,32 +28,54 @@ ui = f7Page(
     f7Tabs(
       animated = TRUE,
       id = "tabs",
-      # Map tab
+      # # Map tab
+      # f7Tab(
+      #   tabName = "map",
+      #   icon = f7Icon("map"),
+      #   active = TRUE,
+      #   # Tab 1 content
+      #   h4(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
+      #             "HSE Coronavirus information.", 
+      #             target="_blank"),
+      #      "Data from Ireland (",
+      #      tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/",
+      #             "Department of Health", target="_blank"),
+      #      paste0("), Northern Ireland ("),
+      #      tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
+      #             "NHS", target="_blank"),
+      #      paste0(") and WHO")),
+      #   infoBoxOutput("CasesBox"),
+      #   infoBoxOutput("MortBox"),
+      #   h4("Map of cases using Belfast, Cork, Dublin, Letterkenny and Galway as locations
+      #      Note: no locations for 121 cases announced March 12/13/18th"),
+      #   leafletOutput("map", width = "90%", height = 600),
+      #   h4(paste0("Developed by Dr. Andrew Simpkin"),
+      #             tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
+      #      paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
+      #             tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
+      #   
+      # ),
+      # Weekly tab
       f7Tab(
         tabName = "map",
-        icon = f7Icon("map"),
-        active = TRUE,
-        # Tab 1 content
-        h4(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
-                  "HSE Coronavirus information.", 
-                  target="_blank"),
-           "Data from Ireland (",
-           tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/",
-                  "Department of Health", target="_blank"),
-           paste0("), Northern Ireland ("),
-           tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
-                  "NHS", target="_blank"),
-           paste0(") and WHO")),
-        infoBoxOutput("CasesBox"),
-        infoBoxOutput("MortBox"),
-        h4("Map of cases using Belfast, Cork, Dublin, Letterkenny and Galway as locations
-           Note: no locations for 121 cases announced March 12/13/18th"),
+        icon = f7Icon("calendar"),
+        active = FALSE,
+        # Tab 5 content
+        h3(paste0("Report data as of midnight on 17/03/20 from Republic of Ireland"),
+           tags$a(href="https://www.gov.ie/en/publication/cd0cea-an-analysis-of-the-266-cases-of-covid-19-in-ireland-as-of-march-16-2/", 
+                  "(National Public Health Emergency Team)", target="_blank")),
+        valueBoxOutput("HospBox"),
+        valueBoxOutput("ICUBox"),
+        valueBoxOutput("CFRBox"),
         leafletOutput("map", width = "90%", height = 600),
-        h4(paste0("Developed by Dr. Andrew Simpkin"),
-                  tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
-           paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
-                  tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
-        
+        h4(tags$caption("County data")),
+        DTOutput("weekarea", width = "80%"),
+        plotlyOutput("ageplot", width = "70%"),
+        h4(tags$caption("Age data")),
+        DTOutput("weekage", width = "80%"),
+        plotlyOutput("transplot", width = "70%"),
+        h4(tags$caption("Transmission data")),
+        DTOutput("weektrans", width = "80%")
       ),
       # Time tab
       f7Tab(
@@ -64,16 +86,19 @@ ui = f7Page(
         h4(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
                   "HSE Coronavirus information", 
                   target="_blank"),
-           paste0(". Data from Ireland ("),
+           paste0(". Data (18/03/2020) from Ireland ("),
            tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
                   "Department of Health", target="_blank"),
            paste0("), Northern Ireland ("),
            tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
                   "NHS", target="_blank"),
            paste0(") and WHO")),
-        plotlyOutput("cumulcases", width = "90%", height = 400),
-        plotlyOutput("cumularea", width = "90%", height = 400),
-        plotlyOutput("cumulgender", width = "90%", height = 400)
+        infoBoxOutput("CasesBox"),
+        infoBoxOutput("MortBox"),
+        plotlyOutput("cumulcases", width = "90%", height = 400)
+        # ,
+        # plotlyOutput("cumularea", width = "90%", height = 400),
+        # plotlyOutput("cumulgender", width = "90%", height = 400)
         
       ),
       # Compare tab
@@ -100,32 +125,12 @@ ui = f7Page(
         # Tab 4 content
         h4(tags$caption("Raw data")),
         DTOutput("dattable", width = "80%"),
-        h4(tags$caption("Total cases by Area (Missing area for 47 cases)")),
-        DTOutput("areatable", width = "80%"),
-        h4(tags$caption("Total cases by Gender (ROI only and 47 with no gender information)")),
-        DTOutput("gendertable", width = "80%")
-      ),
-      # Weekly tab
-      f7Tab(
-        tabName = "weekly",
-        icon = f7Icon("calendar"),
-        active = FALSE,
-        # Tab 5 content
-        h3(paste0("Weekly report data from Republic of Ireland"),
-           tags$a(href="https://www.gov.ie/en/publication/cd0cea-an-analysis-of-the-266-cases-of-covid-19-in-ireland-as-of-march-16-2/", 
-                  "(National Public Health Emergency Team)", target="_blank")),
-        valueBoxOutput("HospBox"),
-        valueBoxOutput("ICUBox"),
-        valueBoxOutput("CFRBox"),
-        h4(tags$caption("County data")),
-        DTOutput("weekarea", width = "80%"),
-        plotlyOutput("ageplot", width = "70%"),
-        h4(tags$caption("Age data")),
-        DTOutput("weekage", width = "80%"),
-        plotlyOutput("transplot", width = "70%"),
-        h4(tags$caption("Transmission data")),
-        DTOutput("weektrans", width = "80%")
+        # h4(tags$caption("Total cases by Area (Missing area for 121 cases)")),
+        # DTOutput("areatable", width = "80%"),
+        # h4(tags$caption("Total cases by Gender (ROI only and 47 with no gender information)")),
+        # DTOutput("gendertable", width = "80%")
       )
+
     )
   )
 )
@@ -404,13 +409,17 @@ server <- function(input, output) {
       read.csv("data/corona_county.csv")
     })
     dataAge <- reactive({
-      read.csv("data/corona_age.csv")
+      read.csv("data/corona_age.csv") %>%
+        mutate(age_group = factor(age_group, levels(age_group)[c(1,2,7,3:6,8,9)]))
     })
     dataTrans <- reactive({
       read.csv("data/corona_trans.csv")
     })
     dataStats <- reactive({
-      read.csv("data/corona_stats.csv")
+      read.csv("data/corona_stats.csv") %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        filter(date == max(date))
+      
     })
     
     ## info boxes
@@ -435,9 +444,16 @@ server <- function(input, output) {
     
     ## Plot weekly data
     
-    ### Map
-    output$weekmap <-  renderLeaflet({
-      dataCounty() %>%
+    ### map
+    output$map <-  renderLeaflet({
+      
+      labs <- lapply(seq(nrow(dataCounty())), function(i) {
+        paste0( '<p>', dataCounty()[i, "ncase"],' cases </p><p>') 
+      })
+      
+      dataCounty()  %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        filter(date == max(date)) %>%
         mutate(long = case_when(county == "Carlow" ~ -6.9261098,
                                 county == "Cavan" ~ -7.3605599,
                                 county == "Clare" ~ -8.9811,
@@ -490,46 +506,23 @@ server <- function(input, output) {
                                county == "Limerick" ~ 52.6638,
                                county == "Cork" ~ 51.8985,
                                county == "Dublin" ~ 53.3498)) %>%
-        mutate(ncase = as.character(ncase),
-               ncase = ifelse(ncase == "< = 5","5",ncase)) %>%
-        mutate(ncase = as.numeric(ncase)) %>%
+        mutate(ncases = as.character(ncase),
+               ncases = ifelse(ncases == "< = 5","5",ncases)) %>%
+        mutate(ncases = as.numeric(ncases)) %>%
         leaflet() %>%
         addTiles(
           urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
           attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>'
         ) %>%
-        setView(lng = -8, lat = 53.5, zoom = 7) %>%
+        setView(lng = -8, lat = 53.5, zoom = 8) %>%
         clearShapes() %>%
         addCircleMarkers(lng= ~long, 
                          lat= ~lat, 
                          layerId = ~county,
-                         radius = ~ncase)
+                         radius = ~ncases/2,
+                         label = lapply(labs, htmltools::HTML))
     })
-    
-    # Show a popup at the given location
-    showCountyPopup <- function(t, lat, long) {
-      selectedCounty <- dataCounty()[dataCounty()$county == t,]
-      content <- as.character(tagList(
-        tags$h4("Number of cases:", selectedCounty$ncase),
-        tags$h4("Number of deaths:", selectedCounty$ndeath)
-      ))
-      leafletProxy("weekmap") %>% 
-        addPopups(long, lat, content, layerId = t)
-    }
-    
-    # When map is clicked, show a popup with city info
-    observe({
-      leafletProxy("weekmap") %>% 
-        clearPopups()
-      event <- input$map_marker_click
-      if (is.null(event))
-        return()
-      
-      isolate({
-        showCountyPopup(event$id, event$lat, event$lng)
-      })
-    })
-    
+
     ## age plot
     output$ageplot <- renderPlotly({
       g = dataAge() %>% 

@@ -1,5 +1,10 @@
-type,ncase,Percentage
-Total number hospitalised,84,31%
-Total number admitted to ICU,6,2%
-Total number deaths,2,0.70%
-Case fatality rate,2,0.70%
+date,type,ncase,Percentage
+16/03/2020,Total number hospitalised,84,31%
+16/03/2020,Total number admitted to ICU,6,2%
+16/03/2020,Total number deaths,2,0.70%
+16/03/2020,Case fatality rate,2,0.70%
+17/03/2020,Total number hospitalised,108,31%
+17/03/2020,Total number admitted to ICU,7,2%
+17/03/2020,Total number deaths,2,0.60%
+17/03/2020,Case fatality rate,2,0.60%
+17/03/2020,Median age,43,

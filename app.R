@@ -65,10 +65,10 @@ sidebar <- dashboardSidebar(disable=FALSE,width='190px',
                                                     choices = c("Republic of Ireland", "Island of Ireland"),
                                                     selected = "Island of Ireland"),
                                         menuItem("Time", icon = icon("line-chart"), tabName = "time"),
+                                        menuItem("Map and reports", icon = icon("list"), tabName = "nphet"),
                                         menuItem("Compare", icon = icon("globe"), tabName = "compare"),
-                                        menuItem("Map", icon = icon("map"), tabName = "map"),
-                                        menuItem("Data", icon = icon("eye"), tabName = "data"),
-                                        menuItem("Weekly Reports", icon = icon("list"), tabName = "nphet")
+                                        # menuItem("Map", icon = icon("map"), tabName = "map"),
+                                        menuItem("Daily Data", icon = icon("eye"), tabName = "data")
                             )
                             
                             
@@ -81,38 +81,38 @@ body <- dashboardBody(
     # tabs
     tabItems(
   
-        # Map Tab #
-        tabItem("map",   
-                h3(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
-                          "HSE Coronavirus information", 
-                          target="_blank")),
-                h3(paste0("Data from Ireland ("),
-                   tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
-                          "Department of Health", target="_blank"),
-                   paste0("), Northern Ireland ("),
-                   tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
-                          "NHS", target="_blank"),
-                   paste0(") and WHO")),
-                fluidRow(
-                  box(title = "Map of cases using Belfast, Cork, Dublin, Letterkenny and Galway as locations",
-                      footer = "Note: no locations for 121 cases announced March 12/13/18th",
-                      width = 12,
-                      leafletOutput("map", width = "70%", height = 600)
-                    )
-                  ),
-                h3(paste0("Developed by Dr. Andrew Simpkin "),
-                   tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
-                   paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
-                   tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
-
-        ),
+        # # Map Tab #
+        # tabItem("map",   
+        #         h3(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
+        #                   "HSE Coronavirus information", 
+        #                   target="_blank")),
+        #         h3(paste0("Data from Ireland ("),
+        #            tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
+        #                   "Department of Health", target="_blank"),
+        #            paste0("), Northern Ireland ("),
+        #            tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
+        #                   "NHS", target="_blank"),
+        #            paste0(") and WHO")),
+        #         fluidRow(
+        #           box(title = "Map of cases using Belfast, Cork, Dublin, Letterkenny and Galway as locations",
+        #               footer = "Note: no locations for 121 cases announced March 12/13/18th",
+        #               width = 12,
+        #               leafletOutput("map", width = "70%", height = 600)
+        #             )
+        #           ),
+        #         h3(paste0("Developed by Dr. Andrew Simpkin "),
+        #            tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
+        #            paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
+        #            tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
+        # 
+        # ),
         
         # Time series Tab #
         tabItem("time", 
                 h3(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
                                    "HSE Coronavirus information", 
                                    target="_blank")),
-                h3(paste0("Data from Ireland ("),
+                h3(paste0("Data (18/03/2020) from Ireland ("),
                    tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
                           "Department of Health", target="_blank"),
                    paste0("), Northern Ireland ("),
@@ -124,9 +124,11 @@ body <- dashboardBody(
                 
                 fluidRow(
                     box(width = 12, title = "Cumulative and new cases per day", 
-                        plotlyOutput("cumulcases", width = "80%", height = 400),
-                        plotlyOutput("cumularea", width = "80%", height = 400),
-                        plotlyOutput("cumulgender", width = "80%", height = 400)
+                        plotlyOutput("cumulcases", width = "80%", height = 400)
+                        # ,
+                        # plotlyOutput("cumularea", width = "80%", height = 400)
+                        # ,
+                        # plotlyOutput("cumulgender", width = "80%", height = 400)
                     )
                 ),
                 h3(paste0("Developed by Dr. Andrew Simpkin "),
@@ -181,12 +183,12 @@ body <- dashboardBody(
                 fluidRow(box(width = 12, title = "Raw data",
                              column(10, DTOutput("dattable"))
                 )),
-                fluidRow(box(width = 12, title = "Total cases by Area (Missing area for 47 cases)",
-                             column(10, DTOutput("areatable"))
-                )),
-                fluidRow(box(width = 12, title = "Total cases by Gender (ROI only and 47 with no gender information)",
-                             column(10, DTOutput("gendertable"))
-                )),
+                # fluidRow(box(width = 12, title = "Total cases by Area (Missing area for 121 cases)",
+                #              column(10, DTOutput("areatable"))
+                # )),
+                # fluidRow(box(width = 12, title = "Total cases by Gender (ROI only and 47 with no gender information)",
+                #              column(10, DTOutput("gendertable"))
+                # )),
                 h3(paste0("Developed by Dr. Andrew Simpkin "),
                    tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
                    paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
@@ -196,15 +198,15 @@ body <- dashboardBody(
         
         # Weekly Tab
         tabItem("nphet",
-                h3(paste0("Data from Ireland"),
+                h3(paste0("Data as of midnight on 17/03/2020 from Ireland"),
                    tags$a(href="https://www.gov.ie/en/publication/cd0cea-an-analysis-of-the-266-cases-of-covid-19-in-ireland-as-of-march-16-2/", 
                           "(National Public Health Emergency Team)", target="_blank")),
                 valueBoxOutput("HospBox"),
                 valueBoxOutput("ICUBox"),
                 valueBoxOutput("CFRBox"),
-                # fluidRow(box(title = "Map of cases by county (ROI only)", width = 12,
-                #              leafletOutput("weekmap", width = "70%", height = 600)
-                #              )),
+                fluidRow(box(title = "Map of cases by county (ROI only)", width = 12,
+                             leafletOutput("map", width = "70%", height = 600)
+                             )),
                 fluidRow(box(width = 12, title = "Weekly area data",
                              column(10, DTOutput("weekarea"))
                 )),
@@ -297,45 +299,45 @@ server <- function(input, output) {
  
     ## Interactive Map ###########################################
     
-    # Create the map
-    output$map <- renderLeaflet({
-        dataArea() %>%
-            leaflet() %>%
-            addTiles(
-                urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
-                attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>'
-            ) %>%
-            setView(lng = -8, lat = 53.5, zoom = 7) %>%
-            clearShapes() %>%
-            addCircleMarkers(lng= ~long, 
-                             lat= ~lat, 
-                             layerId = ~area,
-                             radius = ~ncases/2)
-    })
-    
-    # Show a popup at the given location
-    showAreaPopup <- function(t, lat, long) {
-        selectedArea <- dataArea()[dataArea()$area == t,]
-        content <- as.character(tagList(
-            tags$h4("Number of cases:", as.integer(selectedArea$ncases)),
-            tags$h4("Number of deaths:", as.integer(selectedArea$ndeaths))
-        ))
-        leafletProxy("map") %>% 
-            addPopups(long, lat, content, layerId = t)
-    }
-    
-    # When map is clicked, show a popup with city info
-    observe({
-        leafletProxy("map") %>% 
-            clearPopups()
-        event <- input$map_marker_click
-        if (is.null(event))
-            return()
-        
-        isolate({
-            showAreaPopup(event$id, event$lat, event$lng)
-        })
-    })
+    # # Create the map
+    # output$map <- renderLeaflet({
+    #     dataArea() %>%
+    #         leaflet() %>%
+    #         addTiles(
+    #             urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
+    #             attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>'
+    #         ) %>%
+    #         setView(lng = -8, lat = 53.5, zoom = 7) %>%
+    #         clearShapes() %>%
+    #         addCircleMarkers(lng= ~long, 
+    #                          lat= ~lat, 
+    #                          layerId = ~area,
+    #                          radius = ~ncases/2)
+    # })
+    # 
+    # # Show a popup at the given location
+    # showAreaPopup <- function(t, lat, long) {
+    #     selectedArea <- dataArea()[dataArea()$area == t,]
+    #     content <- as.character(tagList(
+    #         tags$h4("Number of cases:", as.integer(selectedArea$ncases)),
+    #         tags$h4("Number of deaths:", as.integer(selectedArea$ndeaths))
+    #     ))
+    #     leafletProxy("map") %>% 
+    #         addPopups(long, lat, content, layerId = t)
+    # }
+    # 
+    # # When map is clicked, show a popup with city info
+    # observe({
+    #     leafletProxy("map") %>% 
+    #         clearPopups()
+    #     event <- input$map_marker_click
+    #     if (is.null(event))
+    #         return()
+    #     
+    #     isolate({
+    #         showAreaPopup(event$id, event$lat, event$lng)
+    #     })
+    # })
     
     ################### Info boxes ##########
     ## Info box
@@ -365,11 +367,12 @@ server <- function(input, output) {
         group_by(date) %>%
         summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
         na.omit() %>%
-        mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
-        ggplot(aes(x=date,y=ccases,label=Date,label1=Total_cases,label2=New_cases)) + 
+        mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases))  %>%
+        mutate(Growth_Percentage = round(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
+        ggplot(aes(x=date,y=ccases,label=Date,label1=Total_cases,label2=New_cases, label3=Growth_Percentage)) + 
         geom_line() + geom_point() + geom_col(aes(x=date,y=ncases)) +
         theme(legend.position="none") + labs(y="Cases")
-      ggplotly(g, tooltip = c("Date","Total_cases","New_cases"))
+      ggplotly(g, tooltip = c("Date","Total_cases","New_cases", "Growth_Percentage"))
       
     })
     
@@ -495,13 +498,17 @@ server <- function(input, output) {
       read.csv("data/corona_county.csv")
     })
     dataAge <- reactive({
-      read.csv("data/corona_age.csv")
+      read.csv("data/corona_age.csv") %>%
+        mutate(age_group = factor(age_group, levels(age_group)[c(1,2,7,3:6,8,9)]))
     })
     dataTrans <- reactive({
       read.csv("data/corona_trans.csv")
     })
     dataStats <- reactive({
-      read.csv("data/corona_stats.csv")
+      read.csv("data/corona_stats.csv") %>%
+      mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        filter(date == max(date))
+        
     })
     
     ## info boxes
@@ -527,8 +534,15 @@ server <- function(input, output) {
     ## Plot weekly data
     
     ### Map
-    output$weekmap <-  renderLeaflet({
-        dataCounty() %>%
+    output$map <-  renderLeaflet({
+      
+      labs <- lapply(seq(nrow(dataCounty())), function(i) {
+        paste0( '<p>', dataCounty()[i, "ncase"],' cases </p><p>') 
+      })
+      
+        dataCounty()  %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        filter(date == max(date)) %>%
         mutate(long = case_when(county == "Carlow" ~ -6.9261098,
                                 county == "Cavan" ~ -7.3605599,
                                 county == "Clare" ~ -8.9811,
@@ -581,50 +595,28 @@ server <- function(input, output) {
                                county == "Limerick" ~ 52.6638,
                                county == "Cork" ~ 51.8985,
                                county == "Dublin" ~ 53.3498)) %>%
-        mutate(ncase = as.character(ncase),
-               ncase = ifelse(ncase == "< = 5","5",ncase)) %>%
-        mutate(ncase = as.numeric(ncase)) %>%
+        mutate(ncases = as.character(ncase),
+               ncases = ifelse(ncases == "< = 5","5",ncases)) %>%
+        mutate(ncases = as.numeric(ncases)) %>%
           leaflet() %>%
           addTiles(
             urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
             attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>'
           ) %>%
-          setView(lng = -8, lat = 53.5, zoom = 7) %>%
+          setView(lng = -8, lat = 53.5, zoom = 8) %>%
           clearShapes() %>%
           addCircleMarkers(lng= ~long, 
                            lat= ~lat, 
                            layerId = ~county,
-                           radius = ~ncase)
+                           radius = ~ncases/2,
+                           label = lapply(labs, htmltools::HTML))
       })
-    
-    # Show a popup at the given location
-    showCountyPopup <- function(t, lat, long) {
-      selectedCounty <- dataCounty()[dataCounty()$county == t,]
-      content <- as.character(tagList(
-        tags$h4("Number of cases:", selectedCounty$ncase),
-        tags$h4("Number of deaths:", selectedCounty$ndeath)
-      ))
-      leafletProxy("weekmap") %>% 
-        addPopups(long, lat, content, layerId = t)
-    }
-    
-    # When map is clicked, show a popup with city info
-    observe({
-      leafletProxy("weekmap") %>% 
-        clearPopups()
-      event <- input$map_marker_click
-      if (is.null(event))
-        return()
-      
-      isolate({
-        showCountyPopup(event$id, event$lat, event$lng)
-      })
-    })
     
     ## age plot
     output$ageplot <- renderPlotly({
       g = dataAge() %>% 
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        filter(date == max(date)) %>%
         ggplot(aes(x=age_group,y=ncase,fill=age_group)) + 
         geom_col() + labs(y="Cases",x="Age group") + 
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -635,6 +627,7 @@ server <- function(input, output) {
     output$transplot <- renderPlotly({
       g = dataTrans() %>% 
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        filter(date == max(date)) %>%
         ggplot(aes(x=transmission,y=ncase,fill=transmission)) + 
         geom_col() + labs(y="Cases",x="Transmission type") + 
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -662,7 +655,7 @@ server <- function(input, output) {
     output$weektrans <- renderDT({
       
       dataTrans() %>% mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        mutate(Percentage = round(100*ncase/sum(ncase),0))
+        group_by(date) %>% mutate(Percentage = round(100*ncase/sum(ncase),0))
       
     })
 }
