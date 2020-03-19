@@ -67,9 +67,8 @@ sidebar <- dashboardSidebar(disable=FALSE,width='190px',
                                         menuItem("Time", icon = icon("line-chart"), tabName = "time"),
                                         menuItem("Compare", icon = icon("globe"), tabName = "compare"),
                                         menuItem("Map", icon = icon("map"), tabName = "map"),
-                                        menuItem("Data", icon = icon("eye"), tabName = "data")
-                                        #,
-                                        #checkboxInput("partitiion",label = "Partition")
+                                        menuItem("Data", icon = icon("eye"), tabName = "data"),
+                                        menuItem("Weekly Reports", icon = icon("list"), tabName = "nphet")
                             )
                             
                             
@@ -95,13 +94,13 @@ body <- dashboardBody(
                           "NHS", target="_blank"),
                    paste0(") and WHO")),
                 fluidRow(
-                  box(title = "Map of cases using Belfast, Cork, Dublin, Letterkenny and Galway as locations", 
-                      footer = "Note: no locations for 47 cases announced March 12/13th",
+                  box(title = "Map of cases using Belfast, Cork, Dublin, Letterkenny and Galway as locations",
+                      footer = "Note: no locations for 121 cases announced March 12/13/18th",
                       width = 12,
                       leafletOutput("map", width = "70%", height = 600)
                     )
                   ),
-                h3(paste0("Developed by Dr. Andrew Simpkin (NUI Galway)"),
+                h3(paste0("Developed by Dr. Andrew Simpkin "),
                    tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
                    paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
                    tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
@@ -130,7 +129,7 @@ body <- dashboardBody(
                         plotlyOutput("cumulgender", width = "80%", height = 400)
                     )
                 ),
-                h3(paste0("Developed by Dr. Andrew Simpkin (NUI Galway)"),
+                h3(paste0("Developed by Dr. Andrew Simpkin "),
                             tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1", target="_blank"),
                             paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
                             tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer", target="_blank"))
@@ -153,9 +152,9 @@ body <- dashboardBody(
                   column(width=6,
                          selectInput("place", "Country to compare", 
                                      choices = c("france", "germany", "italy", "spain", "uk"), 
-                                     selected = "italy")),
+                                     selected = "france")),
                   column(width=6,
-                         sliderInput("days","Decide the time difference",min = -5,max=30,value=13)
+                         sliderInput("days","Decide the time difference",min = -5,max=30,value=0)
                   )
                 ),
                 fluidRow(
@@ -164,7 +163,7 @@ body <- dashboardBody(
                       plotlyOutput("irelandcompare", width = "90%", height = 500) 
                   )
                 ),
-                h3(paste0("Developed by Dr. Andrew Simpkin (NUI Galway)"),
+                h3(paste0("Developed by Dr. Andrew Simpkin "),
                    tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
                    paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
                    tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
@@ -188,11 +187,44 @@ body <- dashboardBody(
                 fluidRow(box(width = 12, title = "Total cases by Gender (ROI only and 47 with no gender information)",
                              column(10, DTOutput("gendertable"))
                 )),
-                h3(paste0("Developed by Dr. Andrew Simpkin (NUI Galway)"),
+                h3(paste0("Developed by Dr. Andrew Simpkin "),
                    tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
                    paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
                    tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
-              )
+              ),
+        
+        
+        # Weekly Tab
+        tabItem("nphet",
+                h3(paste0("Data from Ireland"),
+                   tags$a(href="https://www.gov.ie/en/publication/cd0cea-an-analysis-of-the-266-cases-of-covid-19-in-ireland-as-of-march-16-2/", 
+                          "(National Public Health Emergency Team)", target="_blank")),
+                valueBoxOutput("HospBox"),
+                valueBoxOutput("ICUBox"),
+                valueBoxOutput("CFRBox"),
+                # fluidRow(box(title = "Map of cases by county (ROI only)", width = 12,
+                #              leafletOutput("weekmap", width = "70%", height = 600)
+                #              )),
+                fluidRow(box(width = 12, title = "Weekly area data",
+                             column(10, DTOutput("weekarea"))
+                )),
+                fluidRow(box(title = "Cases by Age Group", width = 12,
+                             plotlyOutput("ageplot", width = "70%", height = 600)
+                )),
+                fluidRow(box(width = 12, title = "Weekly age data",
+                             column(10, DTOutput("weekage"))
+                )),
+                fluidRow(box(title = "Cases by Transmission type", width = 12,
+                             plotlyOutput("transplot", width = "70%", height = 600)
+                )),
+                fluidRow(box(width = 12, title = "Weekly transmission data",
+                             column(10, DTOutput("weektrans"))
+                )),
+                h3(paste0("Developed by Dr. Andrew Simpkin "),
+                   tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
+                   paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
+                   tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
+        )
     ) # end of tabItems
     
 )# end of body
@@ -260,6 +292,7 @@ server <- function(input, output) {
                                              lat = mean(lat, na.rm=TRUE)) %>%
             na.omit() 
     })
+
     
  
     ## Interactive Map ###########################################
@@ -321,47 +354,7 @@ server <- function(input, output) {
         color = "red"
       )
     })
-    
-    #################### Data Table  ###################
-    output$dattable <- renderDT({
-      
-      dataRaw() %>% mutate(date = as.Date(date,format = "%d/%m/%Y"))
-    
-      })
-    
-    output$areatable <- renderDT({
-      
-      dataIreland() %>%
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        group_by(date,area) %>%
-        summarise(New_cases = sum(ncase)) %>%
-        na.omit() %>%
-        group_by(area) %>%
-        mutate(Total_cases = cumsum(New_cases)) %>%
-        filter(date == max(date), area!="unknown") %>%
-        select(date,area,Total_cases) %>%
-        group_by(date) %>%
-        mutate(Total_cases= Total_cases,
-               Percentage = round(100*Total_cases/sum(Total_cases),0))
-      
-    })
-    
-    output$gendertable <- renderDT({
-      
-      dataGender() %>%
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        group_by(date,gender) %>%
-        summarise(New_cases = sum(ncase)) %>%
-        na.omit() %>%
-        group_by(gender) %>%
-        mutate(Total_cases= cumsum(New_cases)) %>%
-        filter(date == max(date), gender != "unknown") %>%
-        select(date,gender,Total_cases) %>%
-        group_by(date) %>%
-        mutate(Total_cases= Total_cases,
-               Percentage = round(100*Total_cases/sum(Total_cases),0))
-      
-    })
+
     
     ################### Time series plots ##############
     #### Plotly cases per day
@@ -451,8 +444,227 @@ server <- function(input, output) {
         ggtitle(paste0("Mean daily difference is ",round(mean(comp$diff,na.rm=TRUE),0), " cases"))
       ggplotly(g, tooltip = c("Country","Date","Total_cases","New_cases"))
       
-    })    
+    })
     
+    
+    
+    #################### Data Table  ###################
+    output$dattable <- renderDT({
+      
+      dataRaw() %>% mutate(date = as.Date(date,format = "%d/%m/%Y"))
+      
+    })
+    
+    output$areatable <- renderDT({
+      
+      dataIreland() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        group_by(date,area) %>%
+        summarise(New_cases = sum(ncase)) %>%
+        na.omit() %>%
+        group_by(area) %>%
+        mutate(Total_cases = cumsum(New_cases)) %>%
+        filter(date == max(date), area!="unknown") %>%
+        select(date,area,Total_cases) %>%
+        group_by(date) %>%
+        mutate(Total_cases= Total_cases,
+               Percentage = round(100*Total_cases/sum(Total_cases),0))
+      
+    })
+    
+    output$gendertable <- renderDT({
+      
+      dataGender() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        group_by(date,gender) %>%
+        summarise(New_cases = sum(ncase)) %>%
+        na.omit() %>%
+        group_by(gender) %>%
+        mutate(Total_cases= cumsum(New_cases)) %>%
+        filter(date == max(date), gender != "unknown") %>%
+        select(date,gender,Total_cases) %>%
+        group_by(date) %>%
+        mutate(Total_cases= Total_cases,
+               Percentage = round(100*Total_cases/sum(Total_cases),0))
+      
+    })
+    
+    
+    ######################### weekly tab
+    dataCounty <- reactive({
+      read.csv("data/corona_county.csv")
+    })
+    dataAge <- reactive({
+      read.csv("data/corona_age.csv")
+    })
+    dataTrans <- reactive({
+      read.csv("data/corona_trans.csv")
+    })
+    dataStats <- reactive({
+      read.csv("data/corona_stats.csv")
+    })
+    
+    ## info boxes
+    output$HospBox <- renderValueBox({
+      valueBox(paste0(dataStats()$ncase[dataStats()$type=="Total number hospitalised"], "(",
+                      dataStats()$Percentage[dataStats()$type=="Total number hospitalised"], ")"), "Hospitalised",
+               color = "blue"
+      )
+    })
+    output$ICUBox <- renderValueBox({
+      valueBox(paste0(dataStats()$ncase[dataStats()$type=="Total number admitted to ICU"], "(",
+                      dataStats()$Percentage[dataStats()$type=="Total number admitted to ICU"], ")"), "in Intensive Care",
+               color = "purple"
+      )
+    })
+    output$CFRBox <- renderValueBox({
+      valueBox(paste0(dataStats()$ncase[dataStats()$type=="Case fatality rate"], "(",
+                      dataStats()$Percentage[dataStats()$type=="Case fatality rate"], ")"), "Case fatality rate",
+               color = "red"
+      )
+    })
+    
+    ## Plot weekly data
+    
+    ### Map
+    output$weekmap <-  renderLeaflet({
+        dataCounty() %>%
+        mutate(long = case_when(county == "Carlow" ~ -6.9261098,
+                                county == "Cavan" ~ -7.3605599,
+                                county == "Clare" ~ -8.9811,
+                                county == "Donegal" ~ -8.1041,
+                                county == "Kildare" ~ -6.9144402,
+                                county == "Kilkenny" ~ -7.2448,
+                                county == "Laois" ~ -7.3323,
+                                county == "Leitrim" ~ -8.0020,
+                                county == "Longford" ~ -7.7933,
+                                county == "Louth" ~ -6.4889,
+                                county == "Mayo" ~ -9.4289,
+                                county == "Meath" ~ -6.6564,
+                                county == "Monaghan" ~ -6.9683,
+                                county == "Offaly" ~ -7.7122,
+                                county == "Roscommon" ~ -8.1891,
+                                county == "Sligo" ~ -8.4761,
+                                county == "Tipperary" ~ -8.1619,
+                                county == "Wexford" ~ -6.4633,
+                                county == "Kerry" ~ -9.5669,
+                                county == "Waterford" ~ -7.1101,
+                                county == "Westmeath" ~ -7.4653,
+                                county == "Wicklow" ~ -6.0446,
+                                county == "Galway" ~ -9.0568,
+                                county == "Limerick" ~ -8.6267,
+                                county == "Cork" ~ -8.4756,
+                                county == "Dublin" ~ -6.2603),
+               lat = case_when(county == "Carlow" ~ 52.8408318,
+                               county == "Cavan" ~ 53.9908295,
+                               county == "Clare" ~ 52.9045,
+                               county == "Donegal" ~ 54.6549,
+                               county == "Kildare" ~ 53.1561089,
+                               county == "Kilkenny" ~ 52.6541,
+                               county == "Laois" ~ 52.9943,
+                               county == "Leitrim" ~ 54.1247,
+                               county == "Longford" ~ 53.7276,
+                               county == "Louth" ~ 53.9252,
+                               county == "Mayo" ~ 54.0153,
+                               county == "Meath" ~ 53.6055,
+                               county == "Monaghan" ~ 54.2492,
+                               county == "Offaly" ~ 53.2357,
+                               county == "Roscommon" ~ 53.6276,
+                               county == "Sligo" ~ 54.2766,
+                               county == "Tipperary" ~ 52.4738,
+                               county == "Wexford" ~ 52.3369,
+                               county == "Kerry" ~ 52.1545,
+                               county == "Waterford" ~ 52.2593,
+                               county == "Westmeath" ~ 53.5345,
+                               county == "Wicklow" ~ 52.9808,
+                               county == "Galway" ~ 53.2707,
+                               county == "Limerick" ~ 52.6638,
+                               county == "Cork" ~ 51.8985,
+                               county == "Dublin" ~ 53.3498)) %>%
+        mutate(ncase = as.character(ncase),
+               ncase = ifelse(ncase == "< = 5","5",ncase)) %>%
+        mutate(ncase = as.numeric(ncase)) %>%
+          leaflet() %>%
+          addTiles(
+            urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
+            attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>'
+          ) %>%
+          setView(lng = -8, lat = 53.5, zoom = 7) %>%
+          clearShapes() %>%
+          addCircleMarkers(lng= ~long, 
+                           lat= ~lat, 
+                           layerId = ~county,
+                           radius = ~ncase)
+      })
+    
+    # Show a popup at the given location
+    showCountyPopup <- function(t, lat, long) {
+      selectedCounty <- dataCounty()[dataCounty()$county == t,]
+      content <- as.character(tagList(
+        tags$h4("Number of cases:", selectedCounty$ncase),
+        tags$h4("Number of deaths:", selectedCounty$ndeath)
+      ))
+      leafletProxy("weekmap") %>% 
+        addPopups(long, lat, content, layerId = t)
+    }
+    
+    # When map is clicked, show a popup with city info
+    observe({
+      leafletProxy("weekmap") %>% 
+        clearPopups()
+      event <- input$map_marker_click
+      if (is.null(event))
+        return()
+      
+      isolate({
+        showCountyPopup(event$id, event$lat, event$lng)
+      })
+    })
+    
+    ## age plot
+    output$ageplot <- renderPlotly({
+      g = dataAge() %>% 
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        ggplot(aes(x=age_group,y=ncase,fill=age_group)) + 
+        geom_col() + labs(y="Cases",x="Age group") + 
+        theme(axis.text.x = element_text(angle = 45, hjust = 1))
+      ggplotly(g, tooltip = c("age_group","ncase"))
+    })
+    
+    ## age plot
+    output$transplot <- renderPlotly({
+      g = dataTrans() %>% 
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        ggplot(aes(x=transmission,y=ncase,fill=transmission)) + 
+        geom_col() + labs(y="Cases",x="Transmission type") + 
+        theme(axis.text.x = element_text(angle = 45, hjust = 1))
+      ggplotly(g, tooltip = c("transmission","ncase"))
+    })
+    
+    
+    ## Table weekly data
+    ### county
+    output$weekarea <- renderDT({
+
+      dataCounty() %>% mutate(date = as.Date(date,format = "%d/%m/%Y"))
+      
+    })
+    
+    ### age
+    output$weekage <- renderDT({
+      
+      dataAge() %>% mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        mutate(Percentage = round(100*ncase/sum(ncase),0))
+      
+    })
+    
+    ### transmission
+    output$weektrans <- renderDT({
+      
+      dataTrans() %>% mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        mutate(Percentage = round(100*ncase/sum(ncase),0))
+      
+    })
 }
 
 # Run the application 
