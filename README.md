@@ -1,4 +1,6 @@
-# Visualisation of Covid-19 in Ireland using Irish government data
+# Visualisation of Covid-19 case data for the ssland of Ireland
+
+Data used are from the Republic of Ireland( Department of Health ), Northern Ireland ( NHS) and WHO
 
 [Shiny app](https://andsim.shinyapps.io/Corona/)
 
