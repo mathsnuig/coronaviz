@@ -1,6 +1,6 @@
-# Visualisation of Covid-19 case data for the ssland of Ireland
+# Visualisation of Covid-19 case data for the Island of Ireland
 
-Data used are from the Republic of Ireland( Department of Health ), Northern Ireland ( NHS) and WHO
+Data used are from the Republic of Ireland(Department of Health), Northern Ireland (NHS) and WHO
 
 [Shiny app](https://andsim.shinyapps.io/Corona/)
 
