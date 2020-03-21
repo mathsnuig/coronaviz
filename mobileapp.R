@@ -61,7 +61,7 @@ ui = f7Page(
         icon = f7Icon("calendar"),
         active = FALSE,
         # Tab 5 content
-        h3(paste0("Report data as of midnight on 17/03/20 from Republic of Ireland"),
+        h3(paste0("Report data (midnight 19/03/20) from Republic of Ireland only"),
            tags$a(href="https://www.gov.ie/en/publication/cd0cea-an-analysis-of-the-266-cases-of-covid-19-in-ireland-as-of-march-16-2/", 
                   "(National Public Health Emergency Team)", target="_blank")),
         valueBoxOutput("HospBox"),
@@ -71,9 +71,13 @@ ui = f7Page(
         h4(tags$caption("County data")),
         DTOutput("weekarea", width = "80%"),
         plotlyOutput("ageplot", width = "70%"),
+        h4(tags$caption("Cumulative cases by age group")),
+        plotlyOutput("cumulage", width = "70%", height = 600),
         h4(tags$caption("Age data")),
         DTOutput("weekage", width = "80%"),
         plotlyOutput("transplot", width = "70%"),
+        h4(tags$caption("Cumulative cases by transmission type")),
+        plotlyOutput("cumultrans", width = "70%", height = 600),
         h4(tags$caption("Transmission data")),
         DTOutput("weektrans", width = "80%")
       ),
@@ -86,7 +90,7 @@ ui = f7Page(
         h4(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
                   "HSE Coronavirus information", 
                   target="_blank"),
-           paste0(". Data (18/03/2020) from Ireland ("),
+           paste0(". Data (21/03/2020) from Ireland ("),
            tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
                   "Department of Health", target="_blank"),
            paste0("), Northern Ireland ("),
@@ -95,7 +99,13 @@ ui = f7Page(
            paste0(") and WHO")),
         infoBoxOutput("CasesBox"),
         infoBoxOutput("MortBox"),
-        plotlyOutput("cumulcases", width = "90%", height = 400)
+        fluidRow(),
+        valueBoxOutput("GrowthBox"),
+        #valueBoxOutput("DoublingBox"),
+        h4("New and cumulative cases per day"),
+        plotlyOutput("cumulcases", width = "90%", height = 400),
+        h4("Cumulative cases on the log10 scale"),
+        plotlyOutput("cumullog", width = "90%", height = 400)
         # ,
         # plotlyOutput("cumularea", width = "90%", height = 400),
         # plotlyOutput("cumulgender", width = "90%", height = 400)
@@ -111,11 +121,15 @@ ui = f7Page(
            Number of cases from other countries are scaled to reflect the Irish population. 
            For example, ROI+NI (6.712 million people) is about 11% of Italy's population (60.48m), so 100 cases in Italy is equivalent to 11 cases in Ireland"),
         f7SmartSelect("place", "Country to compare", 
-                      choices = c("france", "germany", "italy", "spain", "uk"), 
+                      choices = c("belgium", "denmark", "france", "germany", "italy", 
+                                  "netherlands", "norway", "portugal", "spain", "uk"), 
                       selected = "france"),
         h4("Decide how many days behind/ahead Ireland is to your selected country"),
         f7Slider("days","Decide the time difference",min = -5,max=30,value=0,scale = TRUE,step = 1),
-        plotlyOutput("irelandcompare", width = "90%", height = 500)
+        h4("Compare cumulative growth"),
+        plotlyOutput("irelandcompare", width = "90%", height = 500),
+        h4("Compare cumulative growth on the log10 scale"),
+        plotlyOutput("logcompare", width = "90%", height = 500)
       ),
       # Data tab
       f7Tab(
@@ -124,7 +138,7 @@ ui = f7Page(
         active = FALSE,
         # Tab 4 content
         h4(tags$caption("Raw data")),
-        DTOutput("dattable", width = "80%"),
+        DTOutput("dattable", width = "80%")
         # h4(tags$caption("Total cases by Area (Missing area for 121 cases)")),
         # DTOutput("areatable", width = "80%"),
         # h4(tags$caption("Total cases by Gender (ROI only and 47 with no gender information)")),
@@ -141,20 +155,30 @@ server <- function(input, output) {
   # read in all data
   dataRaw <- reactive({
     dat1 <- read.csv("data/corona_island.csv") %>% 
-      mutate(pop = case_when(country=="ireland"~6.712,
+      mutate(pop = case_when(country=="ireland"~6.804,
+                             country=="belgium"~11.4,
+                             country=="denmark"~5.786,
                              country=="france"~66.99,
                              country=="germany"~82.79,
                              country=="italy"~60.48,
+                             country=="netherlands"~17.18,
+                             country=="norway"~5.368,
+                             country=="portugal"~10.29,
                              country=="spain"~46.66,
                              country=="uk"~66.44)) 
     
     dat2 <- read.csv("data/corona_island.csv") %>% 
-      mutate(pop = case_when(country=="ireland"~4.88,
-                             country=="france"~66.99,
-                             country=="germany"~82.79,
-                             country=="italy"~60.48,
-                             country=="spain"~46.66,
-                             country=="uk"~66.44))%>%
+      mutate(pop = case_when(country=="ireland"~4.922,
+                             country=="belgium"~11.575,
+                             country=="denmark"~5.786,
+                             country=="france"~65.233,
+                             country=="germany"~83.710,
+                             country=="italy"~60.486,
+                             country=="netherlands"~17.124,
+                             country=="norway"~5.409,
+                             country=="portugal"~10.204,
+                             country=="spain"~46.749,
+                             country=="uk"~67.787)) %>%
       filter(area!="north")
     
     if(input$partition == TRUE) return(dat1)
@@ -270,6 +294,34 @@ server <- function(input, output) {
       )
     })
     
+    dataGrowth <- reactive({
+      dataRaw() %>%
+        filter(country=="ireland") %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        group_by(date) %>%
+        summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
+        na.omit() %>%
+        mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
+        mutate(Growth = round(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
+        mutate(median = median(Growth,na.rm=TRUE))
+    })
+    
+    output$GrowthBox <- renderValueBox({
+      
+      dat <- dataGrowth()
+      
+      valueBox(paste0(dat$median[1],"%"), "Median growth rate", color = "blue")
+      
+    })
+    
+    output$DoublingBox <- renderValueBox({
+      
+      dat <- dataGrowth()
+      
+      valueBox(round(70/dat$median[1],2), "Estimated days for number of cases to double", color = "maroon")
+      
+    })
+    
     
     #################### Data Table  ###################
     output$dattable <- renderDT({
@@ -324,8 +376,26 @@ server <- function(input, output) {
         mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
         ggplot(aes(x=date,y=ccases,label=Date,label1=Total_cases,label2=New_cases)) + 
         geom_line() + geom_point() + geom_col(aes(x=date,y=ncases)) +
-        theme(legend.position="none") + labs(y="Cases", title = "New and cumulative cases")
+        theme(legend.position="none") + labs(y="Cases")
       ggplotly(g, tooltip = c("Date","Total_cases","New_cases"))
+      
+    })
+    
+    #### Plotly cases per day
+    output$cumullog <- renderPlotly({
+      
+      g = dataIreland() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        group_by(date) %>%
+        summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
+        na.omit() %>%
+        mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases))  %>%
+        mutate(Growth_Percentage = round(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
+        ggplot(aes(x=date,y=ccases,label=Date,label1=Total_cases,label2=New_cases, label3=Growth_Percentage)) + 
+        geom_line() + geom_point() + 
+        theme(legend.position="none") + labs(y="Cases (axis shows log10 scale)") +
+        scale_y_continuous(trans='log10')
+      ggplotly(g, tooltip = c("Date","Total_cases","New_cases", "Growth_Percentage"))
       
     })
     
@@ -404,6 +474,27 @@ server <- function(input, output) {
       
     }) 
     
+    output$logcompare <- renderPlotly({
+      
+      
+      dat <- dataCountry()
+      dat <- dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"), country = as.character(country)) 
+      prop = mean(dat$pop[dat$country=="ireland"])/mean(dat$pop[dat$country==input$place])
+      dat$ncase[dat$country==input$place] <- round(dat$ncase[dat$country==input$place]*prop,0)
+      dat$date[dat$country==input$place] <- dat$date[dat$country==input$place]+input$days
+      dat$country[dat$country==input$place] <- paste(input$place, "scaled to ireland +",input$days,"days")
+      
+      g = dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"))%>%
+        group_by(country, date) %>%
+        summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date), Country = country[1]) %>%
+        na.omit() %>%
+        mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
+        ggplot(aes(x=date,y=ccases,color=country,fill=country,label=Date,label1=Country,label2=Total_cases)) +
+        geom_line() + geom_point() + labs(y="Cases (scaled to Ireland)") + theme_bw() + scale_y_continuous(trans = "log10")
+      ggplotly(g, tooltip = c("Country","Date","Total_cases","New_cases"))
+      
+    })  
+    
     ######################### weekly tab
     dataCounty <- reactive({
       read.csv("data/corona_county.csv")
@@ -436,8 +527,7 @@ server <- function(input, output) {
       )
     })
     output$CFRBox <- renderValueBox({
-      valueBox(paste0(dataStats()$ncase[dataStats()$type=="Case fatality rate"], "(",
-                      dataStats()$Percentage[dataStats()$type=="Case fatality rate"], ")"), "Case fatality rate",
+      valueBox(paste0(dataStats()$Percentage[dataStats()$type=="Case fatality rate"]), "Case fatality rate",
                color = "red"
       )
     })
@@ -448,10 +538,10 @@ server <- function(input, output) {
     output$map <-  renderLeaflet({
       
       labs <- lapply(seq(nrow(dataCounty())), function(i) {
-        paste0( '<p>', dataCounty()[i, "ncase"],' cases </p><p>') 
+        paste0( '<p>', dataCounty()[i, "ncase"],' cases in ', dataCounty()[i, "county"], '</p><p>') 
       })
       
-      dataCounty()  %>%
+      counties <- dataCounty()  %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
         filter(date == max(date)) %>%
         mutate(long = case_when(county == "Carlow" ~ -6.9261098,
@@ -508,18 +598,24 @@ server <- function(input, output) {
                                county == "Dublin" ~ 53.3498)) %>%
         mutate(ncases = as.character(ncase),
                ncases = ifelse(ncases == "< = 5","5",ncases)) %>%
-        mutate(ncases = as.numeric(ncases)) %>%
+        mutate(ncases = as.numeric(ncases),
+               logcases = log(ncases+1))
+      
+      pal <- colorNumeric('Reds', counties$logcases)
+      
+      counties %>%
         leaflet() %>%
         addTiles(
           urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
           attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>'
         ) %>%
-        setView(lng = -8, lat = 53.5, zoom = 8) %>%
+        setView(lng = -8, lat = 53.5, zoom = 7) %>%
         clearShapes() %>%
         addCircleMarkers(lng= ~long, 
                          lat= ~lat, 
                          layerId = ~county,
-                         radius = ~ncases/2,
+                         radius = ~5*log(ncases),
+                         color = ~pal(logcases),
                          label = lapply(labs, htmltools::HTML))
     })
 
@@ -533,22 +629,49 @@ server <- function(input, output) {
       ggplotly(g, tooltip = c("age_group","ncase"))
     })
     
-    ## age plot
+    # age spaghetti chart
+    output$cumulage <- renderPlotly({
+      
+      g = dataAge() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        group_by(date,age_group) %>%
+        summarise(Total_cases = sum(ncase)) %>%
+        ggplot(aes(x=date,y=Total_cases,color=age_group)) + 
+        geom_line() + geom_point() + labs(y="Cases")
+      ggplotly(g, tooltip = c("date", "age_group", "Total_cases"))
+      
+    })
+    
+    ## transimission barplot
     output$transplot <- renderPlotly({
       g = dataTrans() %>% 
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        filter(date == max(date)) %>%
         ggplot(aes(x=transmission,y=ncase,fill=transmission)) + 
         geom_col() + labs(y="Cases",x="Transmission type") + 
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
-      ggplotly(g, tooltip = c("transmission","ncase"))
+      ggplotly(g)
     })
+    
+    # trans spaghetti chart
+    output$cumultrans <- renderPlotly({
+      
+      g = dataTrans() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        group_by(date,transmission) %>%
+        summarise(Total_cases = sum(ncase)) %>%
+        ggplot(aes(x=date,y=Total_cases,color=transmission)) + 
+        geom_line() + geom_point() + labs(y="Cases")
+      ggplotly(g, tooltip = c("date", "transmission", "Total_cases"))
+      
+    })       
     
     
     ## Table weekly data
     ### county
     output$weekarea <- renderDT({
       
-      dataCounty() %>% mutate(date = as.Date(date,format = "%d/%m/%Y"))
+      dataCounty() %>% mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% arrange(desc(date))
       
     })
     
@@ -556,7 +679,7 @@ server <- function(input, output) {
     output$weekage <- renderDT({
       
       dataAge() %>% mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        mutate(Percentage = round(100*ncase/sum(ncase),0))
+        group_by(date) %>% mutate(Percentage = round(100*ncase/sum(ncase),0)) %>% arrange(desc(date))
       
     })
     
@@ -564,7 +687,7 @@ server <- function(input, output) {
     output$weektrans <- renderDT({
       
       dataTrans() %>% mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        mutate(Percentage = round(100*ncase/sum(ncase),0))
+        mutate(Percentage = round(100*ncase/sum(ncase),0)) %>% arrange(desc(date))
       
     })
     
