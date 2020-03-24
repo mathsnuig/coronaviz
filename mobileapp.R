@@ -12,10 +12,14 @@ library(ggplot2)
 library(DT)
 library(googleVis)
 
+# Set range for day shifts considered in comparison
+minshift = -5
+maxshift = 30
                             
            
 ui = f7Page(
   title = "Coronavirus Ireland",
+  f7Init(theme = "dark"),
   f7TabLayout(
       navbar = f7Navbar(
         title = "COVID19 Ireland",
@@ -28,30 +32,7 @@ ui = f7Page(
     f7Tabs(
       animated = TRUE,
       id = "tabs",
-      # Map, report tab
-      f7Tab(
-        tabName = "map",
-        icon = f7Icon("calendar"),
-        active = FALSE,
-        # Tab 5 content
-        h3(paste0("Report data (midnight 21/03/20) from Republic of Ireland only"),
-           tags$a(href="https://www.gov.ie/en/collection/ef2560-analysis-of-confirmed-cases-of-covid-19-coronavirus-in-ireland/", 
-                  "(National Public Health Emergency Team)", target="_blank")),
-        valueBoxOutput("HospBox"),
-        valueBoxOutput("ICUBox"),
-        valueBoxOutput("CFRBox"),
-        leafletOutput("map", width = "90%", height = 600),
-        h4(tags$caption("County data")),
-        DTOutput("weekarea", width = "80%"),
-        h4(tags$caption("Cumulative cases by age group")),
-        plotOutput("cumulage", width = "70%", height = 600),
-        h4(tags$caption("Age data")),
-        DTOutput("weekage", width = "80%"),
-        h4(tags$caption("Cumulative cases by transmission type")),
-        plotOutput("cumultrans", width = "70%", height = 600),
-        h4(tags$caption("Transmission data")),
-        DTOutput("weektrans", width = "80%")
-      ),
+      
       # Time tab
       f7Tab(
         tabName = "time",
@@ -61,7 +42,7 @@ ui = f7Page(
         h4(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
                   "HSE Coronavirus information", 
                   target="_blank"),
-           paste0(". Data (23/03/2020) from Ireland ("),
+           paste0(". Data (24/03/2020) from Ireland ("),
            tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
                   "Department of Health", target="_blank"),
            paste0("), Northern Ireland ("),
@@ -77,6 +58,35 @@ ui = f7Page(
         plotOutput("cumulcases", width = "90%", height = 400)
         
       ),
+      
+      # Map, report tab
+      f7Tab(
+        tabName = "map",
+        icon = f7Icon("calendar"),
+        active = FALSE,
+        # Tab 5 content
+        h3(paste0("Report data (midnight 22/03/20) from Republic of Ireland only"),
+           tags$a(href="https://www.gov.ie/en/collection/ef2560-analysis-of-confirmed-cases-of-covid-19-coronavirus-in-ireland/", 
+                  "(National Public Health Emergency Team)", target="_blank")),
+        valueBoxOutput("HospBox"),
+        valueBoxOutput("ICUBox"),
+        valueBoxOutput("CFRBox"),
+        leafletOutput("map", width = "90%", height = 600),
+        h4(tags$caption("Cumulative cases by province, per 100,000 population")),
+        plotOutput("cumulcountyscaled", width = "70%", height = 600),
+        # h4(tags$caption("County data")),
+        # DTOutput("weekarea", width = "80%"),
+        h4(tags$caption("Cumulative cases by age group")),
+        plotOutput("cumulage", width = "70%", height = 600),
+        # h4(tags$caption("Age data")),
+        # DTOutput("weekage", width = "80%"),
+        h4(tags$caption("Cumulative cases by transmission type")),
+        plotOutput("cumultrans", width = "70%", height = 600)
+        #,
+        # h4(tags$caption("Transmission data")),
+        # DTOutput("weektrans", width = "80%")
+      ),
+      
       # Compare tab
       f7Tab(
         tabName = "compare",
@@ -94,16 +104,17 @@ ui = f7Page(
         f7Slider("days","Decide the time difference",min = -5,max=30,value=0,scale = TRUE,step = 1),
         h4("Compare cumulative growth"),
         plotOutput("irelandcompare", width = "90%", height = 500)
-      ),
-      # Data tab
-      f7Tab(
-        tabName = "data",
-        icon = f7Icon("list_number"),
-        active = FALSE,
-        # Tab 4 content
-        h4(tags$caption("Raw data")),
-        DTOutput("dattable", width = "80%")
       )
+      # ,
+      # # Data tab
+      # f7Tab(
+      #   tabName = "data",
+      #   icon = f7Icon("list_number"),
+      #   active = FALSE,
+      #   # Tab 4 content
+      #   h4(tags$caption("Raw data")),
+      #   DTOutput("dattable", width = "80%")
+      # )
 
     )
   )
@@ -259,42 +270,130 @@ server <- function(input, output) {
 
     ################### Comparison plots ############
     ##### Plot Ireland v other countries
+    # output$irelandcompare <- renderPlot({
+    #   
+    #   
+    #   dat <- dataCountry()
+    #   dat <- dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"), country = as.character(country)) 
+    #   prop = mean(dat$pop[dat$country=="ireland"])/mean(dat$pop[dat$country==input$place])
+    #   dat$ncase[dat$country==input$place] <- round(dat$ncase[dat$country==input$place]*prop,0)
+    #   dat$date[dat$country==input$place] <- dat$date[dat$country==input$place]+input$days
+    #   
+    #   diffdat = dat %>% 
+    #     mutate(date = as.Date(date,format = "%d/%m/%Y"))%>%
+    #     filter(country=="ireland"|country==input$place) %>%
+    #     group_by(country, date) %>%
+    #     summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date), Country = country[1]) %>%
+    #     na.omit() %>%
+    #     mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases))
+    #   
+    #   ireland <- diffdat %>% filter(country == "ireland")
+    #   comp <- diffdat %>% filter(country == input$place)
+    #   comp <- merge(ireland,comp,by="date") %>%
+    #     mutate(diff = abs(Total_cases.x - Total_cases.y)) %>%
+    #     select(date,diff)
+    #   
+    #   
+    #   dat$country[dat$country==input$place] <- paste(input$place, "scaled to ireland +",input$days,"days")
+    #   
+    #   dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"))%>%
+    #     group_by(country, date) %>%
+    #     summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date), Country = country[1]) %>%
+    #     na.omit() %>%
+    #     mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
+    #     ggplot(aes(x=date,y=ccases,color=country,fill=country,label=Date,label1=Country,label2=Total_cases)) +
+    #     geom_line() + geom_point() + labs(y="Cases (scaled to Ireland)") + theme_bw() + 
+    #     theme(legend.position = "bottom")
+    #   
+    # }) 
+    
     output$irelandcompare <- renderPlot({
       
       
       dat <- dataCountry()
-      dat <- dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"), country = as.character(country)) 
-      prop = mean(dat$pop[dat$country=="ireland"])/mean(dat$pop[dat$country==input$place])
-      dat$ncase[dat$country==input$place] <- round(dat$ncase[dat$country==input$place]*prop,0)
-      dat$date[dat$country==input$place] <- dat$date[dat$country==input$place]+input$days
+      dat <- dat %>% mutate(date = as.Date(date, format = "%d/%m/%Y"), country = as.character(country))
       
-      diffdat = dat %>% 
-        mutate(date = as.Date(date,format = "%d/%m/%Y"))%>%
-        filter(country=="ireland"|country==input$place) %>%
+      # use round away from zero form of rounding (sometimes called banker's rounding)
+      # what many of us learnt in school!
+      # check out the "round" package to find out more than you ever wanted to know about the complexities of rounding
+      round2 <- function(x, n = 0) (trunc((abs(x) * 10 ^ n) + 0.5) / 10 ^ n) * sign(x)
+      
+      # scale comparator country to Ireland based on population size (dat$pop)
+      prop = mean(dat$pop[dat$country == "ireland"]) / mean(dat$pop[dat$country == input$place])
+      dat$ncase[dat$country == input$place] <- round2(dat$ncase[dat$country == input$place] * prop, 0)
+      
+      # Function to calculate MSE in cumulative cases for a particular shift
+      
+      cdiffmad <- function(dayshift, dat) { # dat is input, so only locally defined
+        
+        dat$date[dat$country == input$place] <- dat$date[dat$country == input$place] + dayshift
+        
+        # extract Ireland and comparator data and calculate cumulative cases
+        diffdat = dat %>%
+          mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
+          filter(country == "ireland" | country == input$place) %>%
+          group_by(country, date) %>%
+          summarise(ncases = sum(ncase), Date = min(date), Country = country[1]) %>% # sum up over all people
+          na.omit() %>%
+          mutate(ccases = cumsum(ncases)) # cumulative count upto each day
+        
+        # Calculate difference in number of cases when shifted and scaled to Ireland
+        ireland <- diffdat %>% filter(country == "ireland")
+        comp <- diffdat %>% filter(country == input$place)
+        comp <- merge(ireland, comp, by = "date") %>%
+          mutate(diff = abs(ccases.x - ccases.y)) %>% # absolute differences
+          select(date, diff)
+        
+        cmad = mean(comp$diff, na.rm = T) # MAD estimator
+        ifelse(is.na(cmad), Inf, cmad) # allow search to ignore the shift with no overlapping data
+      }
+      
+      allshifts = minshift:maxshift
+      allmads = sapply(allshifts, cdiffmad, dat)
+      cmad <- allmads[which.min(allmads)]
+      bestshift <- allshifts[which.min(allmads)] # must change slider if want this to be default behaviour
+      
+      # when setting search range of overlap, need to make sure there is enough non-zero entries
+      
+      # apply the shift to non-Ireland input country
+      dayshift = input$days
+      dat$date[dat$country==input$place] <- dat$date[dat$country==input$place] + dayshift
+      
+      # extract Ireland and comparator data and calculate cumulative cases
+      diffdat = dat %>%
+        mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
+        filter(country == "ireland" | country == input$place) %>%
         group_by(country, date) %>%
-        summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date), Country = country[1]) %>%
+        summarise(ncases = sum(ncase), Date = min(date), Country = country[1]) %>% # sum up over all people
         na.omit() %>%
-        mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases))
+        mutate(ccases = cumsum(ncases)) # cumulative count upto each day
       
+      # Calculate difference in number of cases when shifted and scaled to Ireland
       ireland <- diffdat %>% filter(country == "ireland")
       comp <- diffdat %>% filter(country == input$place)
-      comp <- merge(ireland,comp,by="date") %>%
-        mutate(diff = abs(Total_cases.x - Total_cases.y)) %>%
-        select(date,diff)
+      comp <- merge(ireland,comp, by = "date") %>%
+        mutate(diff = abs(ccases.x - ccases.y)) %>%  # absolute differences
+        select(date, diff)
       
+      # change text label for comparator to say indicate shift and scale
+      dat$country[dat$country == input$place] <- paste(input$place, "scaled to ireland +", input$days, "days")
       
-      dat$country[dat$country==input$place] <- paste(input$place, "scaled to ireland +",input$days,"days")
-      
-      dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"))%>%
+      xnote = min(as.Date(dat$date, format = "%d/%m/%Y")) + diff(range(as.Date(dat$date, format = "%d/%m/%Y"))) * 0.5
+      ynote = max(diffdat$ccases)
+      dat %>% mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
         group_by(country, date) %>%
-        summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date), Country = country[1]) %>%
+        summarise(New_cases = sum(ncase), Date = min(date), Country = country[1]) %>%
         na.omit() %>%
-        mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
-        ggplot(aes(x=date,y=ccases,color=country,fill=country,label=Date,label1=Country,label2=Total_cases)) +
-        geom_line() + geom_point() + labs(y="Cases (scaled to Ireland)") + theme_bw() + 
+        mutate(Total_cases = cumsum(New_cases)) %>%
+        ggplot(aes(x = date, y = Total_cases, color = country, fill = country, label = Date,
+                   label1 = Country, label2 = Total_cases, label3 = New_cases)) +
+        geom_line() + geom_point() + labs(y = "Cases (scaled to Ireland)") + theme_bw() + 
+        ggtitle(paste0("Mean daily difference is ", round2(mean(comp$diff, na.rm = TRUE), 0), " cases ")) +
+        annotate("text", x = xnote, y = ynote, 
+                 label = paste0("Closest trajectory at ", bestshift, " days")) + 
         theme(legend.position = "bottom")
       
-    }) 
+    })
     
     
     ######################### weekly tab
@@ -410,6 +509,40 @@ server <- function(input, output) {
                          label = lapply(labs, htmltools::HTML),
                          fillOpacity = 0.9)
     })
+    
+    ## province time scaled
+    output$cumulcountyscaled <- renderPlot({
+      
+      dataCounty() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        mutate(ncases = as.character(ncase),
+               ncases = ifelse(ncases == "< = 5","5",ncases)) %>%
+        mutate(ncases = as.numeric(ncases)) %>%
+        mutate(province = case_when(county=="Carlow"|county=="Dublin"|
+                                      county=="Kildare"|county=="Kilkenny"|
+                                      county=="Laois"|county=="Longford"|
+                                      county=="Louth"|county=="Meath"|
+                                      county=="Offaly"|county=="Westmeath"|
+                                      county=="Wexford"|county=="Wicklow" ~ "Leinster",
+                                    county=="Clare"|county=="Cork"|
+                                      county=="Kerry"|county=="Limerick"|
+                                      county=="Tipperary"|county=="Waterford" ~ "Munster",
+                                    county=="Galway"|county=="Leitrim"|
+                                      county=="Mayo"|county=="Roscommon"|
+                                      county=="Sligo" ~ "Connacht",
+                                    county=="Donegal"|county=="Cavan"|
+                                      county=="Monaghan" ~ "Ulster (ROI)")) %>% 
+        mutate(pop = case_when(province == "Connacht" ~ 550742,
+                               province == "Munster" ~ 1280020,
+                               province == "Leinster" ~ 2630720,
+                               province == "Ulster (ROI)" ~ 159192+32044+76176)) %>%
+        group_by(date,province) %>%
+        summarise(Total_cases = sum(ncases), pop = mean(pop)) %>%
+        mutate(Cases_per100k = round(100000*Total_cases/pop,0)) %>%
+        ggplot(aes(x=date,y=Cases_per100k,color=province,group=province)) + 
+        geom_line() + geom_point() + labs(y="Cases per 100,000 population")
+      
+    })  
 
 
     
