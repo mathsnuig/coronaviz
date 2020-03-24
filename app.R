@@ -116,7 +116,7 @@ body <- dashboardBody(
                    tags$a(href="https://andsim.shinyapps.io/coronamobile", 
                           "try the mobile version here!", 
                           target="_blank") ),
-                h3(paste0("Data (21/03/2020) from Ireland ("),
+                h3(paste0("Data (23/03/2020) from Ireland ("),
                    tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
                           "Department of Health", target="_blank"),
                    paste0("), Northern Ireland ("),
@@ -125,9 +125,9 @@ body <- dashboardBody(
                    paste0(") and WHO")),
                 valueBoxOutput("CasesBox"),
                 valueBoxOutput("MortBox"),
-                valueBoxOutput("GrowthBox"),
                 fluidRow(),
-                #valueBoxOutput("DoublingBox"),
+                valueBoxOutput("GrowthBox"),
+                valueBoxOutput("DoublingBox"),
                 
                 fluidRow(
                     box(width = 12, title = "Cumulative and new cases per day", 
@@ -184,6 +184,12 @@ body <- dashboardBody(
                       plotlyOutput("logcompare", width = "90%", height = 500) 
                   )
                 ),
+                # fluidRow(
+                #   box(width = 12, 
+                #       title = "Compare on per million of population", 
+                #       plotlyOutput("permillioncompare", width = "90%", height = 500) 
+                #   )
+                # ),
                 h3(paste0("Developed by Dr. Andrew Simpkin "),
                    tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
                    paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
@@ -217,8 +223,8 @@ body <- dashboardBody(
         
         # Weekly Tab
         tabItem("nphet",
-                h3(paste0("Data (midnight 19/03/2020) from Ireland"),
-                   tags$a(href="https://www.gov.ie/en/publication/cd0cea-an-analysis-of-the-266-cases-of-covid-19-in-ireland-as-of-march-16-2/", 
+                h3(paste0("Data (midnight 21/03/2020) from Ireland"),
+                   tags$a(href="https://www.gov.ie/en/collection/ef2560-analysis-of-confirmed-cases-of-covid-19-coronavirus-in-ireland/", 
                           "(National Public Health Emergency Team)", target="_blank")),
                 valueBoxOutput("HospBox"),
                 valueBoxOutput("ICUBox"),
@@ -226,6 +232,12 @@ body <- dashboardBody(
                 fluidRow(box(title = "Map of cases by county (ROI only)", width = 12,
                              leafletOutput("map", width = "70%", height = 600)
                              )),
+                # fluidRow(box(title = "Cases by province over time", width = 12,
+                #              plotlyOutput("cumulcounty", width = "70%", height = 600)
+                # )),
+                # fluidRow(box(title = "Cases per 100,000 population by province over time", width = 12,
+                #              plotlyOutput("cumulcountyscaled", width = "70%", height = 600)
+                # )),
                 fluidRow(box(width = 12, title = "County data",
                              column(10, DTOutput("weekarea"))
                 )),
@@ -295,10 +307,10 @@ server <- function(input, output) {
       
     })
     
-    # gender data
-    dataGender <- reactive({
-      read.csv("data/corona_island_gender.csv")
-    })
+    # # gender data
+    # dataGender <- reactive({
+    #   read.csv("data/corona_island_gender.csv")
+    # })
     
     # irish data only
     dataIreland <- reactive({
@@ -310,26 +322,57 @@ server <- function(input, output) {
       dataRaw() %>% filter(country=="ireland" | country == input$place)
     })
     
-    # irish area data
-    dataArea <- reactive({        
-    dataIreland() %>% 
-            mutate(long = case_when(area=="east" ~ -6.2690,
-                                    area=="west" ~ -9.0650,
-                                    area=="south" ~ -8.5110,
-                                    area=="north" ~ -5.954,
-                                    area=="northwest" ~ -7.7328),
-                   lat = case_when(area=="east" ~ 53.3593,
-                                   area=="west" ~ 53.2760,
-                                   area=="south" ~ 51.8830,
-                                   area=="north" ~ 54.588,
-                                   area=="northwest" ~ 54.9598))  %>% 
-        group_by(area) %>% summarise(ncases=sum(ncase,na.rm=TRUE),
-                                             ndeaths=sum(ndeath,na.rm=TRUE),
-                                             long = mean(long,na.rm=TRUE),
-                                             lat = mean(lat, na.rm=TRUE)) %>%
-            na.omit() 
+    
+    # create dataset with growth per day for use in growth rate calc and doubling time
+    dataGrowth <- reactive({
+      dataRaw() %>%
+        filter(country=="ireland") %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        group_by(date) %>%
+        summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
+        na.omit() %>%
+        mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
+        mutate(Growth = round(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
+        mutate(median = median(Growth,na.rm=TRUE))
     })
+    
+    # # irish area data
+    # dataArea <- reactive({        
+    # dataIreland() %>% 
+    #         mutate(long = case_when(area=="east" ~ -6.2690,
+    #                                 area=="west" ~ -9.0650,
+    #                                 area=="south" ~ -8.5110,
+    #                                 area=="north" ~ -5.954,
+    #                                 area=="northwest" ~ -7.7328),
+    #                lat = case_when(area=="east" ~ 53.3593,
+    #                                area=="west" ~ 53.2760,
+    #                                area=="south" ~ 51.8830,
+    #                                area=="north" ~ 54.588,
+    #                                area=="northwest" ~ 54.9598))  %>% 
+    #     group_by(area) %>% summarise(ncases=sum(ncase,na.rm=TRUE),
+    #                                          ndeaths=sum(ndeath,na.rm=TRUE),
+    #                                          long = mean(long,na.rm=TRUE),
+    #                                          lat = mean(lat, na.rm=TRUE)) %>%
+    #         na.omit() 
+    # })
 
+    ## detailed data read in
+    dataCounty <- reactive({
+      read.csv("data/corona_county.csv")
+    })
+    dataAge <- reactive({
+      read.csv("data/corona_age.csv") %>%
+        mutate(age_group = factor(age_group, levels(age_group)[c(1,2,7,3:6,8,9)]))
+    })
+    dataTrans <- reactive({
+      read.csv("data/corona_trans.csv")
+    })
+    dataStats <- reactive({
+      read.csv("data/corona_stats.csv") %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        filter(date == max(date))
+      
+    })
 
     ################### Info boxes ##########
     ## Info box
@@ -348,20 +391,7 @@ server <- function(input, output) {
         color = "red"
       )
     })
-    
-    # create dataset with growth per day for use in growth rate calc and doubling time
-    dataGrowth <- reactive({
-      dataRaw() %>%
-        filter(country=="ireland") %>%
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        group_by(date) %>%
-        summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
-        na.omit() %>%
-        mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
-        mutate(Growth = round(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
-        mutate(median = median(Growth,na.rm=TRUE))
-    })
-    
+
     # % growth, median?
     output$GrowthBox <- renderValueBox({
       
@@ -417,21 +447,21 @@ server <- function(input, output) {
     })
 
     
-    # #### Plotly cases per day by gender
-    output$cumulgender <- renderPlotly({
-      
-      g = dataGender() %>%
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        group_by(date,gender) %>%
-        summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
-        na.omit() %>%
-        group_by(gender) %>%
-        mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
-        ggplot(aes(x=date,y=ccases,color=gender,label=Date,label1=Total_cases,label2=New_cases)) + 
-        geom_line() + geom_point() + labs(y="Cases", title = "Cumulative cases by gender (ROI only)")
-      ggplotly(g, tooltip = c("Date", "gender", "Total_cases","New_cases"))
-      
-    })    
+    # # #### Plotly cases per day by gender
+    # output$cumulgender <- renderPlotly({
+    #   
+    #   g = dataGender() %>%
+    #     mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+    #     group_by(date,gender) %>%
+    #     summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
+    #     na.omit() %>%
+    #     group_by(gender) %>%
+    #     mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
+    #     ggplot(aes(x=date,y=ccases,color=gender,label=Date,label1=Total_cases,label2=New_cases)) + 
+    #     geom_line() + geom_point() + labs(y="Cases", title = "Cumulative cases by gender (ROI only)")
+    #   ggplotly(g, tooltip = c("Date", "gender", "Total_cases","New_cases"))
+    #   
+    # })    
 
     ################### Comparison plots ############
     ##### Plotly Ireland v other countries
@@ -473,6 +503,7 @@ server <- function(input, output) {
       
     })
     
+    ## compare countries on the log10 scale
     output$logcompare <- renderPlotly({
       
       
@@ -492,7 +523,29 @@ server <- function(input, output) {
         geom_line() + geom_point() + labs(y="Cases (scaled to Ireland)") + theme_bw() + scale_y_continuous(trans = "log10")
       ggplotly(g, tooltip = c("Country","Date","Total_cases","New_cases"))
       
-    })    
+    })  
+    
+    
+    ## compare countries on the per 1m of pop scale
+    output$permillioncompare <- renderPlotly({
+
+
+      dat <- dataCountry()
+      dat <- dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"), country = as.character(country))
+      dat$ncase <- round(dat$ncase/dat$pop,0)
+      dat$date[dat$country==input$place] <- dat$date[dat$country==input$place]+input$days
+      dat$country[dat$country==input$place] <- paste(input$place, "+",input$days,"days")
+
+      g = dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"))%>%
+        group_by(country, date) %>%
+        summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date), Country = country[1]) %>%
+        na.omit() %>%
+        mutate(ccases = cumsum(ncases), Total_cases_per_million= cumsum(ncases)) %>%
+        ggplot(aes(x=date,y=ccases,color=country,fill=country,label=Date,label1=Country,label2=Total_cases_per_million)) +
+        geom_line() + geom_point() + labs(y="Cases (per million of population)") + theme_bw()
+      ggplotly(g, tooltip = c("Country","Date","Total_cases_per_million","New_cases"))
+
+    })
     
     #################### Data Table  ###################
     output$dattable <- renderDT({
@@ -504,22 +557,7 @@ server <- function(input, output) {
     
     
     ######################### detailed data tab
-    dataCounty <- reactive({
-      read.csv("data/corona_county.csv")
-    })
-    dataAge <- reactive({
-      read.csv("data/corona_age.csv") %>%
-        mutate(age_group = factor(age_group, levels(age_group)[c(1,2,7,3:6,8,9)]))
-    })
-    dataTrans <- reactive({
-      read.csv("data/corona_trans.csv")
-    })
-    dataStats <- reactive({
-      read.csv("data/corona_stats.csv") %>%
-      mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
-        filter(date == max(date))
-        
-    })
+
     
     ## info boxes
     output$HospBox <- renderValueBox({
@@ -609,9 +647,13 @@ server <- function(input, output) {
         mutate(ncases = as.character(ncase),
                ncases = ifelse(ncases == "< = 5","5",ncases)) %>%
         mutate(ncases = as.numeric(ncases),
-               logcases = log(ncases+1))
-          
-          pal <- colorNumeric('Reds', counties$logcases)
+               logcases = log(ncases+1),
+               case_groups = case_when(ncases < 20 ~ "1",
+                                       ncases >= 20 & ncases < 100 ~ "2",
+                                       ncases >= 100 & ncases < 300 ~ "3",
+                                       ncases >= 300 ~ "4"))
+       
+       pal <- colorFactor('YlOrRd', counties$case_groups)
        
           counties %>%
           leaflet() %>%
@@ -625,9 +667,75 @@ server <- function(input, output) {
                            lat= ~lat, 
                            layerId = ~county,
                            radius = ~6*log(ncases),
-                           color = ~pal(logcases),
-                           label = lapply(labs, htmltools::HTML))
+                           color = ~pal(case_groups),
+                           label = lapply(labs, htmltools::HTML),
+                           fillOpacity = 0.9)
       })
+    
+    ## province time
+    output$cumulcounty <- renderPlotly({
+      
+      g = dataCounty() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        mutate(ncases = as.character(ncase),
+               ncases = ifelse(ncases == "< = 5","5",ncases)) %>%
+        mutate(ncases = as.numeric(ncases)) %>%
+        mutate(province = case_when(county=="Carlow"|county=="Dublin"|
+                                      county=="Kildare"|county=="Kilkenny"|
+                                      county=="Laois"|county=="Longford"|
+                                      county=="Louth"|county=="Meath"|
+                                      county=="Offaly"|county=="Westmeath"|
+                                      county=="Wexford"|county=="Wicklow" ~ "Leinster",
+                                    county=="Clare"|county=="Cork"|
+                                      county=="Kerry"|county=="Limerick"|
+                                      county=="Tipperary"|county=="Waterford" ~ "Munster",
+                                    county=="Galway"|county=="Leitrim"|
+                                      county=="Mayo"|county=="Roscommon"|
+                                      county=="Sligo" ~ "Connacht",
+                                    county=="Donegal"|county=="Cavan"|
+                                      county=="Monaghan" ~ "Ulster")) %>% 
+        group_by(date,province) %>%
+        summarise(Total_cases = sum(ncases)) %>%
+        ggplot(aes(x=date,y=Total_cases,color=province,group=province)) + 
+        geom_line() + geom_point() + labs(y="Cases")
+      ggplotly(g, tooltip = c("date", "province", "Total_cases"))
+      
+    })   
+    
+    ## province time scaled
+    output$cumulcountyscaled <- renderPlotly({
+      
+      g = dataCounty() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        mutate(ncases = as.character(ncase),
+               ncases = ifelse(ncases == "< = 5","5",ncases)) %>%
+        mutate(ncases = as.numeric(ncases)) %>%
+        mutate(province = case_when(county=="Carlow"|county=="Dublin"|
+                                      county=="Kildare"|county=="Kilkenny"|
+                                      county=="Laois"|county=="Longford"|
+                                      county=="Louth"|county=="Meath"|
+                                      county=="Offaly"|county=="Westmeath"|
+                                      county=="Wexford"|county=="Wicklow" ~ "Leinster",
+                                    county=="Clare"|county=="Cork"|
+                                      county=="Kerry"|county=="Limerick"|
+                                      county=="Tipperary"|county=="Waterford" ~ "Munster",
+                                    county=="Galway"|county=="Leitrim"|
+                                      county=="Mayo"|county=="Roscommon"|
+                                      county=="Sligo" ~ "Connacht",
+                                    county=="Donegal"|county=="Cavan"|
+                                      county=="Monaghan" ~ "Ulster")) %>% 
+        mutate(pop = case_when(province == "Connacht" ~ 550742,
+                               province == "Munster" ~ 1280020,
+                               province == "Leinster" ~ 2630720,
+                               province == "Ulster" ~ 159192+32044+76176)) %>%
+        group_by(date,province) %>%
+        summarise(Total_cases = sum(ncases), pop = mean(pop)) %>%
+        mutate(Cases_per100k = 100000*Total_cases/pop) %>%
+        ggplot(aes(x=date,y=Cases_per100k,color=province,group=province)) + 
+        geom_line() + geom_point() + labs(y="Cases per 100,000 population")
+      ggplotly(g, tooltip = c("date", "province", "Cases_per100k"))
+      
+    })       
     
     ## age barplot
     output$ageplot <- renderPlotly({
