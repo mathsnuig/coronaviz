@@ -15,6 +15,11 @@ library(googleVis)
 minshift = -5
 maxshift = 30
 
+# use round away from zero form of rounding (sometimes called banker's rounding)
+# what many of us learnt in school!
+# check out the "round" package to find out more than you ever wanted to know about the complexities of rounding
+round2 <- function(x, n = 0) (trunc((abs(x) * 10 ^ n) + 0.5) / 10 ^ n) * sign(x)
+
 # Any JS functions
 jsCode = 'shinyjs.clear_warning = function(){document.getElementById("note_save_confirm").innerHTML = "";}'
 
@@ -120,7 +125,7 @@ body <- dashboardBody(
                    tags$a(href="https://andsim.shinyapps.io/coronamobile", 
                           "try the mobile version here!", 
                           target="_blank") ),
-                h3(paste0("Data (24/03/2020) from Ireland ("),
+                h3(paste0("Data (25/03/2020) from Ireland ("),
                    tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
                           "Department of Health", target="_blank"),
                    paste0("), Northern Ireland ("),
@@ -180,7 +185,7 @@ body <- dashboardBody(
                                                  "netherlands", "norway", "portugal", "spain", "uk"), 
                                      selected = "france")),
                   column(width=6,
-                         sliderInput("days","Decide the time difference",min = -5,max=30,value=0)
+                         sliderInput("days","Decide the time difference",min = minshift, max = maxshift,value=0)
                   )
                 ),
                 fluidRow(
@@ -190,8 +195,9 @@ body <- dashboardBody(
                   tabPanel("Case count", plotlyOutput("irelandcompare", width = "90%", height = 500)),
                   tabPanel("Log cases", plotlyOutput("logcompare", width = "90%", height = 500)),
                   tabPanel("Cases per million", plotlyOutput("permillioncompare", width = "90%", height = 500)),
-                  tabPanel("Deaths", plotlyOutput("irecompdeath", width = "90%", height = 500))
-                )
+                  tabPanel("Deaths", plotlyOutput("irecompdeath", width = "90%", height = 500)),
+                  tabPanel("Case Fatality Rate", plotlyOutput("irecompdeathcase", width = "90%", height = 500))
+                  )
                 ),
                 # fluidRow(
                 #   box(width = 12, 
@@ -244,7 +250,7 @@ body <- dashboardBody(
         
         # Weekly Tab
         tabItem("nphet",
-                h3(paste0("Data (midnight 22/03/2020) from Ireland"),
+                h3(paste0("Data (midnight 23/03/2020) from Ireland"),
                    tags$a(href="https://www.gov.ie/en/collection/ef2560-analysis-of-confirmed-cases-of-covid-19-coronavirus-in-ireland/", 
                           "(National Public Health Emergency Team)", target="_blank")),
                 valueBoxOutput("HospBox"),
@@ -361,7 +367,7 @@ server <- function(input, output) {
         summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
         na.omit() %>%
         mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
-        mutate(Growth = round(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
+        mutate(Growth = round2(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
         mutate(median = median(Growth,na.rm=TRUE))
     })
     
@@ -435,7 +441,7 @@ server <- function(input, output) {
       
       dat <- dataGrowth()
       
-      valueBox(round(log(2)/log(1+dat$median[1]/100),2), "Estimated days for number of cases to double", color = "maroon")
+      valueBox(round2(log(2)/log(1+dat$median[1]/100),2), "Estimated days for number of cases to double", color = "maroon")
       
     })
     
@@ -449,11 +455,11 @@ server <- function(input, output) {
         summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
         na.omit() %>%
         mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases))  %>%
-        mutate(Growth_Percentage = round(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
-        ggplot(aes(x=date,y=ccases,label=Date,label1=Total_cases,label2=New_cases, label3=Growth_Percentage)) + 
-        geom_line() + geom_point() + geom_col(aes(x=date,y=ncases)) +
+        mutate(Growth_Percentage = round2(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
+        ggplot(aes(x=Date,y=ccases,label=Date,label1=Total_cases,label2=New_cases, label3=Growth_Percentage)) + 
+        geom_line() + geom_point() + geom_col(aes(y=ncases)) +
         theme(legend.position="none") + labs(y="Cases")
-      ggplotly(g, tooltip = c("Date","Total_cases","New_cases", "Growth_Percentage"))
+      ggplotly(g, tooltip = c("Date", "Total_cases","New_cases", "Growth_Percentage"))
       
     })
     
@@ -466,8 +472,8 @@ server <- function(input, output) {
         summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
         na.omit() %>%
         mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases))  %>%
-        mutate(Growth_Percentage = round(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
-        ggplot(aes(x=date,y=ccases,label=Date,label1=Total_cases,label2=New_cases, label3=Growth_Percentage)) + 
+        mutate(Growth_Percentage = round2(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
+        ggplot(aes(x=Date,y=ccases,label=Date,label1=Total_cases,label2=New_cases, label3=Growth_Percentage)) + 
         geom_line() + geom_point() +
         theme(legend.position="none") + labs(y="Cases (axis shows log10 scale)") +
         scale_y_continuous(trans='log10')
@@ -484,8 +490,8 @@ server <- function(input, output) {
         summarise(ndeaths = sum(ndeath), New_deaths = sum(ndeath), Date = min(date)) %>%
         na.omit() %>%
         mutate(cdeaths = cumsum(ndeaths), Total_deaths= cumsum(ndeaths))  %>%
-        ggplot(aes(x=date,y=cdeaths,label=Date,label1=Total_deaths,label2=New_deaths)) + 
-        geom_line() + geom_point() + geom_col(aes(x=date,y=ndeaths)) +
+        ggplot(aes(x=Date,y=cdeaths,label=Date,label1=Total_deaths,label2=New_deaths)) + 
+        geom_line() + geom_point() + geom_col(aes(x=Date,y=ndeaths)) +
         theme(legend.position="none") + labs(y="Deaths")
       ggplotly(g, tooltip = c("Date","Total_deaths","New_deaths"))
       
@@ -500,7 +506,7 @@ server <- function(input, output) {
     #     na.omit() %>%
     #     group_by(gender) %>%
     #     mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
-    #     ggplot(aes(x=date,y=ccases,color=gender,label=Date,label1=Total_cases,label2=New_cases)) + 
+    #     ggplot(aes(x=Date,y=ccases,color=gender,label=Date,label1=Total_cases,label2=New_cases)) + 
     #     geom_line() + geom_point() + labs(y="Cases", title = "Cumulative cases by gender (ROI only)")
     #   ggplotly(g, tooltip = c("Date", "gender", "Total_cases","New_cases"))
     #   
@@ -514,7 +520,7 @@ server <- function(input, output) {
     #   dat <- dataCountry()
     #   dat <- dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"), country = as.character(country)) 
     #   prop = mean(dat$pop[dat$country=="ireland"])/mean(dat$pop[dat$country==input$place])
-    #   dat$ncase[dat$country==input$place] <- round(dat$ncase[dat$country==input$place]*prop,0)
+    #   dat$ncase[dat$country==input$place] <- round2(dat$ncase[dat$country==input$place]*prop,0)
     #   dat$date[dat$country==input$place] <- dat$date[dat$country==input$place]+input$days
     #   
     #   diffdat = dat %>% 
@@ -539,9 +545,9 @@ server <- function(input, output) {
     #     summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date), Country = country[1]) %>%
     #     na.omit() %>%
     #     mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
-    #     ggplot(aes(x=date,y=ccases,color=country,fill=country,label=Date,label1=Country,label2=Total_cases)) +
+    #     ggplot(aes(x=Date,y=ccases,color=country,fill=country,label=Date,label1=Country,label2=Total_cases)) +
     #     geom_line() + geom_point() + labs(y="Cases (scaled to Ireland)") + theme_bw() + 
-    #     ggtitle(paste0("Mean daily difference is ",round(mean(comp$diff,na.rm=TRUE),0), " cases"))
+    #     ggtitle(paste0("Mean daily difference is ",round2(mean(comp$diff,na.rm=TRUE),0), " cases"))
     #   ggplotly(g, tooltip = c("Country","Date","Total_cases","New_cases"))
     #   
     # })
@@ -551,11 +557,6 @@ server <- function(input, output) {
       
       dat <- dataCountry()
       dat <- dat %>% mutate(date = as.Date(date, format = "%d/%m/%Y"), country = as.character(country))
-      
-      # use round away from zero form of rounding (sometimes called banker's rounding)
-      # what many of us learnt in school!
-      # check out the "round" package to find out more than you ever wanted to know about the complexities of rounding
-      round2 <- function(x, n = 0) (trunc((abs(x) * 10 ^ n) + 0.5) / 10 ^ n) * sign(x)
       
       # scale comparator country to Ireland based on population size (dat$pop)
       prop = mean(dat$pop[dat$country == "ireland"]) / mean(dat$pop[dat$country == input$place])
@@ -617,14 +618,14 @@ server <- function(input, output) {
       # change text label for comparator to say indicate shift and scale
       dat$country[dat$country == input$place] <- paste(input$place, "scaled to ireland +", input$days, "days")
       
-      xnote = min(as.Date(dat$date, format = "%d/%m/%Y")) + diff(range(as.Date(dat$date, format = "%d/%m/%Y"))) * 0.5
+      xnote = min(dat$date) + diff(range(dat$date)) * 0.5
       ynote = max(diffdat$ccases)
       g = dat %>% mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
         group_by(country, date) %>%
         summarise(New_cases = sum(ncase), Date = min(date), Country = country[1]) %>%
         na.omit() %>%
         mutate(Total_cases = cumsum(New_cases)) %>%
-        ggplot(aes(x = date, y = Total_cases, color = country, fill = country, label = Date,
+        ggplot(aes(x = Date, y = Total_cases, color = country, fill = country, label = Date,
                    label1 = Country, label2 = Total_cases, label3 = New_cases)) +
         geom_line() + geom_point() + labs(y = "Cases (scaled to Ireland)") + theme_bw() + 
         ggtitle(paste0("Mean daily difference is ", round2(mean(comp$diff, na.rm = TRUE), 0), " cases ")) +
@@ -641,7 +642,7 @@ server <- function(input, output) {
       dat <- dataCountry()
       dat <- dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"), country = as.character(country)) 
       prop = mean(dat$pop[dat$country=="ireland"])/mean(dat$pop[dat$country==input$place])
-      dat$ncase[dat$country==input$place] <- round(dat$ncase[dat$country==input$place]*prop,0)
+      dat$ncase[dat$country==input$place] <- round2(dat$ncase[dat$country==input$place]*prop,0)
       dat$date[dat$country==input$place] <- dat$date[dat$country==input$place]+input$days
       dat$country[dat$country==input$place] <- paste(input$place, "scaled to ireland +",input$days,"days")
       
@@ -650,7 +651,7 @@ server <- function(input, output) {
         summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date), Country = country[1]) %>%
         na.omit() %>%
         mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
-        ggplot(aes(x=date,y=ccases,color=country,fill=country,label=Date,label1=Country,label2=Total_cases)) +
+        ggplot(aes(x=Date,y=ccases,color=country,fill=country,label=Date,label1=Country,label2=Total_cases)) +
         geom_line() + geom_point() + labs(y="Cases (scaled to Ireland)") + theme_bw() + scale_y_continuous(trans = "log10")
       ggplotly(g, tooltip = c("Country","Date","Total_cases","New_cases"))
       
@@ -660,10 +661,9 @@ server <- function(input, output) {
     ## compare countries on the per 1m of pop scale
     output$permillioncompare <- renderPlotly({
 
-
       dat <- dataCountry()
       dat <- dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"), country = as.character(country))
-      dat$ncase <- round(dat$ncase/dat$pop,0)
+      dat$ncase <- round2(dat$ncase/dat$pop,0)
       dat$date[dat$country==input$place] <- dat$date[dat$country==input$place]+input$days
       dat$country[dat$country==input$place] <- paste(input$place, "+",input$days,"days")
 
@@ -672,7 +672,7 @@ server <- function(input, output) {
         summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date), Country = country[1]) %>%
         na.omit() %>%
         mutate(ccases = cumsum(ncases), Total_cases_per_million= cumsum(ncases)) %>%
-        ggplot(aes(x=date,y=ccases,color=country,fill=country,label=Date,label1=Country,label2=Total_cases_per_million)) +
+        ggplot(aes(x=Date,y=ccases,color=country,fill=country,label=Date,label1=Country,label2=Total_cases_per_million)) +
         geom_line() + geom_point() + labs(y="Cases (per million of population)") + theme_bw()
       ggplotly(g, tooltip = c("Country","Date","Total_cases_per_million","New_cases"))
 
@@ -683,19 +683,14 @@ server <- function(input, output) {
     
     output$irecompdeath <- renderPlotly({
       
-      
       dat <- dataCountry()
       dat <- dat %>% mutate(date = as.Date(date, format = "%d/%m/%Y"), country = as.character(country))
       
-      # use round away from zero form of rounding (sometimes called banker's rounding)
-      # what many of us learnt in school!
-      # check out the "round" package to find out more than you ever wanted to know about the complexities of rounding
-      round2 <- function(x, n = 0) (trunc((abs(x) * 10 ^ n) + 0.5) / 10 ^ n) * sign(x)
-      
-      # scale comparator country to Ireland based on population size (dat$pop)
-      prop = mean(dat$pop[dat$country == "ireland"]) / mean(dat$pop[dat$country == input$place])
-      dat$ndeath[dat$country == input$place] <- round2(dat$ndeath[dat$country == input$place] * prop, 0)
-      
+      # scale comparator country to Ireland based on population size (dat$pop) 
+      # SCALING APPLIED AFTER CALCULATING CUMULATIVE COUNTS
+      irelandpop = mean(dat$pop[dat$country == "ireland"])
+      dat <- dat %>% mutate(prop = irelandpop / pop)
+
       # Function to calculate MSE in cumulative deaths for a particular shift
       
       cdiffmad <- function(dayshift, dat) { # dat is input, so only locally defined
@@ -707,9 +702,9 @@ server <- function(input, output) {
           mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
           filter(country == "ireland" | country == input$place) %>%
           group_by(country, date) %>%
-          summarise(ndeaths = sum(ndeath), Date = min(date), Country = country[1]) %>% # sum up over all people
+          summarise(ndeaths = sum(ndeath), Date = min(date), Country = country[1], Prop = mean(prop)) %>% # sum up over all people
           na.omit() %>%
-          mutate(cdeaths = cumsum(ndeaths)) # cumulative count upto each day
+          mutate(cdeaths = cumsum(ndeaths) * Prop) # cumulative count upto each day (scaled)
         
         # Calculate difference in number of deaths when shifted and scaled to Ireland
         ireland <- diffdat %>% filter(country == "ireland")
@@ -731,17 +726,17 @@ server <- function(input, output) {
       
       # apply the shift to non-Ireland input country
       dayshift = input$days
-      dat$date[dat$country==input$place] <- dat$date[dat$country==input$place] + dayshift
+      dat$date[dat$country == input$place] <- dat$date[dat$country == input$place] + dayshift
       
       # extract Ireland and comparator data and calculate cumulative deaths
       diffdat = dat %>%
         mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
         filter(country == "ireland" | country == input$place) %>%
         group_by(country, date) %>%
-        summarise(ndeaths = sum(ndeath), Date = min(date), Country = country[1]) %>% # sum up over all people
+        summarise(ndeaths = sum(ndeath), Date = min(date), Country = country[1], Prop = mean(prop)) %>% # sum up over all people
         na.omit() %>%
-        mutate(cdeaths = cumsum(ndeaths)) # cumulative count upto each day
-      
+        mutate(cdeaths = cumsum(ndeaths) * Prop) # cumulative count upto each day
+
       # Calculate difference in number of deaths when shifted and scaled to Ireland
       ireland <- diffdat %>% filter(country == "ireland")
       comp <- diffdat %>% filter(country == input$place)
@@ -751,25 +746,77 @@ server <- function(input, output) {
       
       # change text label for comparator to say indicate shift and scale
       dat$country[dat$country == input$place] <- paste(input$place, "scaled to ireland +", input$days, "days")
-      
-      xnote = min(as.Date(dat$date, format = "%d/%m/%Y")) + diff(range(as.Date(dat$date, format = "%d/%m/%Y"))) * 0.5
+
+      xnote = min(dat$date) + diff(range(dat$date)) * 0.5
       ynote = max(diffdat$cdeaths)
       g = dat %>% mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
         group_by(country, date) %>%
-        summarise(New_deaths = sum(ndeath), Date = min(date), Country = country[1]) %>%
+        summarise(ndeaths = sum(ndeath), Date = min(date), Country = country[1], Prop = mean(prop)) %>%
+        mutate(New_deaths = round2(ndeaths * Prop, 0)) %>%
         na.omit() %>%
-        mutate(Total_deaths = cumsum(New_deaths)) %>%
-        ggplot(aes(x = date, y = Total_deaths, color = country, fill = country, label = Date,
-                   label1 = Country, label2 = Total_deaths, label3 = New_deaths)) +
+        mutate(cdeaths = cumsum(ndeaths)) %>%
+        mutate(Total_deaths = round2(cdeaths * Prop, 0)) %>%
+        ggplot(aes(x = Date, y = Total_deaths, color = country, fill = country, label = Date,
+                   label1 = Country, label2 = Total_deaths)) +
         geom_line() + geom_point() + labs(y = "Deaths (scaled to Ireland)") + theme_bw() + 
         ggtitle(paste0("Mean daily difference is ", round2(mean(comp$diff, na.rm = TRUE), 0), " deaths ")) +
         annotate("text", x = xnote, y = ynote, 
                  label = paste0("Closest trajectory at ", bestshift, " days"))
-      ggplotly(g, tooltip = c("Country", "Date", "Total_deaths", "New_deaths"))
+      ggplotly(g, tooltip = c("Country", "Date", "Total_deaths"))
       
     })
     
     
+    ###### comparing death rate per case
+    
+    output$irecompdeathcase <- renderPlotly({
+      
+      dat <- dataCountry()
+      dat <- dat %>% mutate(date = as.Date(date, format = "%d/%m/%Y"), country = as.character(country))
+      
+      # DO NOT NEED TO SCALE WHEN CALCULATING RATES
+#      # scale comparator country to Ireland based on population size (dat$pop)
+#      prop = mean(dat$pop[dat$country == "ireland"]) / mean(dat$pop[dat$country == input$place])
+#      dat$ndeath[dat$country == input$place] <- round2(dat$ndeath[dat$country == input$place] * prop, 0)
+#      dat$ncase[dat$country == input$place] <- round2(dat$ncase[dat$country == input$place] * prop, 0)
+      
+      # apply the shift to non-Ireland input country
+      dayshift = input$days
+      dat$date[dat$country == input$place] <- dat$date[dat$country == input$place] + dayshift
+      
+      # extract Ireland and comparator data and calculate cumulative deaths
+      diffdat = dat %>%
+        mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
+        filter(country == "ireland" | country == input$place) %>%
+        group_by(country, date) %>%
+        summarise(ndeaths = sum(ndeath), ncases = sum(ncase), Date = min(date), Country = country[1]) %>% # sum up over all people
+        na.omit() %>%
+        mutate(cdeaths = cumsum(ndeaths), ccases = cumsum(ncases)) %>% # cumulative counts upto each day 
+        mutate(deathrate = 100 * cdeaths / ccases) # fatality rate
+      
+      # Calculate difference in number of deaths when shifted and scaled to Ireland
+      ireland <- diffdat %>% filter(country == "ireland")
+      comp <- diffdat %>% filter(country == input$place)
+      comp <- merge(ireland,comp, by = "date") %>%
+        mutate(diff = abs(deathrate.x - deathrate.y)) %>%  # absolute differences in death rates
+        select(date, diff)
+      
+      # change text label for comparator to say indicate shift and scale
+      dat$country[dat$country == input$place] <- paste(input$place, "to ireland +", input$days, "days (not scaled)")
+      
+      g = dat %>% mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
+        group_by(country, date) %>%
+        summarise(New_deaths = sum(ndeath), New_cases = sum(ncase), Date = min(date), Country = country[1]) %>%
+        na.omit() %>%
+        mutate(Total_deaths = cumsum(New_deaths), Total_cases = cumsum(New_cases)) %>%
+        mutate(Death_rate = round2(100 * Total_deaths / Total_cases, 3)) %>%
+        ggplot(aes(x = Date, y = Death_rate, color = country, fill = country, label = Date,
+                   label1 = Country, label2 = Total_deaths, label3 = Total_cases)) +
+        geom_line() + geom_point() + labs(y = "Case fatality rate (%) = reported deaths / cases ") + theme_bw() + 
+        ggtitle(paste0("Mean daily difference is ", round2(mean(comp$diff, na.rm = TRUE), 2), " percentage points")) # +
+      ggplotly(g, tooltip = c("Country", "Date", "Total_deaths", "Total_cases", "Death_rate"))
+      
+    })
     
     #################### Data Table  ###################
     output$dattable <- renderDT({
@@ -954,7 +1001,7 @@ server <- function(input, output) {
                                province == "Ulster (ROI)" ~ 159192+32044+76176)) %>%
         group_by(date,province) %>%
         summarise(Total_cases = sum(ncases), pop = mean(pop)) %>%
-        mutate(Cases_per100k = round(100000*Total_cases/pop,0)) %>%
+        mutate(Cases_per100k = round2(100000*Total_cases/pop,0)) %>%
         ggplot(aes(x=date,y=Cases_per100k,color=province,group=province)) + 
         geom_line() + geom_point() + labs(y="Cases per 100,000 population")
       ggplotly(g, tooltip = c("date", "province", "Cases_per100k"))
@@ -1021,7 +1068,7 @@ server <- function(input, output) {
     output$weekage <- renderDT({
       
       dataAge() %>% mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        group_by(date) %>% mutate(Percentage = round(100*ncase/sum(ncase),1)) %>% arrange(desc(date))
+        group_by(date) %>% mutate(Percentage = round2(100*ncase/sum(ncase),1)) %>% arrange(desc(date))
       
     })
     
@@ -1029,7 +1076,7 @@ server <- function(input, output) {
     output$weektrans <- renderDT({
       
       dataTrans() %>% mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        group_by(date) %>% mutate(Percentage = round(100*ncase/sum(ncase),1)) %>% arrange(desc(date))
+        group_by(date) %>% mutate(Percentage = round2(100*ncase/sum(ncase),1)) %>% arrange(desc(date))
       
     })
 }

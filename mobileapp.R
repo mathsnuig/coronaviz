@@ -42,7 +42,7 @@ ui = f7Page(
         h4(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
                   "HSE Coronavirus information", 
                   target="_blank"),
-           paste0(". Data (24/03/2020) from Ireland ("),
+           paste0(". Data (25/03/2020) from Ireland ("),
            tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
                   "Department of Health", target="_blank"),
            paste0("), Northern Ireland ("),
@@ -65,7 +65,7 @@ ui = f7Page(
         icon = f7Icon("calendar"),
         active = FALSE,
         # Tab 5 content
-        h3(paste0("Report data (midnight 22/03/20) from Republic of Ireland only"),
+        h3(paste0("Report data (midnight 23/03/20) from Republic of Ireland only"),
            tags$a(href="https://www.gov.ie/en/collection/ef2560-analysis-of-confirmed-cases-of-covid-19-coronavirus-in-ireland/", 
                   "(National Public Health Emergency Team)", target="_blank")),
         valueBoxOutput("HospBox"),
