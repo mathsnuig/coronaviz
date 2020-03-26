@@ -1,0 +1,491 @@
+date,ncase,ndeath,gender,area,country
+27/02/2020,1,0,female,north,ireland
+29/02/2020,1,0,male,east,ireland
+03/03/2020,1,0,female,east,ireland
+04/03/2020,2,0,female,west,ireland
+04/03/2020,2,0,male,west,ireland
+04/03/2020,2,0,unknown,north,ireland
+05/03/2020,4,0,male,east,ireland
+05/03/2020,2,0,female,west,ireland
+05/03/2020,1,0,male,south,ireland
+06/03/2020,1,0,male,east,ireland
+06/03/2020,1,0,female,west,ireland
+06/03/2020,2,0,female,south,ireland
+06/03/2020,1,0,male,south,ireland
+06/03/2020,1,0,unknown,north,ireland
+07/03/2020,1,0,male,east,ireland
+08/03/2020,1,0,female,east,ireland
+08/03/2020,1,0,male,south,ireland
+07/03/2020,3,0,unknown,north,ireland
+09/03/2020,2,0,female,south,ireland
+09/03/2020,1,0,female,west,ireland
+08/03/2020,5,0,unknown,north,ireland
+10/03/2020,4,0,male,south,ireland
+10/03/2020,2,0,female,east,ireland
+10/03/2020,1,0,male,west,ireland
+10/03/2020,1,0,female,west,ireland
+10/03/2020,1,0,female,south,ireland
+10/03/2020,1,0,male,east,ireland
+10/03/2020,4,0,unknown,north,ireland
+11/03/2020,3,1,male,east,ireland
+11/03/2020,5,0,male,south,ireland
+11/03/2020,1,0,female,south,ireland
+11/03/2020,2,0,unknown,north,ireland
+11/03/2020,0,0,unknown,south,ireland
+12/03/2020,27,0,unknown,unknown,ireland
+12/03/2020,2,0,unknown,north,ireland
+13/03/2020,20,0,unknown,unknown,ireland
+13/03/2020,9,0,unknown,north,ireland
+14/03/2020,5,0,unknown,north,ireland
+14/03/2020,21,1,unknown,east,ireland
+14/03/2020,13,0,unknown,south,ireland
+14/03/2020,3,0,unknown,northwest,ireland
+14/03/2020,2,0,unknown,west,ireland
+21/02/2020,17,1,unknown,unknown,italy
+22/02/2020,58,1,unknown,unknown,italy
+23/02/2020,78,1,unknown,unknown,italy
+24/02/2020,72,4,unknown,unknown,italy
+25/02/2020,94,4,unknown,unknown,italy
+26/02/2020,147,1,unknown,unknown,italy
+27/02/2020,185,5,unknown,unknown,italy
+28/02/2020,234,4,unknown,unknown,italy
+29/02/2020,239,8,unknown,unknown,italy
+01/03/2020,573,12,unknown,unknown,italy
+02/03/2020,335,11,unknown,unknown,italy
+03/03/2020,466,27,unknown,unknown,italy
+04/03/2020,587,28,unknown,unknown,italy
+05/03/2020,769,41,unknown,unknown,italy
+06/03/2020,778,49,unknown,unknown,italy
+07/03/2020,1247,36,unknown,unknown,italy
+08/03/2020,1492,133,unknown,unknown,italy
+09/03/2020,1797,97,unknown,unknown,italy
+10/03/2020,977,168,unknown,unknown,italy
+11/03/2020,2313,196,unknown,unknown,italy
+12/03/2020,2651,189,unknown,unknown,italy
+13/03/2020,2547,250,unknown,unknown,italy
+14/03/2020,3497,175,unknown,unknown,italy
+27/02/2020,12,0,unknown,unknown,spain
+28/02/2020,8,0,unknown,unknown,spain
+29/02/2020,25,0,unknown,unknown,spain
+01/03/2020,26,0,unknown,unknown,spain
+02/03/2020,36,0,unknown,unknown,spain
+03/03/2020,45,1,unknown,unknown,spain
+04/03/2020,63,1,unknown,unknown,spain
+05/03/2020,54,1,unknown,unknown,spain
+06/03/2020,119,5,unknown,unknown,spain
+07/03/2020,124,2,unknown,unknown,spain
+08/03/2020,149,7,unknown,unknown,spain
+09/03/2020,557,13,unknown,unknown,spain
+10/03/2020,464,6,unknown,unknown,spain
+11/03/2020,582,19,unknown,unknown,spain
+12/03/2020,869,31,unknown,unknown,spain
+13/03/2020,2086,47,unknown,unknown,spain
+14/03/2020,1159,63,unknown,unknown,spain
+27/02/2020,20,2,unknown,unknown,france
+28/02/2020,19,0,unknown,unknown,france
+29/02/2020,43,0,unknown,unknown,france
+01/03/2020,30,0,unknown,unknown,france
+02/03/2020,61,1,unknown,unknown,france
+03/03/2020,21,1,unknown,unknown,france
+04/03/2020,73,0,unknown,unknown,france
+05/03/2020,138,3,unknown,unknown,france
+06/03/2020,230,2,unknown,unknown,france
+07/03/2020,296,7,unknown,unknown,france
+08/03/2020,260,3,unknown,unknown,france
+09/03/2020,203,11,unknown,unknown,france
+10/03/2020,372,3,unknown,unknown,france
+11/03/2020,497,15,unknown,unknown,france
+12/03/2020,595,13,unknown,unknown,france
+13/03/2020,785,18,unknown,unknown,france
+14/03/2020,808,12,unknown,unknown,france
+27/02/2020,22,0,unknown,unknown,germany
+28/02/2020,26,0,unknown,unknown,germany
+29/02/2020,5,0,unknown,unknown,germany
+01/03/2020,51,0,unknown,unknown,germany
+02/03/2020,35,0,unknown,unknown,germany
+03/03/2020,38,0,unknown,unknown,germany
+04/03/2020,59,0,unknown,unknown,germany
+05/03/2020,283,0,unknown,unknown,germany
+06/03/2020,125,0,unknown,unknown,germany
+07/03/2020,130,0,unknown,unknown,germany
+08/03/2020,240,0,unknown,unknown,germany
+09/03/2020,184,2,unknown,unknown,germany
+10/03/2020,341,0,unknown,unknown,germany
+11/03/2020,401,1,unknown,unknown,germany
+12/03/2020,779,3,unknown,unknown,germany
+13/03/2020,930,2,unknown,unknown,germany
+14/03/2020,924,1,unknown,unknown,germany
+27/02/2020,3,0,unknown,unknown,uk
+28/02/2020,4,0,unknown,unknown,uk
+29/02/2020,3,0,unknown,unknown,uk
+01/03/2020,13,0,unknown,unknown,uk
+02/03/2020,3,0,unknown,unknown,uk
+03/03/2020,12,0,unknown,unknown,uk
+04/03/2020,36,0,unknown,unknown,uk
+05/03/2020,29,1,unknown,unknown,uk
+06/03/2020,48,1,unknown,unknown,uk
+07/03/2020,45,0,unknown,unknown,uk
+08/03/2020,69,1,unknown,unknown,uk
+09/03/2020,43,2,unknown,unknown,uk
+10/03/2020,62,1,unknown,unknown,uk
+11/03/2020,77,2,unknown,unknown,uk
+12/03/2020,130,2,unknown,unknown,uk
+13/03/2020,208,1,unknown,unknown,uk
+14/03/2020,342,10,unknown,unknown,uk
+15/03/2020,11,0,unknown,north,ireland
+15/03/2020,25,0,unknown,east,ireland
+15/03/2020,9,0,unknown,west,ireland
+15/03/2020,6,0,unknown,south,ireland
+15/03/2020,232,14,unknown,unknown,uk
+15/03/2020,924,36,unknown,unknown,france
+15/03/2020,1214,4,unknown,unknown,germany
+15/03/2020,3590,368,unknown,unknown,italy
+15/03/2020,1597,98,unknown,unknown,spain
+16/03/2020,7,0,unknown,north,ireland
+16/03/2020,41,0,unknown,east,ireland
+16/03/2020,11,0,unknown,south,ireland
+16/03/2020,2,0,unknown,northwest,ireland
+16/03/2020,152,20,unknown,unknown,uk
+16/03/2020,1210,21,unknown,unknown,france
+16/03/2020,1459,4,unknown,unknown,germany
+16/03/2020,3233,349,unknown,unknown,italy
+16/03/2020,1954,48,unknown,unknown,spain
+17/03/2020,10,0,unknown,north,ireland
+17/03/2020,48,0,unknown,east,ireland
+17/03/2020,13,0,unknown,south,ireland
+17/03/2020,5,0,unknown,northwest,ireland
+17/03/2020,3,0,unknown,west,ireland
+17/03/2020,1097,27,unknown,unknown,france
+17/03/2020,1884,191,unknown,unknown,spain
+17/03/2020,3526,345,unknown,unknown,italy
+17/03/2020,2095,9,unknown,unknown,germany
+17/03/2020,407,16,unknown,unknown,uk
+18/03/2020,6,0,unknown,north,ireland
+18/03/2020,74,0,unknown,unknown,ireland
+18/03/2020,676,33,unknown,unknown,uk
+18/03/2020,1404,89,unknown,unknown,france
+18/03/2020,2960,2,unknown,unknown,germany
+18/03/2020,4207,475,unknown,unknown,italy
+18/03/2020,2943,105,unknown,unknown,spain
+18/03/2020,9,1,unknown,north,ireland
+19/03/2020,191,1,unknown,unknown,ireland
+19/03/2020,643,40,unknown,unknown,uk
+19/03/2020,1861,108,unknown,unknown,france
+19/03/2020,2993,16,unknown,unknown,germany
+19/03/2020,5322,427,unknown,unknown,italy
+19/03/2020,3308,193,unknown,unknown,spain
+20/03/2020,126,0,unknown,unknown,ireland
+20/03/2020,9,0,unknown,north,ireland
+27/02/2020,1,0,unknown,unknown,denmark
+28/02/2020,1,0,unknown,unknown,denmark
+29/02/2020,1,0,unknown,unknown,denmark
+01/03/2020,1,0,unknown,unknown,denmark
+02/03/2020,0,0,unknown,unknown,denmark
+03/03/2020,6,0,unknown,unknown,denmark
+04/03/2020,4,0,unknown,unknown,denmark
+05/03/2020,5,0,unknown,unknown,denmark
+06/03/2020,2,0,unknown,unknown,denmark
+07/03/2020,6,0,unknown,unknown,denmark
+08/03/2020,8,0,unknown,unknown,denmark
+09/03/2020,55,0,unknown,unknown,denmark
+10/03/2020,172,0,unknown,unknown,denmark
+11/03/2020,252,0,unknown,unknown,denmark
+12/03/2020,160,0,unknown,unknown,denmark
+13/03/2020,130,0,unknown,unknown,denmark
+14/03/2020,32,1,unknown,unknown,denmark
+15/03/2020,28,1,unknown,unknown,denmark
+16/03/2020,50,2,unknown,unknown,denmark
+17/03/2020,63,0,unknown,unknown,denmark
+18/03/2020,80,0,unknown,unknown,denmark
+19/03/2020,94,2,unknown,unknown,denmark
+26/02/2020,1,0,unknown,unknown,norway
+27/02/2020,3,0,unknown,unknown,norway
+28/02/2020,2,0,unknown,unknown,norway
+29/02/2020,9,0,unknown,unknown,norway
+01/03/2020,4,0,unknown,unknown,norway
+02/03/2020,6,0,unknown,unknown,norway
+03/03/2020,8,0,unknown,unknown,norway
+04/03/2020,26,0,unknown,unknown,norway
+05/03/2020,35,0,unknown,unknown,norway
+06/03/2020,33,0,unknown,unknown,norway
+07/03/2020,29,0,unknown,unknown,norway
+08/03/2020,20,0,unknown,unknown,norway
+09/03/2020,51,0,unknown,unknown,norway
+10/03/2020,173,0,unknown,unknown,norway
+11/03/2020,229,0,unknown,unknown,norway
+12/03/2020,171,1,unknown,unknown,norway
+13/03/2020,196,0,unknown,unknown,norway
+14/03/2020,113,2,unknown,unknown,norway
+15/03/2020,147,0,unknown,unknown,norway
+16/03/2020,92,0,unknown,unknown,norway
+17/03/2020,123,0,unknown,unknown,norway
+18/03/2020,120,3,unknown,unknown,norway
+19/03/2020,199,1,unknown,unknown,norway
+15/02/2020,1,0,unknown,unknown,belgium
+16/02/2020,0,0,unknown,unknown,belgium
+17/02/2020,0,0,unknown,unknown,belgium
+18/02/2020,0,0,unknown,unknown,belgium
+19/02/2020,0,0,unknown,unknown,belgium
+20/02/2020,0,0,unknown,unknown,belgium
+21/02/2020,0,0,unknown,unknown,belgium
+22/02/2020,0,0,unknown,unknown,belgium
+23/02/2020,0,0,unknown,unknown,belgium
+24/02/2020,0,0,unknown,unknown,belgium
+25/02/2020,0,0,unknown,unknown,belgium
+26/02/2020,0,0,unknown,unknown,belgium
+27/02/2020,0,0,unknown,unknown,belgium
+28/02/2020,0,0,unknown,unknown,belgium
+29/02/2020,0,0,unknown,unknown,belgium
+01/03/2020,1,0,unknown,unknown,belgium
+02/03/2020,6,0,unknown,unknown,belgium
+03/03/2020,7,0,unknown,unknown,belgium
+04/03/2020,8,0,unknown,unknown,belgium
+05/03/2020,27,0,unknown,unknown,belgium
+06/03/2020,59,0,unknown,unknown,belgium
+07/03/2020,60,0,unknown,unknown,belgium
+08/03/2020,31,0,unknown,unknown,belgium
+09/03/2020,39,0,unknown,unknown,belgium
+10/03/2020,28,0,unknown,unknown,belgium
+11/03/2020,47,3,unknown,unknown,belgium
+12/03/2020,85,0,unknown,unknown,belgium
+13/03/2020,160,0,unknown,unknown,belgium
+14/03/2020,130,1,unknown,unknown,belgium
+15/03/2020,197,0,unknown,unknown,belgium
+16/03/2020,172,6,unknown,unknown,belgium
+17/03/2020,185,0,unknown,unknown,belgium
+18/03/2020,243,4,unknown,unknown,belgium
+19/03/2020,309,7,unknown,unknown,belgium
+27/02/2020,1,0,unknown,unknown,netherlands
+28/02/2020,1,0,unknown,unknown,netherlands
+29/02/2020,5,0,unknown,unknown,netherlands
+01/03/2020,3,0,unknown,unknown,netherlands
+02/03/2020,8,0,unknown,unknown,netherlands
+03/03/2020,5,0,unknown,unknown,netherlands
+04/03/2020,15,0,unknown,unknown,netherlands
+05/03/2020,44,0,unknown,unknown,netherlands
+06/03/2020,46,1,unknown,unknown,netherlands
+07/03/2020,60,0,unknown,unknown,netherlands
+08/03/2020,77,2,unknown,unknown,netherlands
+09/03/2020,56,1,unknown,unknown,netherlands
+10/03/2020,61,0,unknown,unknown,netherlands
+11/03/2020,121,1,unknown,unknown,netherlands
+12/03/2020,111,0,unknown,unknown,netherlands
+13/03/2020,190,5,unknown,unknown,netherlands
+14/03/2020,155,2,unknown,unknown,netherlands
+15/03/2020,176,8,unknown,unknown,netherlands
+16/03/2020,278,4,unknown,unknown,netherlands
+17/03/2020,292,19,unknown,unknown,netherlands
+18/03/2020,346,15,unknown,unknown,netherlands
+19/03/2020,409,18,unknown,unknown,netherlands
+02/03/2020,2,0,unknown,unknown,portugal
+03/03/2020,2,0,unknown,unknown,portugal
+04/03/2020,2,0,unknown,unknown,portugal
+05/03/2020,3,0,unknown,unknown,portugal
+06/03/2020,4,0,unknown,unknown,portugal
+07/03/2020,8,0,unknown,unknown,portugal
+08/03/2020,9,0,unknown,unknown,portugal
+09/03/2020,9,0,unknown,unknown,portugal
+10/03/2020,2,0,unknown,unknown,portugal
+11/03/2020,20,0,unknown,unknown,portugal
+12/03/2020,17,0,unknown,unknown,portugal
+13/03/2020,34,0,unknown,unknown,portugal
+14/03/2020,57,0,unknown,unknown,portugal
+15/03/2020,76,0,unknown,unknown,portugal
+16/03/2020,86,1,unknown,unknown,portugal
+17/03/2020,117,0,unknown,unknown,portugal
+18/03/2020,194,1,unknown,unknown,portugal
+19/03/2020,144,2,unknown,unknown,portugal
+20/03/2020,714,33,unknown,unknown,uk
+20/03/2020,1617,78,unknown,unknown,france
+20/03/2020,4528,24,unknown,unknown,germany
+20/03/2020,5986,627,unknown,unknown,italy
+20/03/2020,3494,262,unknown,unknown,spain
+20/03/2020,169,0,unknown,unknown,norway
+20/03/2020,104,3,unknown,unknown,denmark
+20/03/2020,462,16,unknown,unknown,belgium
+20/03/2020,534,30,unknown,unknown,netherlands
+20/03/2020,234,2,unknown,unknown,portugal
+21/03/2020,102,0,unknown,unknown,ireland
+21/03/2020,22,0,unknown,north,ireland
+21/03/2020,1035,56,unknown,unknown,uk
+21/03/2020,1847,112,unknown,unknown,france
+21/03/2020,2516,16,unknown,unknown,germany
+21/03/2020,6557,793,unknown,unknown,italy
+21/03/2020,3925,288,unknown,unknown,spain
+21/03/2020,205,0,unknown,unknown,norway
+21/03/2020,71,4,unknown,unknown,denmark
+21/03/2020,558,30,unknown,unknown,belgium
+21/03/2020,637,30,unknown,unknown,netherlands
+21/03/2020,260,6,unknown,unknown,portugal
+22/03/2020,20,1,unknown,north,ireland
+22/03/2020,121,1,unknown,unknown,ireland
+22/03/2020,665,48,unknown,unknown,uk
+22/03/2020,1559,112,unknown,unknown,france
+22/03/2020,2509,10,unknown,unknown,germany
+22/03/2020,5560,651,unknown,unknown,italy
+22/03/2020,3272,391,unknown,unknown,spain
+22/03/2020,221,0,unknown,unknown,norway
+22/03/2020,69,0,unknown,unknown,denmark
+22/03/2020,586,8,unknown,unknown,belgium
+22/03/2020,573,43,unknown,unknown,netherlands
+22/03/2020,320,2,unknown,unknown,portugal
+23/03/2020,20,2,unknown,north,ireland
+23/03/2020,219,2,unknown,unknown,ireland
+23/03/2020,967,54,unknown,unknown,uk
+23/03/2020,3838,186,unknown,unknown,france
+23/03/2020,4183,29,unknown,unknown,germany
+23/03/2020,4789,601,unknown,unknown,italy
+23/03/2020,6368,539,unknown,unknown,spain
+23/03/2020,240,3,unknown,unknown,norway
+23/03/2020,65,11,unknown,unknown,denmark
+23/03/2020,342,13,unknown,unknown,belgium
+23/03/2020,545,34,unknown,unknown,netherlands
+23/03/2020,460,9,unknown,unknown,portugal
+24/03/2020,24,1,unknown,north,ireland
+24/03/2020,204,1,unknown,unknown,ireland
+24/03/2020,1427,87,unknown,unknown,uk
+24/03/2020,2448,240,unknown,unknown,france
+24/03/2020,3935,36,unknown,unknown,germany
+24/03/2020,5249,743,unknown,unknown,italy
+24/03/2020,6922,680,unknown,unknown,spain
+24/03/2020,241,2,unknown,unknown,norway
+24/03/2020,131,8,unknown,unknown,denmark
+24/03/2020,526,34,unknown,unknown,belgium
+24/03/2020,811,63,unknown,unknown,netherlands
+24/03/2020,302,10,unknown,unknown,portugal
+25/03/2020,37,2,unknown,north,ireland
+25/03/2020,235,2,unknown,unknown,ireland
+25/03/2020,1452,43,unknown,unknown,uk
+25/03/2020,2929,231,unknown,unknown,france
+25/03/2020,4332,47,unknown,unknown,germany
+25/03/2020,5210,683,unknown,unknown,italy
+25/03/2020,7457,656,unknown,unknown,spain
+25/03/2020,218,2,unknown,unknown,norway
+25/03/2020,133,2,unknown,unknown,denmark
+25/03/2020,668,56,unknown,unknown,belgium
+25/03/2020,852,80,unknown,unknown,netherlands
+25/03/2020,633,10,unknown,unknown,portugal
+26/03/2020,32,3,unknown,north,ireland
+26/03/2020,255,10,unknown,unknown,ireland
+28/02/2020,1,0,male,Auckland,new zealand
+04/03/2020,1,0,male,Waikato,new zealand
+05/03/2020,1,0,male,Auckland,new zealand
+06/03/2020,1,0,female,Auckland,new zealand
+07/03/2020,1,0,female,MidCentral,new zealand
+14/03/2020,1,0,male,Nelson-Marlborough,new zealand
+15/03/2020,1,0,male,Auckland,new zealand
+15/03/2020,1,0,male,Nelson-Marlborough,new zealand
+18/03/2020,3,0,female,Auckland,new zealand
+18/03/2020,1,0,female,Nelson-Marlborough,new zealand
+18/03/2020,1,0,female,Waitemata,new zealand
+18/03/2020,4,0,male,Auckland,new zealand
+18/03/2020,1,0,male,Canterbury,new zealand
+18/03/2020,1,0,male,Capital & Coast,new zealand
+18/03/2020,1,0,male,Nelson-Marlborough,new zealand
+19/03/2020,2,0,female,Capital & Coast,new zealand
+19/03/2020,1,0,female,Counties Manukau,new zealand
+19/03/2020,1,0,female,Hutt Valley,new zealand
+19/03/2020,1,0,female,Nelson-Marlborough,new zealand
+19/03/2020,2,0,female,Waitemata,new zealand
+19/03/2020,1,0,male,Capital & Coast,new zealand
+20/03/2020,1,0,female,Canterbury,new zealand
+20/03/2020,1,0,female,Counties Manukau,new zealand
+20/03/2020,2,0,female,Southern,new zealand
+20/03/2020,1,0,female,Waikato,new zealand
+20/03/2020,2,0,male,Auckland,new zealand
+20/03/2020,1,0,male,Canterbury,new zealand
+20/03/2020,1,0,male,Counties Manukau,new zealand
+20/03/2020,2,0,male,Southern,new zealand
+21/03/2020,4,0,female,Auckland,new zealand
+21/03/2020,1,0,female,Capital & Coast,new zealand
+21/03/2020,1,0,female,Counties Manukau,new zealand
+21/03/2020,1,0,female,Nelson-Marlborough,new zealand
+21/03/2020,2,0,male,Auckland,new zealand
+21/03/2020,2,0,male,Capital & Coast,new zealand
+21/03/2020,2,0,male,Southern,new zealand
+21/03/2020,1,0,male,Waikato,new zealand
+22/03/2020,4,0,female,Capital & Coast,new zealand
+22/03/2020,1,0,female,Hawke’s Bay,new zealand
+22/03/2020,1,0,female,Waitemata,new zealand
+22/03/2020,4,0,male,Capital & Coast,new zealand
+22/03/2020,1,0,male,Hawke’s Bay,new zealand
+22/03/2020,2,0,male,Nelson-Marlborough,new zealand
+23/03/2020,4,0,female,Auckland,new zealand
+23/03/2020,1,0,female,Bay of Plenty,new zealand
+23/03/2020,3,0,female,Canterbury,new zealand
+23/03/2020,1,0,female,Capital & Coast,new zealand
+23/03/2020,1,0,female,Hutt Valley,new zealand
+23/03/2020,3,0,female,Southern,new zealand
+23/03/2020,1,0,female,Taranaki,new zealand
+23/03/2020,3,0,female,Waikato,new zealand
+23/03/2020,1,0,female,Wairarapa,new zealand
+23/03/2020,7,0,female,Waitemata,new zealand
+23/03/2020,4,0,male,Auckland,new zealand
+23/03/2020,2,0,male,Canterbury,new zealand
+23/03/2020,1,0,male,Capital & Coast,new zealand
+23/03/2020,1,0,male,Nelson-Marlborough,new zealand
+23/03/2020,1,0,male,Southern,new zealand
+23/03/2020,2,0,male,Waitemata,new zealand
+24/03/2020,1,0,female,Auckland,new zealand
+24/03/2020,3,0,female,Canterbury,new zealand
+24/03/2020,3,0,female,Capital & Coast,new zealand
+24/03/2020,1,0,female,Hawke’s Bay,new zealand
+24/03/2020,1,0,female,Hawkes’s Bay,new zealand
+24/03/2020,1,0,female,Hutt Valley,new zealand
+24/03/2020,1,0,female,Northland,new zealand
+24/03/2020,3,0,female,Southern,new zealand
+24/03/2020,1,0,female,Waitemata,new zealand
+24/03/2020,2,0,male,Auckland,new zealand
+24/03/2020,2,0,male,Canterbury,new zealand
+24/03/2020,6,0,male,Capital & Coast,new zealand
+24/03/2020,1,0,male,Counties Manukau,new zealand
+24/03/2020,1,0,male,Hawke’s Bay,new zealand
+24/03/2020,1,0,male,Hutt Valley,new zealand
+24/03/2020,1,0,male,MidCentral,new zealand
+24/03/2020,7,0,male,Southern,new zealand
+24/03/2020,1,0,male,Waikato,new zealand
+24/03/2020,1,0,male,Waitemata,new zealand
+24/03/2020,2,0,male,West Coast,new zealand
+25/03/2020,5,0,female,Auckland,new zealand
+25/03/2020,1,0,female,Bay of Plenty,new zealand
+25/03/2020,2,0,female,Counties Manukau,new zealand
+25/03/2020,2,0,female,Lakes,new zealand
+25/03/2020,1,0,female,Taranaki,new zealand
+25/03/2020,8,0,female,Waikato,new zealand
+25/03/2020,1,0,female,Waitemata,new zealand
+25/03/2020,2,0,male,Auckland,new zealand
+25/03/2020,1,0,male,Bay of Plenty,new zealand
+25/03/2020,3,0,male,Capital and Coast,new zealand
+25/03/2020,2,0,male,Counties Manukau,new zealand
+25/03/2020,1,0,male,Hutt Valley,new zealand
+25/03/2020,1,0,male,Lakes,new zealand
+25/03/2020,1,0,male,MidCentral,new zealand
+25/03/2020,2,0,male,Nelson Marlborough,new zealand
+25/03/2020,2,0,male,Southern,new zealand
+25/03/2020,8,0,male,Waikato,new zealand
+25/03/2020,4,0,male,Waitemata,new zealand
+26/03/2020,8,0,female,Auckland,new zealand
+26/03/2020,3,0,female,Canterbury,new zealand
+26/03/2020,1,0,female,Capital & Coast,new zealand
+26/03/2020,1,0,female,Counties Manukau,new zealand
+26/03/2020,1,0,female,MidCentral,new zealand
+26/03/2020,2,0,female,Nelson-Marlborough,new zealand
+26/03/2020,1,0,female,Northland,new zealand
+26/03/2020,3,0,female,Southern,new zealand
+26/03/2020,1,0,female,Taranaki,new zealand
+26/03/2020,6,0,female,Waikato,new zealand
+26/03/2020,3,0,female,Waitemata,new zealand
+26/03/2020,13,0,male,Auckland,new zealand
+26/03/2020,2,0,male,Bay of Plenty,new zealand
+26/03/2020,1,0,male,Canterbury,new zealand
+26/03/2020,6,0,male,Capital & Coast,new zealand
+26/03/2020,2,0,male,Counties Manukau,new zealand
+26/03/2020,1,0,male,Hawkes Bay,new zealand
+26/03/2020,1,0,male,Hutt Valley,new zealand
+26/03/2020,1,0,male,MidCentral,new zealand
+26/03/2020,1,0,male,Northland,new zealand
+26/03/2020,6,0,male,Southern,new zealand
+26/03/2020,3,0,male,Taranaki,new zealand
+26/03/2020,3,0,male,Waikato,new zealand
+26/03/2020,1,0,male,Wairarapa,new zealand
+26/03/2020,2,0,male,Waitemata,new zealand
