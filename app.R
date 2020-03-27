@@ -310,7 +310,7 @@ server <- function(input, output) {
     
     # read in all data
     dataRaw <- reactive({
-      dat1 <- read.csv("data/corona_island_nz.csv") %>% 
+      dat1 <- read.csv("data/corona_island.csv") %>% 
         mutate(pop = case_when(country=="ireland"~6.804,
                                country=="belgium"~11.575,
                                country=="denmark"~5.786,
@@ -324,7 +324,7 @@ server <- function(input, output) {
                                country=="spain"~46.749,
                                country=="uk"~67.787))
 
-      dat2 <- read.csv("data/corona_island_nz.csv") %>% 
+      dat2 <- read.csv("data/corona_island.csv") %>% 
         mutate(pop = case_when(country=="ireland"~4.922,
                                country=="belgium"~11.575,
                                country=="denmark"~5.786,
@@ -990,7 +990,7 @@ server <- function(input, output) {
         mutate(long = case_when(county == "Carlow" ~ -6.9261098,
                                 county == "Cavan" ~ -7.3605599,
                                 county == "Clare" ~ -8.9811,
-                                county == "Donegal" ~ -8.1041,
+                                county == "Donegal" ~ -8.11667,
                                 county == "Kildare" ~ -6.9144402,
                                 county == "Kilkenny" ~ -7.2448,
                                 county == "Laois" ~ -7.3323,
@@ -1001,7 +1001,7 @@ server <- function(input, output) {
                                 county == "Meath" ~ -6.6564,
                                 county == "Monaghan" ~ -6.9683,
                                 county == "Offaly" ~ -7.7122,
-                                county == "Roscommon" ~ -8.1891,
+                                county == "Roscommon" ~ -8.5792,
                                 county == "Sligo" ~ -8.4761,
                                 county == "Tipperary" ~ -8.1619,
                                 county == "Wexford" ~ -6.4633,
@@ -1016,7 +1016,7 @@ server <- function(input, output) {
                lat = case_when(county == "Carlow" ~ 52.8408318,
                                county == "Cavan" ~ 53.9908295,
                                county == "Clare" ~ 52.9045,
-                               county == "Donegal" ~ 54.6549,
+                               county == "Donegal" ~ 54.65,
                                county == "Kildare" ~ 53.1561089,
                                county == "Kilkenny" ~ 52.6541,
                                county == "Laois" ~ 52.9943,
@@ -1027,7 +1027,7 @@ server <- function(input, output) {
                                county == "Meath" ~ 53.6055,
                                county == "Monaghan" ~ 54.2492,
                                county == "Offaly" ~ 53.2357,
-                               county == "Roscommon" ~ 53.6276,
+                               county == "Roscommon" ~ 53.9017,
                                county == "Sligo" ~ 54.2766,
                                county == "Tipperary" ~ 52.4738,
                                county == "Wexford" ~ 52.3369,
