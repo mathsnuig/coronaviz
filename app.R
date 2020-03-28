@@ -125,7 +125,7 @@ body <- dashboardBody(
                    tags$a(href="https://andsim.shinyapps.io/coronamobile", 
                           "try the mobile version here!", 
                           target="_blank") ),
-                h3(paste0("Data (26/03/2020) from Ireland ("),
+                h3(paste0("Data (28/03/2020) from Ireland ("),
                    tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
                           "Department of Health", target="_blank"),
                    paste0("), Northern Ireland ("),
@@ -250,7 +250,7 @@ body <- dashboardBody(
         
         # Weekly Tab
         tabItem("nphet",
-                h3(paste0("Data (midnight 24/03/2020) from Ireland"),
+                h3(paste0("Data (midnight 26/03/2020) from Ireland"),
                    tags$a(href="https://www.gov.ie/en/collection/ef2560-analysis-of-confirmed-cases-of-covid-19-coronavirus-in-ireland/", 
                           "(National Public Health Emergency Team)", target="_blank")),
                 valueBoxOutput("HospBox"),
@@ -310,7 +310,7 @@ server <- function(input, output) {
     
     # read in all data
     dataRaw <- reactive({
-      dat1 <- read.csv("data/corona_island.csv") %>% 
+      dat1 <- read.csv("data/corona_island_nz.csv") %>% 
         mutate(pop = case_when(country=="ireland"~6.804,
                                country=="belgium"~11.575,
                                country=="denmark"~5.786,
@@ -324,7 +324,7 @@ server <- function(input, output) {
                                country=="spain"~46.749,
                                country=="uk"~67.787))
 
-      dat2 <- read.csv("data/corona_island.csv") %>% 
+      dat2 <- read.csv("data/corona_island_nz.csv") %>% 
         mutate(pop = case_when(country=="ireland"~4.922,
                                country=="belgium"~11.575,
                                country=="denmark"~5.786,
@@ -458,8 +458,12 @@ server <- function(input, output) {
         na.omit() %>%
         mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases))  %>%
         mutate(Growth_Percentage = round2(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
+        mutate(double3 = ifelse(date >= as.Date("13/03/2020","%d/%m/%Y"), 119*(1+0.26)^(as.numeric(date-as.Date("13/03/2020","%d/%m/%Y"))), NA),
+               double2 = ifelse(date >= as.Date("13/03/2020","%d/%m/%Y"), 119*(1+0.415)^(as.numeric(date-as.Date("13/03/2020","%d/%m/%Y"))), NA)) %>%
         ggplot(aes(x=Date,y=ccases,label=Date,label1=Total_cases,label2=New_cases, label3=Growth_Percentage)) + 
         geom_line() + geom_point() + geom_col(aes(y=ncases)) +
+        # geom_line(aes(x=date,y=log(double2,10)),color="red",linetype="dashed") +  
+        # geom_line(aes(x=date,y=log(double3,10)),color="blue",linetype="dashed") + 
         theme(legend.position="none") + labs(y="Cases")
       ggplotly(g, tooltip = c("Date", "Total_cases","New_cases", "Growth_Percentage"))
       
@@ -475,6 +479,8 @@ server <- function(input, output) {
         na.omit() %>%
         mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases))  %>%
         mutate(Growth_Percentage = round2(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
+        mutate(double3 = ifelse(date >= as.Date("13/03/2020","%d/%m/%Y"), 119*(1+0.26)^(as.numeric(date-as.Date("13/03/2020","%d/%m/%Y"))), NA),
+               double2 = ifelse(date >= as.Date("13/03/2020","%d/%m/%Y"), 119*(1+0.415)^(as.numeric(date-as.Date("13/03/2020","%d/%m/%Y"))), NA)) %>%
         ggplot(aes(x=Date,y=ccases,label=Date,label1=Total_cases,label2=New_cases, label3=Growth_Percentage)) + 
         geom_line() + geom_point() +
         theme(legend.position="none") + labs(y="Cases (axis shows log10 scale)") +
