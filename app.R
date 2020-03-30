@@ -89,32 +89,6 @@ body <- dashboardBody(
   
     # tabs
     tabItems(
-  
-        # # Map Tab #
-        # tabItem("map",   
-        #         h3(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
-        #                   "HSE Coronavirus information", 
-        #                   target="_blank")),
-        #         h3(paste0("Data from Ireland ("),
-        #            tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
-        #                   "Department of Health", target="_blank"),
-        #            paste0("), Northern Ireland ("),
-        #            tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
-        #                   "NHS", target="_blank"),
-        #            paste0(") and WHO")),
-        #         fluidRow(
-        #           box(title = "Map of cases using Belfast, Cork, Dublin, Letterkenny and Galway as locations",
-        #               footer = "Note: no locations for 121 cases announced March 12/13/18th",
-        #               width = 12,
-        #               leafletOutput("map", width = "70%", height = 600)
-        #             )
-        #           ),
-        #         h3(paste0("Developed by Dr. Andrew Simpkin "),
-        #            tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
-        #            paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
-        #            tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
-        # 
-        # ),
         
         # Time series Tab #
         tabItem("time", 
@@ -125,7 +99,7 @@ body <- dashboardBody(
                    tags$a(href="https://andsim.shinyapps.io/coronamobile", 
                           "try the mobile version here!", 
                           target="_blank") ),
-                h3(paste0("Data (28/03/2020) from Ireland ("),
+                h3(paste0("Data (29/03/2020) from Ireland ("),
                    tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
                           "Department of Health", target="_blank"),
                    paste0("), Northern Ireland ("),
@@ -134,9 +108,9 @@ body <- dashboardBody(
                    paste0(") and WHO")),
                 valueBoxOutput("CasesBox"),
                 valueBoxOutput("MortBox"),
-                fluidRow(),
-                valueBoxOutput("GrowthBox"),
-                valueBoxOutput("DoublingBox"),
+                # fluidRow(),
+                # valueBoxOutput("GrowthBox"),
+                # valueBoxOutput("DoublingBox"),
                 fluidRow(
                   tabBox(
                   width = 12, 
@@ -145,20 +119,6 @@ body <- dashboardBody(
                   tabPanel("Log cases", plotlyOutput("cumullog", width = "80%", height = 400)),
                   tabPanel("Deaths", plotlyOutput("cumuldeaths", width = "80%", height = 400)))
                   ),
-                # fluidRow(
-                #     box(width = 12, title = "Cumulative and new cases per day", 
-                #         plotlyOutput("cumulcases", width = "80%", height = 400)
-                #         # ,
-                #         # plotlyOutput("cumularea", width = "80%", height = 400)
-                #         # ,
-                #         # plotlyOutput("cumulgender", width = "80%", height = 400)
-                #     )
-                # ),
-                # fluidRow(
-                #   box(width = 12, title = "Cumulative cases per day on log10 scale", 
-                #       plotlyOutput("cumullog", width = "80%", height = 400)
-                #   )
-                # ),
                 h3(paste0("Developed by Dr. Andrew Simpkin "),
                             tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1", target="_blank"),
                             paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
@@ -199,24 +159,6 @@ body <- dashboardBody(
                   tabPanel("Case Fatality Rate", plotlyOutput("irecompdeathcase", width = "90%", height = 500))
                   )
                 ),
-                # fluidRow(
-                #   box(width = 12, 
-                #       title = "Compare cases with other countries scaled by population, with time shifted", 
-                #       plotlyOutput("irelandcompare", width = "90%", height = 500) 
-                #   )
-                # ),
-                # fluidRow(
-                #   box(width = 12, 
-                #       title = "Compare on the log10 scale", 
-                #       plotlyOutput("logcompare", width = "90%", height = 500) 
-                #   )
-                # ),
-                # fluidRow(
-                #   box(width = 12, 
-                #       title = "Compare on per million of population", 
-                #       plotlyOutput("permillioncompare", width = "90%", height = 500) 
-                #   )
-                # ),
                 h3(paste0("Developed by Dr. Andrew Simpkin "),
                    tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
                    paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
@@ -235,12 +177,6 @@ body <- dashboardBody(
                 fluidRow(box(width = 12, title = "Raw data",
                              column(10, DTOutput("dattable"))
                 )),
-                # fluidRow(box(width = 12, title = "Total cases by Area (Missing area for 121 cases)",
-                #              column(10, DTOutput("areatable"))
-                # )),
-                # fluidRow(box(width = 12, title = "Total cases by Gender (ROI only and 47 with no gender information)",
-                #              column(10, DTOutput("gendertable"))
-                # )),
                 h3(paste0("Developed by Dr. Andrew Simpkin "),
                    tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
                    paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
@@ -250,7 +186,7 @@ body <- dashboardBody(
         
         # Weekly Tab
         tabItem("nphet",
-                h3(paste0("Data (midnight 26/03/2020) from Ireland"),
+                h3(paste0("Data (midnight 27/03/2020) from Ireland"),
                    tags$a(href="https://www.gov.ie/en/collection/ef2560-analysis-of-confirmed-cases-of-covid-19-coronavirus-in-ireland/", 
                           "(National Public Health Emergency Team)", target="_blank")),
                 valueBoxOutput("HospBox"),
@@ -260,21 +196,23 @@ body <- dashboardBody(
                              leafletOutput("map", width = "70%", height = 600)
                              )),
                 fluidRow(
-                  tabBox(
+                  tabBox(title = "Area data over time",
                     width = 12, 
                     selected = "Case count",
                     tabPanel("Case count", plotlyOutput("cumulcounty", width = "90%", height = 500)),
                     tabPanel("Cases per 100000", plotlyOutput("cumulcountyscaled", width = "90%", height = 500))
                   )
                 ),
-                # fluidRow(box(title = "Cases by province over time", width = 12,
-                #              plotlyOutput("cumulcounty", width = "70%", height = 600)
-                # )),
-                # fluidRow(box(title = "Cases per 100,000 population by province over time", width = 12,
-                #              plotlyOutput("cumulcountyscaled", width = "70%", height = 600)
-                # )),
                 fluidRow(box(width = 12, title = "County data",
                              column(10, DTOutput("weekarea"))
+                )),
+                fluidRow(
+                  tabBox(title = "Hospital and ICU cases over time", 
+                         width = 12,
+                         selected = "Counts",
+                         tabPanel("Counts", plotlyOutput("patienttime", width = "70%", height = 600)),
+                         tabPanel("Percentage", plotlyOutput("patienttimepercent", width = "70%", height = 600))
+                                  
                 )),
                 fluidRow(box(title = "Cases by Age Group", width = 12,
                              plotlyOutput("ageplot", width = "70%", height = 600)
@@ -284,15 +222,6 @@ body <- dashboardBody(
                 )),
                 fluidRow(box(width = 12, title = "Age groups",
                              column(10, DTOutput("weekage"))
-                )),
-                fluidRow(box(title = "Cases by Transmission type", width = 12,
-                             plotlyOutput("transplot", width = "70%", height = 600)
-                )),
-                fluidRow(box(title = "Cases by Transmission type over time", width = 12,
-                             plotlyOutput("cumultrans", width = "70%", height = 600)
-                )),
-                fluidRow(box(width = 12, title = "Transmission types",
-                             column(10, DTOutput("weektrans"))
                 )),
                 h3(paste0("Developed by Dr. Andrew Simpkin "),
                    tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
@@ -344,11 +273,6 @@ server <- function(input, output) {
       
     })
     
-    # # gender data
-    # dataGender <- reactive({
-    #   read.csv("data/corona_island_gender.csv")
-    # })
-    
     # irish data only
     dataIreland <- reactive({
       dataRaw() %>% filter(country == "ireland")
@@ -372,26 +296,6 @@ server <- function(input, output) {
         mutate(Growth = round2(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
         mutate(median = median(Growth,na.rm=TRUE))
     })
-    
-    # # irish area data
-    # dataArea <- reactive({        
-    # dataIreland() %>% 
-    #         mutate(long = case_when(area=="east" ~ -6.2690,
-    #                                 area=="west" ~ -9.0650,
-    #                                 area=="south" ~ -8.5110,
-    #                                 area=="north" ~ -5.954,
-    #                                 area=="northwest" ~ -7.7328),
-    #                lat = case_when(area=="east" ~ 53.3593,
-    #                                area=="west" ~ 53.2760,
-    #                                area=="south" ~ 51.8830,
-    #                                area=="north" ~ 54.588,
-    #                                area=="northwest" ~ 54.9598))  %>% 
-    #     group_by(area) %>% summarise(ncases=sum(ncase,na.rm=TRUE),
-    #                                          ndeaths=sum(ndeath,na.rm=TRUE),
-    #                                          long = mean(long,na.rm=TRUE),
-    #                                          lat = mean(lat, na.rm=TRUE)) %>%
-    #         na.omit() 
-    # })
 
     ## detailed data read in
     dataCounty <- reactive({
@@ -401,14 +305,9 @@ server <- function(input, output) {
       read.csv("data/corona_age.csv") %>%
         mutate(age_group = factor(age_group, levels(age_group)[c(1,2,7,3:6,8,9)]))
     })
-    dataTrans <- reactive({
-      read.csv("data/corona_trans.csv")
-    })
     dataStats <- reactive({
       read.csv("data/corona_stats.csv") %>%
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
-        filter(date == max(date))
-      
+        mutate(date = as.Date(date,format = "%d/%m/%Y"))
     })
 
     ################### Info boxes ##########
@@ -504,61 +403,9 @@ server <- function(input, output) {
       ggplotly(g, tooltip = c("Date","Total_deaths","New_deaths"))
       
     })    
-    # # #### Plotly cases per day by gender
-    # output$cumulgender <- renderPlotly({
-    #   
-    #   g = dataGender() %>%
-    #     mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-    #     group_by(date,gender) %>%
-    #     summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
-    #     na.omit() %>%
-    #     group_by(gender) %>%
-    #     mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
-    #     ggplot(aes(x=Date,y=ccases,color=gender,label=Date,label1=Total_cases,label2=New_cases)) + 
-    #     geom_line() + geom_point() + labs(y="Cases", title = "Cumulative cases by gender (ROI only)")
-    #   ggplotly(g, tooltip = c("Date", "gender", "Total_cases","New_cases"))
-    #   
-    # })    
 
     ################### Comparison plots ############
     ##### Plotly Ireland v other countries
-    # output$irelandcompare <- renderPlotly({
-    #   
-    #   
-    #   dat <- dataCountry()
-    #   dat <- dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"), country = as.character(country)) 
-    #   prop = mean(dat$pop[dat$country=="ireland"])/mean(dat$pop[dat$country==input$place])
-    #   dat$ncase[dat$country==input$place] <- round2(dat$ncase[dat$country==input$place]*prop,0)
-    #   dat$date[dat$country==input$place] <- dat$date[dat$country==input$place]+input$days
-    #   
-    #   diffdat = dat %>% 
-    #     mutate(date = as.Date(date,format = "%d/%m/%Y"))%>%
-    #     filter(country=="ireland"|country==input$place) %>%
-    #     group_by(country, date) %>%
-    #     summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date), Country = country[1]) %>%
-    #     na.omit() %>%
-    #     mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases))
-    #   
-    #   ireland <- diffdat %>% filter(country == "ireland")
-    #   comp <- diffdat %>% filter(country == input$place)
-    #   comp <- merge(ireland,comp,by="date") %>%
-    #     mutate(diff = abs(Total_cases.x - Total_cases.y)) %>%
-    #     select(date,diff)
-    #   
-    #   
-    #   dat$country[dat$country==input$place] <- paste(input$place, "scaled to ireland +",input$days,"days")
-    #   
-    #   g = dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"))%>%
-    #     group_by(country, date) %>%
-    #     summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date), Country = country[1]) %>%
-    #     na.omit() %>%
-    #     mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
-    #     ggplot(aes(x=Date,y=ccases,color=country,fill=country,label=Date,label1=Country,label2=Total_cases)) +
-    #     geom_line() + geom_point() + labs(y="Cases (scaled to Ireland)") + theme_bw() + 
-    #     ggtitle(paste0("Mean daily difference is ",round2(mean(comp$diff,na.rm=TRUE),0), " cases"))
-    #   ggplotly(g, tooltip = c("Country","Date","Total_cases","New_cases"))
-    #   
-    # })
     
     output$irelandcompare <- renderPlotly({
       
@@ -962,19 +809,28 @@ server <- function(input, output) {
     
     ## info boxes
     output$HospBox <- renderValueBox({
-      valueBox(paste0(dataStats()$ncase[dataStats()$type=="Total number hospitalised"], "(",
-                      dataStats()$Percentage[dataStats()$type=="Total number hospitalised"], ")"), "Hospitalised",
+      dat <-  dataStats() %>% 
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        filter(date == max(date)) %>%
+        mutate(Percentage = round(100*Hospitalised/Cases,1))
+      valueBox(paste0(dat$Hospitalised, "(", dat$Percentage, "%)"), "Hospitalised",
                color = "blue"
       )
     })
     output$ICUBox <- renderValueBox({
-      valueBox(paste0(dataStats()$ncase[dataStats()$type=="Total number admitted to ICU"], "(",
-                      dataStats()$Percentage[dataStats()$type=="Total number admitted to ICU"], ")"), "in Intensive Care",
+      dat <-  dataStats() %>% 
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        filter(date == max(date)) %>%
+        mutate(Percentage = round(100*ICU/Cases,1))
+      valueBox(paste0(dat$ICU, "(", dat$Percentage, "%)"), "in Intensive Care",
                color = "purple"
       )
     })
     output$CFRBox <- renderValueBox({
-      valueBox(paste0(dataStats()$Percentage[dataStats()$type=="Case fatality rate"]), "Case fatality rate",
+      dat <-  dataStats() %>% 
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        filter(date == max(date))
+      valueBox(paste0(dat$CFR, "%"), "Case fatality rate",
                color = "red"
       )
     })
@@ -987,8 +843,6 @@ server <- function(input, output) {
       labs <- lapply(seq(nrow(dataCounty())), function(i) {
         paste0( '<p>', dataCounty()[i, "ncase"],' cases in ', dataCounty()[i, "county"], '</p><p>') 
       })
-      
-
       
        counties <- dataCounty()  %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
@@ -1138,6 +992,37 @@ server <- function(input, output) {
       
     })       
     
+    
+    ## patient time raw
+    output$patienttime <- renderPlotly({
+      g = dataStats() %>% 
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        ggplot() + 
+        geom_point(aes(x=date,y=Hospitalised),color="orange") + 
+        geom_line(aes(x=date,y=Hospitalised),color="orange") + 
+        geom_point(aes(x=date,y=ICU),color="red") + 
+        geom_line(aes(x=date,y=ICU),color="red") + 
+        theme_bw() + 
+        labs(y="Hospitalised and ICU patients")
+      ggplotly(g)
+    })
+    
+    ## patient time percentage
+    output$patienttimepercent <- renderPlotly({
+      g = dataStats() %>% 
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        mutate(ICU_percent = round(100*ICU/Cases,1),
+               Hospitalised_percent = round(100*Hospitalised/Cases,1)) %>%
+        ggplot() + 
+        geom_point(aes(x=date,y=Hospitalised_percent), color="orange") + 
+        geom_line(aes(x=date,y=Hospitalised_percent), color="orange") + 
+        geom_point(aes(x=date,y=ICU_percent),color="red") + 
+        geom_line(aes(x=date,y=ICU_percent),color="red") + theme_bw() + 
+        labs(y="Hospitalised and ICU patients (% of total cases)")
+      ggplotly(g)
+    })
+    
+    
     ## age barplot
     output$ageplot <- renderPlotly({
       g = dataAge() %>% 
@@ -1162,29 +1047,7 @@ server <- function(input, output) {
       
     })
     
-    ## transimission barplot
-    output$transplot <- renderPlotly({
-      g = dataTrans() %>% 
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
-        filter(date == max(date)) %>%
-        ggplot(aes(x=transmission,y=ncase,fill=transmission)) + 
-        geom_col() + labs(y="Cases",x="Transmission type") + 
-        theme(axis.text.x = element_text(angle = 45, hjust = 1))
-      ggplotly(g)
-    })
-    
-    # trans spaghetti chart
-    output$cumultrans <- renderPlotly({
-      
-      g = dataTrans() %>%
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        group_by(date,transmission) %>%
-        summarise(Total_cases = sum(ncase)) %>%
-        ggplot(aes(x=date,y=Total_cases,color=transmission)) + 
-        geom_line() + geom_point() + labs(y="Cases")
-      ggplotly(g, tooltip = c("date", "transmission", "Total_cases"))
-      
-    })    
+ 
     
     ## Table weekly data
     ### county
@@ -1201,14 +1064,7 @@ server <- function(input, output) {
         group_by(date) %>% mutate(Percentage = round2(100*ncase/sum(ncase),1)) %>% arrange(desc(date))
       
     })
-    
-    ### transmission
-    output$weektrans <- renderDT({
-      
-      dataTrans() %>% mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        group_by(date) %>% mutate(Percentage = round2(100*ncase/sum(ncase),1)) %>% arrange(desc(date))
-      
-    })
+
 }
 
 # Run the application 

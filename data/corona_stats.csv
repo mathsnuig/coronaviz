@@ -1,55 +1,13 @@
-date,type,ncase,Percentage
-16/03/2020,Total number hospitalised,84,31%
-16/03/2020,Total number admitted to ICU,6,2%
-16/03/2020,Total number deaths,2,0.70%
-16/03/2020,Case fatality rate,2,0.70%
-17/03/2020,Total number hospitalised,108,31%
-17/03/2020,Total number admitted to ICU,7,2%
-17/03/2020,Total number deaths,2,0.60%
-17/03/2020,Case fatality rate,2,0.60%
-17/03/2020,Median age,43,
-18/03/2020,Total number hospitalised,140,32%
-18/03/2020,Total number admitted to ICU,12,3%
-18/03/2020,Total number deaths,3,0.70%
-18/03/2020,Case fatality rate,3,0.60%
-18/03/2020,Median age,44,
-19/03/2020,Total number hospitalised,173,30%
-19/03/2020,Total number admitted to ICU,13,2%
-19/03/2020,Total number deaths,3,0.50%
-19/03/2020,Case fatality rate,3,0.50%
-19/03/2020,Median age,44,
-20/03/2020,Total number hospitalised,211,30%
-20/03/2020,Total number admitted to ICU,17,2%
-20/03/2020,Total number deaths,4,0.60%
-20/03/2020,Case fatality rate,4,0.60%
-20/03/2020,Median age,44,
-21/03/2020,Total number hospitalised,239,29%
-21/03/2020,Total number admitted to ICU,25,3%
-21/03/2020,Total number deaths,6,0.70%
-21/03/2020,Case fatality rate,6,0.70%
-21/03/2020,Median age,44,
-22/03/2020,Total number hospitalised,277,29%
-22/03/2020,Total number admitted to ICU,36,4%
-22/03/2020,Total number deaths,6,0.60%
-22/03/2020,Case fatality rate,6,0.60%
-22/03/2020,Median age,45,
-23/03/2020,Total number hospitalised,305,26%
-23/03/2020,Total number admitted to ICU,39,3%
-23/03/2020,Total number deaths,7,0.60%
-23/03/2020,Case fatality rate,7,0.60%
-23/03/2020,Median age,45,
-24/03/2020,Total number hospitalised,340,25%
-24/03/2020,Total number admitted to ICU,47,3%
-24/03/2020,Total number deaths,12,0.90%
-24/03/2020,Case fatality rate,12,0.90%
-24/03/2020,Median age,46,
-25/03/2020,Total number hospitalised,419,26%
-25/03/2020,Total number admitted to ICU,59,4%
-25/03/2020,Total number deaths,23,1.30%
-25/03/2020,Case fatality rate,23,1.30%
-25/03/2020,Median age,46,
-26/03/2020,Total number hospitalised,489,26%
-26/03/2020,Total number admitted to ICU,67,4%
-26/03/2020,Total number deaths,33,1.70%
-26/03/2020,Case fatality rate,33,1.70%
-26/03/2020,Median age,46,
+date,Cases,Hospitalised,ICU,CFR,Age
+16/03/2020,271,84,6,0.7,
+17/03/2020,350,108,7,0.6,43
+18/03/2020,438,140,12,0.6,44
+19/03/2020,584,173,13,0.5,44
+20/03/2020,712,211,17,0.6,44
+21/03/2020,836,239,25,0.7,44
+22/03/2020,965,277,36,0.6,45
+23/03/2020,1146,305,39,0.6,45
+24/03/2020,1383,340,47,0.9,46
+25/03/2020,1639,419,59,1.3,46
+26/03/2020,1904,489,67,1.7,46
+27/03/2020,2216,564,77,1.9,47

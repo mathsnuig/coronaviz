@@ -42,7 +42,7 @@ ui = f7Page(
         h4(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
                   "HSE Coronavirus information", 
                   target="_blank"),
-           paste0(". Data (28/03/2020) from Ireland ("),
+           paste0(". Data (29/03/2020) from Ireland ("),
            tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
                   "Department of Health", target="_blank"),
            paste0("), Northern Ireland ("),
@@ -51,8 +51,8 @@ ui = f7Page(
            paste0(") and WHO")),
         infoBoxOutput("CasesBox"),
         infoBoxOutput("MortBox"),
-        fluidRow(),
-        valueBoxOutput("GrowthBox"),
+        # fluidRow(),
+        # valueBoxOutput("GrowthBox"),
         #valueBoxOutput("DoublingBox"),
         h4("New and cumulative cases per day"),
         plotOutput("cumulcases", width = "90%", height = 400)
@@ -65,7 +65,7 @@ ui = f7Page(
         icon = f7Icon("calendar"),
         active = FALSE,
         # Tab 5 content
-        h3(paste0("Report data (midnight 26/03/20) from Republic of Ireland only"),
+        h3(paste0("Report data (midnight 27/03/20) from Republic of Ireland only"),
            tags$a(href="https://www.gov.ie/en/collection/ef2560-analysis-of-confirmed-cases-of-covid-19-coronavirus-in-ireland/", 
                   "(National Public Health Emergency Team)", target="_blank")),
         valueBoxOutput("HospBox"),
@@ -77,11 +77,11 @@ ui = f7Page(
         # h4(tags$caption("County data")),
         # DTOutput("weekarea", width = "80%"),
         h4(tags$caption("Cumulative cases by age group")),
-        plotOutput("cumulage", width = "70%", height = 600),
+        plotOutput("cumulage", width = "70%", height = 600)
         # h4(tags$caption("Age data")),
         # DTOutput("weekage", width = "80%"),
-        h4(tags$caption("Cumulative cases by transmission type")),
-        plotOutput("cumultrans", width = "70%", height = 600)
+        # h4(tags$caption("Cumulative cases by transmission type")),
+        # plotOutput("cumultrans", width = "70%", height = 600)
         #,
         # h4(tags$caption("Transmission data")),
         # DTOutput("weektrans", width = "80%")
@@ -231,14 +231,8 @@ server <- function(input, output) {
       read.csv("data/corona_age.csv") %>%
         mutate(age_group = factor(age_group, levels(age_group)[c(1,2,7,3:6,8,9)]))
     })
-    dataTrans <- reactive({
-      read.csv("data/corona_trans.csv")
-    })
     dataStats <- reactive({
-      read.csv("data/corona_stats.csv") %>%
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
-        filter(date == max(date))
-      
+      read.csv("data/corona_stats.csv")
     })
     
     
@@ -270,42 +264,6 @@ server <- function(input, output) {
 
     ################### Comparison plots ############
     ##### Plot Ireland v other countries
-    # output$irelandcompare <- renderPlot({
-    #   
-    #   
-    #   dat <- dataCountry()
-    #   dat <- dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"), country = as.character(country)) 
-    #   prop = mean(dat$pop[dat$country=="ireland"])/mean(dat$pop[dat$country==input$place])
-    #   dat$ncase[dat$country==input$place] <- round(dat$ncase[dat$country==input$place]*prop,0)
-    #   dat$date[dat$country==input$place] <- dat$date[dat$country==input$place]+input$days
-    #   
-    #   diffdat = dat %>% 
-    #     mutate(date = as.Date(date,format = "%d/%m/%Y"))%>%
-    #     filter(country=="ireland"|country==input$place) %>%
-    #     group_by(country, date) %>%
-    #     summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date), Country = country[1]) %>%
-    #     na.omit() %>%
-    #     mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases))
-    #   
-    #   ireland <- diffdat %>% filter(country == "ireland")
-    #   comp <- diffdat %>% filter(country == input$place)
-    #   comp <- merge(ireland,comp,by="date") %>%
-    #     mutate(diff = abs(Total_cases.x - Total_cases.y)) %>%
-    #     select(date,diff)
-    #   
-    #   
-    #   dat$country[dat$country==input$place] <- paste(input$place, "scaled to ireland +",input$days,"days")
-    #   
-    #   dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"))%>%
-    #     group_by(country, date) %>%
-    #     summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date), Country = country[1]) %>%
-    #     na.omit() %>%
-    #     mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
-    #     ggplot(aes(x=date,y=ccases,color=country,fill=country,label=Date,label1=Country,label2=Total_cases)) +
-    #     geom_line() + geom_point() + labs(y="Cases (scaled to Ireland)") + theme_bw() + 
-    #     theme(legend.position = "bottom")
-    #   
-    # }) 
     
     output$irelandcompare <- renderPlot({
       
@@ -401,19 +359,28 @@ server <- function(input, output) {
     
     ## info boxes
     output$HospBox <- renderValueBox({
-      valueBox(paste0(dataStats()$ncase[dataStats()$type=="Total number hospitalised"], "(",
-                      dataStats()$Percentage[dataStats()$type=="Total number hospitalised"], ")"), "Hospitalised",
+      dat <-  dataStats() %>% 
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        filter(date == max(date)) %>%
+        mutate(Percentage = round(100*Hospitalised/Cases,1))
+      valueBox(paste0(dat$Hospitalised, "(", dat$Percentage, "%)"), "Hospitalised",
                color = "blue"
       )
     })
     output$ICUBox <- renderValueBox({
-      valueBox(paste0(dataStats()$ncase[dataStats()$type=="Total number admitted to ICU"], "(",
-                      dataStats()$Percentage[dataStats()$type=="Total number admitted to ICU"], ")"), "in Intensive Care",
+      dat <-  dataStats() %>% 
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        filter(date == max(date)) %>%
+        mutate(Percentage = round(100*ICU/Cases,1))
+      valueBox(paste0(dat$ICU, "(", dat$Percentage, "%)"), "in Intensive Care",
                color = "purple"
       )
     })
     output$CFRBox <- renderValueBox({
-      valueBox(paste0(dataStats()$Percentage[dataStats()$type=="Case fatality rate"]), "Case fatality rate",
+      dat <-  dataStats() %>% 
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        filter(date == max(date))
+      valueBox(paste0(dat$CFR, "%"), "Case fatality rate",
                color = "red"
       )
     })
@@ -557,23 +524,7 @@ server <- function(input, output) {
         geom_line() + geom_point() + labs(y="Cases")
       
     })
-    
-
-    # trans spaghetti chart
-    output$cumultrans <- renderPlot({
-      
-      dataTrans() %>%
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        mutate(transmission = case_when(transmission == "Community transmission" ~ "Community",
-                                        transmission == "Contact with a confirmed case" ~ "Contact",
-                                        transmission == "Travel abroad" ~ "Travel",
-                                        transmission == "Under investigation" ~ "Not yet known")) %>%
-        group_by(date,transmission) %>%
-        summarise(Total_cases = sum(ncase)) %>%
-        ggplot(aes(x=date,y=Total_cases,color=transmission)) + 
-        geom_line() + geom_point() + labs(y="Cases")
-
-    })       
+ 
     
     
     ## Table weekly data
@@ -592,13 +543,7 @@ server <- function(input, output) {
       
     })
     
-    ### transmission
-    output$weektrans <- renderDT({
-      
-      dataTrans() %>% mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        mutate(Percentage = round(100*ncase/sum(ncase),0)) %>% arrange(desc(date))
-      
-    })
+
     
 }
 

@@ -391,7 +391,31 @@ date,ncase,ndeath,gender,area,country
 27/03/2020,724,16,unknown,unknown,portugal
 28/03/2020,49,2,unknown,north,ireland
 28/03/2020,294,14,unknown,unknown,ireland
+28/03/2020,2546,260,unknown,unknown,uk
+28/03/2020,4611,319,unknown,unknown,france
+28/03/2020,6824,82,unknown,unknown,germany
+28/03/2020,5974,889,unknown,unknown,italy
+28/03/2020,7516,844,unknown,unknown,spain
+28/03/2020,244,4,unknown,unknown,norway
+28/03/2020,155,13,unknown,unknown,denmark
+28/03/2020,1850,64,unknown,unknown,belgium
+28/03/2020,1159,93,unknown,unknown,netherlands
+28/03/2020,902,24,unknown,unknown,portugal
+29/03/2020,86,6,unknown,north,ireland
+29/03/2020,200,10,unknown,unknown,ireland
+29/03/2020,2433,209,unknown,unknown,uk
+29/03/2020,2599,292,unknown,unknown,france
+29/03/2020,4740,108,unknown,unknown,germany
+29/03/2020,5217,756,unknown,unknown,italy
+29/03/2020,6875,821,unknown,unknown,spain
+29/03/2020,269,3,unknown,unknown,norway
+29/03/2020,194,7,unknown,unknown,denmark
+29/03/2020,1702,78,unknown,unknown,belgium
+29/03/2020,1104,132,unknown,unknown,netherlands
+29/03/2020,792,19,unknown,unknown,portugal
 26/02/2020,1,0,female,Auckland,new zealand
+28/02/2020,1,0,female,Southern,new zealand
+28/02/2020,1,0,male,Southern,new zealand
 02/03/2020,1,0,female,Waitemata,new zealand
 04/03/2020,1,0,male,Counties Manukau,new zealand
 04/03/2020,1,0,male,Waitemata,new zealand
@@ -400,16 +424,16 @@ date,ncase,ndeath,gender,area,country
 13/03/2020,1,0,female,Southern,new zealand
 14/03/2020,1,0,male,Capital and Coast,new zealand
 15/03/2020,1,0,female,Waitemata,new zealand
-16/03/2020,1,0,female,Taranaki,new zealand
-16/03/2020,1,0,female,Waikato,new zealand
 16/03/2020,1,0,male,Auckland,new zealand
 16/03/2020,2,0,male,Capital and Coast,new zealand
+16/03/2020,1,0,female,Taranaki,new zealand
 16/03/2020,1,0,male,Taranaki,new zealand
+16/03/2020,1,0,female,Waikato,new zealand
 16/03/2020,1,0,male,Waikato,new zealand
-17/03/2020,1,0,female,Canterbury,new zealand
-17/03/2020,1,0,female,Counties Manukau,new zealand
 17/03/2020,2,0,male,Auckland,new zealand
+17/03/2020,1,0,female,Canterbury,new zealand
 17/03/2020,1,0,male,Capital and Coast,new zealand
+17/03/2020,1,0,female,Counties Manukau,new zealand
 17/03/2020,1,0,male,Lakes,new zealand
 17/03/2020,1,0,male,Northland,new zealand
 17/03/2020,2,0,male,Southern,new zealand
@@ -418,168 +442,205 @@ date,ncase,ndeath,gender,area,country
 18/03/2020,1,0,male,Canterbury,new zealand
 18/03/2020,1,0,male,Capital and Coast,new zealand
 18/03/2020,2,0,male,Southern,new zealand
-19/03/2020,1,0,female,Capital and Coast,new zealand
-19/03/2020,2,0,female,MidCentral,new zealand
-19/03/2020,1,0,female,Southern,new zealand
-19/03/2020,2,0,female,Waikato,new zealand
-19/03/2020,1,0,female,Waitemata,new zealand
 19/03/2020,2,0,male,Auckland,new zealand
+19/03/2020,1,0,female,Capital and Coast,new zealand
 19/03/2020,1,0,male,Capital and Coast,new zealand
 19/03/2020,1,0,male,Counties Manukau,new zealand
 19/03/2020,1,0,male,Hawke's Bay,new zealand
 19/03/2020,2,0,male,Hutt Valley,new zealand
+19/03/2020,2,0,female,MidCentral,new zealand
 19/03/2020,1,0,male,MidCentral,new zealand
+19/03/2020,1,0,female,Southern,new zealand
+19/03/2020,2,0,female,Waikato,new zealand
 19/03/2020,1,0,male,Wairarapa,new zealand
-20/03/2020,1,0,female,Canterbury,new zealand
-20/03/2020,2,0,female,Nelson Marlborough,new zealand
-20/03/2020,1,0,female,Waikato,new zealand
-20/03/2020,1,0,female,Waitemata,new zealand
+19/03/2020,1,0,female,Waitemata,new zealand
 20/03/2020,1,0,male,Auckland,new zealand
+20/03/2020,1,0,female,Canterbury,new zealand
 20/03/2020,1,0,male,Canterbury,new zealand
 20/03/2020,1,0,male,Lakes,new zealand
+20/03/2020,2,0,female,Nelson Marlborough,new zealand
 20/03/2020,2,0,male,Southern,new zealand
+20/03/2020,1,0,female,Waikato,new zealand
+20/03/2020,1,0,female,Waitemata,new zealand
 20/03/2020,1,0,male,Waitemata,new zealand
 21/03/2020,2,0,female,Auckland,new zealand
-21/03/2020,1,0,female,Canterbury,new zealand
-21/03/2020,1,0,female,Counties Manukau,new zealand
-21/03/2020,1,0,female,MidCentral,new zealand
-21/03/2020,2,0,female,Waikato,new zealand
-21/03/2020,1,0,female,Wairarapa,new zealand
 21/03/2020,2,0,male,Auckland,new zealand
 21/03/2020,1,0,male,Bay of Plenty,new zealand
+21/03/2020,1,0,female,Canterbury,new zealand
 21/03/2020,2,0,male,Canterbury,new zealand
 21/03/2020,1,0,male,Capital and Coast,new zealand
+21/03/2020,1,0,female,Counties Manukau,new zealand
 21/03/2020,3,0,male,Counties Manukau,new zealand
+21/03/2020,1,0,female,MidCentral,new zealand
 21/03/2020,2,0,male,Nelson Marlborough,new zealand
 21/03/2020,1,0,male,Taranaki,new zealand
+21/03/2020,2,0,female,Waikato,new zealand
 21/03/2020,1,0,male,Waikato,new zealand
+21/03/2020,1,0,female,Wairarapa,new zealand
 21/03/2020,1,0,male,Wairarapa,new zealand
+21/03/2020,1,0,female,Waitemata,new zealand
 22/03/2020,2,0,female,Auckland,new zealand
+22/03/2020,4,0,male,Auckland,new zealand
+22/03/2020,1,0,unknown,Auckland,new zealand
 22/03/2020,3,0,female,Canterbury,new zealand
 22/03/2020,3,0,female,Capital and Coast,new zealand
+22/03/2020,2,0,male,Capital and Coast,new zealand
 22/03/2020,4,0,female,Counties Manukau,new zealand
+22/03/2020,4,0,male,Counties Manukau,new zealand
 22/03/2020,1,0,female,Hutt Valley,new zealand
 22/03/2020,2,0,female,Nelson Marlborough,new zealand
+22/03/2020,3,0,male,Nelson Marlborough,new zealand
 22/03/2020,1,0,female,Northland,new zealand
 22/03/2020,2,0,female,Southern,new zealand
 22/03/2020,1,0,female,Waikato,new zealand
-22/03/2020,3,0,female,Waitemata,new zealand
-22/03/2020,4,0,male,Auckland,new zealand
-22/03/2020,3,0,male,Capital and Coast,new zealand
-22/03/2020,3,0,male,Counties Manukau,new zealand
-22/03/2020,3,0,male,Nelson Marlborough,new zealand
 22/03/2020,1,0,male,Waikato,new zealand
+22/03/2020,3,0,female,Waitemata,new zealand
 22/03/2020,2,0,male,Waitemata,new zealand
 22/03/2020,1,0,male,West Coast,new zealand
-22/03/2020,1,0,unknown,Auckland,new zealand
 23/03/2020,5,0,female,Auckland,new zealand
-23/03/2020,1,0,female,Canterbury,new zealand
-23/03/2020,3,0,female,Capital and Coast,new zealand
-23/03/2020,1,0,female,Counties Manukau,new zealand
-23/03/2020,1,0,female,Lakes,new zealand
-23/03/2020,1,0,female,Nelson Marlborough,new zealand
-23/03/2020,2,0,female,Southern,new zealand
-23/03/2020,2,0,female,Waikato,new zealand
-23/03/2020,2,0,female,Waitemata,new zealand
 23/03/2020,2,0,male,Auckland,new zealand
+23/03/2020,1,0,female,Canterbury,new zealand
 23/03/2020,3,0,male,Canterbury,new zealand
+23/03/2020,3,0,female,Capital and Coast,new zealand
 23/03/2020,5,0,male,Capital and Coast,new zealand
+23/03/2020,1,0,female,Counties Manukau,new zealand
 23/03/2020,1,0,male,Hutt Valley,new zealand
+23/03/2020,1,0,female,Lakes,new zealand
 23/03/2020,1,0,male,MidCentral,new zealand
+23/03/2020,1,0,female,Nelson Marlborough,new zealand
 23/03/2020,2,0,male,Nelson Marlborough,new zealand
 23/03/2020,2,0,male,South Canterbury,new zealand
+23/03/2020,2,0,female,Southern,new zealand
 23/03/2020,2,0,male,Southern,new zealand
+23/03/2020,2,0,female,Waikato,new zealand
 23/03/2020,2,0,male,Waikato,new zealand
+23/03/2020,2,0,female,Waitemata,new zealand
 24/03/2020,3,0,female,Auckland,new zealand
+24/03/2020,4,0,male,Auckland,new zealand
 24/03/2020,1,0,female,Bay of Plenty,new zealand
 24/03/2020,6,0,female,Canterbury,new zealand
-24/03/2020,4,0,female,Capital and Coast,new zealand
-24/03/2020,1,0,female,Counties Manukau,new zealand
-24/03/2020,1,0,female,Hawke's Bay,new zealand
-24/03/2020,1,0,female,MidCentral,new zealand
-24/03/2020,1,0,female,Northland,new zealand
-24/03/2020,3,0,female,Southern,new zealand
-24/03/2020,2,0,female,Waikato,new zealand
-24/03/2020,1,0,female,Wairarapa,new zealand
-24/03/2020,6,0,female,Waitemata,new zealand
-24/03/2020,4,0,male,Auckland,new zealand
 24/03/2020,2,0,male,Canterbury,new zealand
+24/03/2020,4,0,female,Capital and Coast,new zealand
 24/03/2020,6,0,male,Capital and Coast,new zealand
+24/03/2020,1,0,female,Counties Manukau,new zealand
 24/03/2020,1,0,male,Counties Manukau,new zealand
+24/03/2020,1,0,female,Hawke's Bay,new zealand
 24/03/2020,1,0,male,Hawke's Bay,new zealand
 24/03/2020,1,0,male,Lakes,new zealand
+24/03/2020,1,0,female,MidCentral,new zealand
 24/03/2020,2,0,male,Nelson Marlborough,new zealand
+24/03/2020,1,0,female,Northland,new zealand
+24/03/2020,3,0,female,Southern,new zealand
 24/03/2020,4,0,male,Southern,new zealand
+24/03/2020,2,0,female,Waikato,new zealand
+24/03/2020,1,0,female,Wairarapa,new zealand
 24/03/2020,1,0,male,Wairarapa,new zealand
+24/03/2020,6,0,female,Waitemata,new zealand
 24/03/2020,3,0,male,Waitemata,new zealand
 25/03/2020,8,0,female,Auckland,new zealand
-25/03/2020,1,0,female,Bay of Plenty,new zealand
-25/03/2020,3,0,female,Canterbury,new zealand
-25/03/2020,1,0,female,Capital and Coast,new zealand
-25/03/2020,3,0,female,Counties Manukau,new zealand
-25/03/2020,2,0,female,Hawke's Bay,new zealand
-25/03/2020,2,0,female,Lakes,new zealand
-25/03/2020,1,0,female,Northland,new zealand
-25/03/2020,3,0,female,Southern,new zealand
-25/03/2020,1,0,female,Taranaki,new zealand
-25/03/2020,10,0,female,Waikato,new zealand
-25/03/2020,4,0,female,Waitemata,new zealand
 25/03/2020,4,0,male,Auckland,new zealand
+25/03/2020,1,0,female,Bay of Plenty,new zealand
 25/03/2020,1,0,male,Bay of Plenty,new zealand
+25/03/2020,4,0,female,Canterbury,new zealand
+25/03/2020,1,0,female,Capital and Coast,new zealand
 25/03/2020,3,0,male,Capital and Coast,new zealand
+25/03/2020,3,0,female,Counties Manukau,new zealand
 25/03/2020,2,0,male,Counties Manukau,new zealand
+25/03/2020,2,0,female,Hawke's Bay,new zealand
 25/03/2020,1,0,male,Hawke's Bay,new zealand
 25/03/2020,1,0,male,Hutt Valley,new zealand
+25/03/2020,2,0,female,Lakes,new zealand
 25/03/2020,1,0,male,Lakes,new zealand
-25/03/2020,3,0,male,Nelson Marlborough,new zealand
-25/03/2020,1,0,male,Northland,new zealand
-25/03/2020,6,0,male,Southern,new zealand
-25/03/2020,10,0,male,Waikato,new zealand
-25/03/2020,5,0,male,Waitemata,new zealand
 25/03/2020,1,0,unknown,MidCentral,new zealand
+25/03/2020,3,0,male,Nelson Marlborough,new zealand
+25/03/2020,1,0,female,Northland,new zealand
+25/03/2020,1,0,male,Northland,new zealand
+25/03/2020,3,0,female,Southern,new zealand
+25/03/2020,6,0,male,Southern,new zealand
+25/03/2020,1,0,female,Taranaki,new zealand
+25/03/2020,10,0,female,Waikato,new zealand
+25/03/2020,10,0,male,Waikato,new zealand
+25/03/2020,4,0,female,Waitemata,new zealand
+25/03/2020,6,0,male,Waitemata,new zealand
 26/03/2020,6,0,female,Auckland,new zealand
+26/03/2020,3,0,male,Auckland,new zealand
 26/03/2020,1,0,female,Bay of Plenty,new zealand
+26/03/2020,1,0,male,Bay of Plenty,new zealand
 26/03/2020,6,0,female,Canterbury,new zealand
+26/03/2020,4,0,male,Canterbury,new zealand
 26/03/2020,1,0,female,Capital and Coast,new zealand
+26/03/2020,1,0,male,Capital and Coast,new zealand
 26/03/2020,2,0,female,Counties Manukau,new zealand
+26/03/2020,1,0,male,Counties Manukau,new zealand
 26/03/2020,2,0,female,Hawke's Bay,new zealand
+26/03/2020,2,0,male,Hawke's Bay,new zealand
 26/03/2020,4,0,female,Hutt Valley,new zealand
+26/03/2020,1,0,male,Lakes,new zealand
 26/03/2020,1,0,female,Northland,new zealand
 26/03/2020,4,0,female,Southern,new zealand
-26/03/2020,5,0,female,Waikato,new zealand
-26/03/2020,6,0,female,Waitemata,new zealand
-26/03/2020,1,0,male,Auckland,new zealand
-26/03/2020,1,0,male,Bay of Plenty,new zealand
-26/03/2020,4,0,male,Canterbury,new zealand
-26/03/2020,1,0,male,Capital and Coast,new zealand
-26/03/2020,1,0,male,Counties Manukau,new zealand
-26/03/2020,2,0,male,Hawke's Bay,new zealand
-26/03/2020,1,0,male,Lakes,new zealand
 26/03/2020,4,0,male,Southern,new zealand
 26/03/2020,1,0,male,Tairawhiti,new zealand
 26/03/2020,2,0,male,Taranaki,new zealand
+26/03/2020,5,0,female,Waikato,new zealand
 26/03/2020,6,0,male,Waikato,new zealand
+26/03/2020,6,0,female,Waitemata,new zealand
 26/03/2020,3,0,male,Waitemata,new zealand
+26/03/2020,1,0,female,West Coast,new zealand
 26/03/2020,1,0,male,West Coast,new zealand
 27/03/2020,4,0,female,Auckland,new zealand
-27/03/2020,1,0,female,Bay of Plenty,new zealand
-27/03/2020,1,0,female,Capital and Coast,new zealand
-27/03/2020,3,0,female,Counties Manukau,new zealand
-27/03/2020,1,0,female,Hawke's Bay,new zealand
-27/03/2020,2,0,female,Hutt Valley,new zealand
-27/03/2020,1,0,female,MidCentral,new zealand
-27/03/2020,1,0,female,South Canterbury,new zealand
-27/03/2020,10,0,female,Southern,new zealand
-27/03/2020,1,0,female,Taranaki,new zealand
-27/03/2020,5,0,female,Waikato,new zealand
 27/03/2020,3,0,male,Auckland,new zealand
+27/03/2020,1,0,female,Bay of Plenty,new zealand
 27/03/2020,1,0,male,Bay of Plenty,new zealand
 27/03/2020,1,0,male,Canterbury,new zealand
+27/03/2020,1,0,unknown,Canterbury,new zealand
+27/03/2020,1,0,female,Capital and Coast,new zealand
 27/03/2020,2,0,male,Capital and Coast,new zealand
+27/03/2020,3,0,female,Counties Manukau,new zealand
 27/03/2020,1,0,male,Counties Manukau,new zealand
+27/03/2020,1,0,female,Hawke's Bay,new zealand
+27/03/2020,2,0,female,Hutt Valley,new zealand
 27/03/2020,1,0,male,Hutt Valley,new zealand
+27/03/2020,2,0,female,MidCentral,new zealand
+27/03/2020,4,0,female,South Canterbury,new zealand
+27/03/2020,9,0,female,Southern,new zealand
 27/03/2020,10,0,male,Southern,new zealand
-27/03/2020,3,0,male,Waikato,new zealand
+27/03/2020,2,0,female,Taranaki,new zealand
+27/03/2020,1,0,male,Taranaki,new zealand
+27/03/2020,1,0,unknown,Taranaki,new zealand
+27/03/2020,6,0,female,Waikato,new zealand
+27/03/2020,5,0,male,Waikato,new zealand
 27/03/2020,2,0,male,Waitemata,new zealand
 27/03/2020,3,0,male,Whanganui,new zealand
-27/03/2020,1,0,unknown,Waikato,new zealand
+28/03/2020,10,0,female,Auckland,new zealand
+28/03/2020,4,0,male,Auckland,new zealand
+28/03/2020,2,0,female,Bay of Plenty,new zealand
+28/03/2020,3,0,female,Canterbury,new zealand
+28/03/2020,3,0,male,Canterbury,new zealand
+28/03/2020,5,0,female,Capital and Coast,new zealand
+28/03/2020,3,0,female,Counties Manukau,new zealand
+28/03/2020,1,0,male,Counties Manukau,new zealand
+28/03/2020,1,0,male,Hawke's Bay,new zealand
+28/03/2020,1,0,female,Lakes,new zealand
+28/03/2020,1,0,male,Nelson Marlborough,new zealand
+28/03/2020,1,0,male,South Canterbury,new zealand
+28/03/2020,8,0,female,Southern,new zealand
+28/03/2020,3,0,male,Southern,new zealand
+28/03/2020,3,0,female,Waikato,new zealand
+28/03/2020,9,0,female,Waitemata,new zealand
+28/03/2020,4,0,male,Waitemata,new zealand
+28/03/2020,0,1,female,West Coast,new zealand
+29/03/2020,5,0,female,Auckland,new zealand
+29/03/2020,3,0,male,Auckland,new zealand
+29/03/2020,1,0,unknown,Auckland,new zealand
+29/03/2020,4,0,female,Capital and Coast,new zealand
+29/03/2020,2,0,male,Capital and Coast,new zealand
+29/03/2020,1,0,male,Counties Manukau,new zealand
+29/03/2020,1,0,female,MidCentral,new zealand
+29/03/2020,1,0,female,Nelson Marlborough,new zealand
+29/03/2020,2,0,female,Northland,new zealand
+29/03/2020,8,0,female,Southern,new zealand
+29/03/2020,4,0,male,Southern,new zealand
+29/03/2020,6,0,female,Waikato,new zealand
+29/03/2020,7,0,male,Waikato,new zealand
+29/03/2020,5,0,female,Waitemata,new zealand
+29/03/2020,7,0,male,Waitemata,new zealand
