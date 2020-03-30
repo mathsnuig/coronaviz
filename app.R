@@ -99,7 +99,7 @@ body <- dashboardBody(
                    tags$a(href="https://andsim.shinyapps.io/coronamobile", 
                           "try the mobile version here!", 
                           target="_blank") ),
-                h3(paste0("Data (29/03/2020) from Ireland ("),
+                h3(paste0("Data (30/03/2020) from Ireland ("),
                    tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
                           "Department of Health", target="_blank"),
                    paste0("), Northern Ireland ("),
@@ -186,7 +186,7 @@ body <- dashboardBody(
         
         # Weekly Tab
         tabItem("nphet",
-                h3(paste0("Data (midnight 27/03/2020) from Ireland"),
+                h3(paste0("Data (midnight 28/03/2020) from Ireland"),
                    tags$a(href="https://www.gov.ie/en/collection/ef2560-analysis-of-confirmed-cases-of-covid-19-coronavirus-in-ireland/", 
                           "(National Public Health Emergency Team)", target="_blank")),
                 valueBoxOutput("HospBox"),
