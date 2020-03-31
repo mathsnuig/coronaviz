@@ -42,7 +42,7 @@ ui = f7Page(
         h4(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
                   "HSE Coronavirus information", 
                   target="_blank"),
-           paste0(". Data (30/03/2020) from Ireland ("),
+           paste0(". Data (31/03/2020) from Ireland ("),
            tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
                   "Department of Health", target="_blank"),
            paste0("), Northern Ireland ("),
@@ -51,11 +51,10 @@ ui = f7Page(
            paste0(") and WHO")),
         infoBoxOutput("CasesBox"),
         infoBoxOutput("MortBox"),
-        # fluidRow(),
-        # valueBoxOutput("GrowthBox"),
-        #valueBoxOutput("DoublingBox"),
         h4("New and cumulative cases per day"),
-        plotOutput("cumulcases", width = "90%", height = 400)
+        plotOutput("cumulcases", width = "90%", height = 400),
+        h4("Percentage growth per day"),
+        plotOutput("growth", width = "90%", height = 400)
         
       ),
       
@@ -65,7 +64,7 @@ ui = f7Page(
         icon = f7Icon("calendar"),
         active = FALSE,
         # Tab 5 content
-        h3(paste0("Report data (midnight 28/03/20) from Republic of Ireland only"),
+        h3(paste0("Report data (midnight 29/03/20) from Republic of Ireland only"),
            tags$a(href="https://www.gov.ie/en/collection/ef2560-analysis-of-confirmed-cases-of-covid-19-coronavirus-in-ireland/", 
                   "(National Public Health Emergency Team)", target="_blank")),
         valueBoxOutput("HospBox"),
@@ -74,17 +73,10 @@ ui = f7Page(
         leafletOutput("map", width = "90%", height = 600),
         h4(tags$caption("Cumulative cases by province, per 100,000 population")),
         plotOutput("cumulcountyscaled", width = "70%", height = 600),
-        # h4(tags$caption("County data")),
-        # DTOutput("weekarea", width = "80%"),
         h4(tags$caption("Cumulative cases by age group")),
-        plotOutput("cumulage", width = "70%", height = 600)
-        # h4(tags$caption("Age data")),
-        # DTOutput("weekage", width = "80%"),
-        # h4(tags$caption("Cumulative cases by transmission type")),
-        # plotOutput("cumultrans", width = "70%", height = 600)
-        #,
-        # h4(tags$caption("Transmission data")),
-        # DTOutput("weektrans", width = "80%")
+        plotOutput("cumulage", width = "70%", height = 600),
+        h4(tags$caption("Cases hospitalised and in intensive care")),
+        plotOutput("patienttime", width = "70%", height = 600)
       ),
       
       # Compare tab
@@ -105,16 +97,6 @@ ui = f7Page(
         h4("Compare cumulative growth"),
         plotOutput("irelandcompare", width = "90%", height = 500)
       )
-      # ,
-      # # Data tab
-      # f7Tab(
-      #   tabName = "data",
-      #   icon = f7Icon("list_number"),
-      #   active = FALSE,
-      #   # Tab 4 content
-      #   h4(tags$caption("Raw data")),
-      #   DTOutput("dattable", width = "80%")
-      # )
 
     )
   )
@@ -203,25 +185,7 @@ server <- function(input, output) {
       )
     })
 
-    # growth box
-    output$GrowthBox <- renderValueBox({
-      
-      dat <- dataGrowth()
-      
-      valueBox(paste0(dat$median[1],"%"), "Median growth rate", color = "blue")
-      
-    })
-    
-    # doubling box
-    output$DoublingBox <- renderValueBox({
-      
-      dat <- dataGrowth()
-      
-      valueBox(round(70/dat$median[1],2), "Estimated days for number of cases to double", color = "maroon")
-      
-    })
-    
-    
+
     ### detailed data
     
     dataCounty <- reactive({
@@ -234,16 +198,7 @@ server <- function(input, output) {
     dataStats <- reactive({
       read.csv("data/corona_stats.csv")
     })
-    
-    
-    #################### Data Table  ###################
-    output$dattable <- renderDT({
-      
-      dataRaw() %>% mutate(date = as.Date(date,format = "%d/%m/%Y"))
-    
-      })
-    
-    
+
     
     ################### Time series plots ##############
     #### Plot cases per day
@@ -257,7 +212,19 @@ server <- function(input, output) {
         mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
         ggplot(aes(x=date,y=ccases,label=Date,label1=Total_cases,label2=New_cases)) + 
         geom_line() + geom_point() + geom_col(aes(x=date,y=ncases)) +
-        theme(legend.position="none") + labs(y="Cases")
+        theme(legend.position="none") + labs(y="Cases") + theme_bw()
+      
+    })
+    
+    # Growth rate
+    output$growth <- renderPlot({
+      
+      dataGrowth() %>%
+        mutate(Date = as.Date(date,format = "%d/%m/%Y")) %>%
+        filter(Date >= as.Date("13/03/2020",format = "%d/%m/%Y")) %>%
+        ggplot(aes(x=Date,y=Growth)) + 
+        geom_line() + geom_point() +
+        theme(legend.position="none") + labs(y="Growth in Total Cases per day (%)") + theme_bw()
       
     })
     
@@ -349,7 +316,7 @@ server <- function(input, output) {
         ggtitle(paste0("Mean daily difference is ", round2(mean(comp$diff, na.rm = TRUE), 0), " cases ")) +
         annotate("text", x = xnote, y = ynote, 
                  label = paste0("Closest trajectory at ", bestshift, " days")) + 
-        theme(legend.position = "bottom")
+        theme(legend.position = "bottom") + theme_bw()
       
     })
     
@@ -507,7 +474,7 @@ server <- function(input, output) {
         summarise(Total_cases = sum(ncases), pop = mean(pop)) %>%
         mutate(Cases_per100k = round(100000*Total_cases/pop,0)) %>%
         ggplot(aes(x=date,y=Cases_per100k,color=province,group=province)) + 
-        geom_line() + geom_point() + labs(y="Cases per 100,000 population")
+        geom_line() + geom_point() + labs(y="Cases per 100,000 population") + theme_bw()
       
     })  
 
@@ -521,28 +488,36 @@ server <- function(input, output) {
         group_by(date,age_group) %>%
         summarise(Total_cases = sum(ncase)) %>%
         ggplot(aes(x=date,y=Total_cases,color=age_group)) + 
-        geom_line() + geom_point() + labs(y="Cases")
+        geom_line() + geom_point() + labs(y="Cases") + theme_bw()
       
     })
- 
-    
-    
-    ## Table weekly data
-    ### county
-    output$weekarea <- renderDT({
-      
-      dataCounty() %>% mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% arrange(desc(date))
-      
+
+    ## patient time raw
+    output$patienttime <- renderPlot({
+      dataStats() %>% 
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        ggplot() + 
+        geom_point(aes(x=date,y=Hospitalised),color="orange") + 
+        geom_line(aes(x=date,y=Hospitalised),color="orange") + 
+        geom_point(aes(x=date,y=ICU),color="red") + 
+        geom_line(aes(x=date,y=ICU),color="red") + 
+        theme_bw() + 
+        labs(y="Hospitalised and ICU patients")
     })
     
-    ### age
-    output$weekage <- renderDT({
-      
-      dataAge() %>% mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        group_by(date) %>% mutate(Percentage = round(100*ncase/sum(ncase),0)) %>% arrange(desc(date))
-      
+    ## patient time percentage
+    output$patienttimepercent <- renderPlot({
+      dataStats() %>% 
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        mutate(ICU_percent = round(100*ICU/Cases,1),
+               Hospitalised_percent = round(100*Hospitalised/Cases,1)) %>%
+        ggplot() + 
+        geom_point(aes(x=date,y=Hospitalised_percent), color="orange") + 
+        geom_line(aes(x=date,y=Hospitalised_percent), color="orange") + 
+        geom_point(aes(x=date,y=ICU_percent),color="red") + 
+        geom_line(aes(x=date,y=ICU_percent),color="red") + theme_bw() + 
+        labs(y="Hospitalised and ICU patients (% of total cases)")
     })
-    
 
     
 }

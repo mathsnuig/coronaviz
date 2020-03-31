@@ -99,7 +99,7 @@ body <- dashboardBody(
                    tags$a(href="https://andsim.shinyapps.io/coronamobile", 
                           "try the mobile version here!", 
                           target="_blank") ),
-                h3(paste0("Data (30/03/2020) from Ireland ("),
+                h3(paste0("Data (31/03/2020) from Ireland ("),
                    tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
                           "Department of Health", target="_blank"),
                    paste0("), Northern Ireland ("),
@@ -117,6 +117,7 @@ body <- dashboardBody(
                   selected = "Case count",
                   tabPanel("Case count", plotlyOutput("cumulcases", width = "80%", height = 400)),
                   tabPanel("Log cases", plotlyOutput("cumullog", width = "80%", height = 400)),
+                  tabPanel("Growth Rate", plotlyOutput("growth", width = "80%", height = 400)),
                   tabPanel("Deaths", plotlyOutput("cumuldeaths", width = "80%", height = 400)))
                   ),
                 h3(paste0("Developed by Dr. Andrew Simpkin "),
@@ -186,7 +187,7 @@ body <- dashboardBody(
         
         # Weekly Tab
         tabItem("nphet",
-                h3(paste0("Data (midnight 28/03/2020) from Ireland"),
+                h3(paste0("Data (midnight 29/03/2020) from Ireland"),
                    tags$a(href="https://www.gov.ie/en/collection/ef2560-analysis-of-confirmed-cases-of-covid-19-coronavirus-in-ireland/", 
                           "(National Public Health Emergency Team)", target="_blank")),
                 valueBoxOutput("HospBox"),
@@ -347,7 +348,6 @@ server <- function(input, output) {
     })
     
     ################### Time series plots ##############
-    #### Plotly cases per day
     output$cumulcases <- renderPlotly({
       
       g = dataIreland() %>%
@@ -363,12 +363,12 @@ server <- function(input, output) {
         geom_line() + geom_point() + geom_col(aes(y=ncases)) +
         # geom_line(aes(x=date,y=log(double2,10)),color="red",linetype="dashed") +  
         # geom_line(aes(x=date,y=log(double3,10)),color="blue",linetype="dashed") + 
-        theme(legend.position="none") + labs(y="Cases")
+        theme(legend.position="none") + theme_bw() + labs(y="Cases")
       ggplotly(g, tooltip = c("Date", "Total_cases","New_cases", "Growth_Percentage"))
       
     })
     
-    #### Plotly cases per day
+    # Cases per day
     output$cumullog <- renderPlotly({
       
       g = dataIreland() %>%
@@ -381,13 +381,28 @@ server <- function(input, output) {
         mutate(double3 = ifelse(date >= as.Date("13/03/2020","%d/%m/%Y"), 119*(1+0.26)^(as.numeric(date-as.Date("13/03/2020","%d/%m/%Y"))), NA),
                double2 = ifelse(date >= as.Date("13/03/2020","%d/%m/%Y"), 119*(1+0.415)^(as.numeric(date-as.Date("13/03/2020","%d/%m/%Y"))), NA)) %>%
         ggplot(aes(x=Date,y=ccases,label=Date,label1=Total_cases,label2=New_cases, label3=Growth_Percentage)) + 
-        geom_line() + geom_point() +
+        geom_line() + geom_point() + theme_bw() +
         theme(legend.position="none") + labs(y="Cases (axis shows log10 scale)") +
         scale_y_continuous(trans='log10')
       ggplotly(g, tooltip = c("Date","Total_cases","New_cases", "Growth_Percentage"))
       
     })
 
+
+    
+    # Growth rate
+    output$growth <- renderPlotly({
+      
+      g = dataGrowth() %>%
+        mutate(Date = as.Date(date,format = "%d/%m/%Y")) %>%
+        filter(Date >= as.Date("13/03/2020",format = "%d/%m/%Y")) %>%
+        ggplot(aes(x=Date,y=Growth,label1=New_cases,label2=Total_cases)) + 
+        geom_line() + geom_point() + theme_bw() +
+        theme(legend.position="none") + labs(y="Growth in Total Cases per day (%)")
+      ggplotly(g, tooltip = c("Date", "Growth", "Total_cases", "New_cases"))
+      
+    })
+    
     #### Plotly deaths per day
     output$cumuldeaths <- renderPlotly({
       
@@ -398,13 +413,13 @@ server <- function(input, output) {
         na.omit() %>%
         mutate(cdeaths = cumsum(ndeaths), Total_deaths= cumsum(ndeaths))  %>%
         ggplot(aes(x=Date,y=cdeaths,label=Date,label1=Total_deaths,label2=New_deaths)) + 
-        geom_line() + geom_point() + geom_col(aes(x=Date,y=ndeaths)) +
+        geom_line() + geom_point() + geom_col(aes(x=Date,y=ndeaths)) + theme_bw() +
         theme(legend.position="none") + labs(y="Deaths")
       ggplotly(g, tooltip = c("Date","Total_deaths","New_deaths"))
       
     })    
 
-    ################### Comparison plots ############
+    ################### Comparison tabs ############
     ##### Plotly Ireland v other countries
     
     output$irelandcompare <- renderPlotly({
@@ -795,18 +810,15 @@ server <- function(input, output) {
       
     })
     
-    #################### Data Table  ###################
+    #################### Data Tab  ###################
     output$dattable <- renderDT({
       
       dataRaw() %>% mutate(date = as.Date(date,format = "%d/%m/%Y"))
       
     })
 
-    
-    
-    ######################### detailed data tab
 
-    
+    #################### Detailed data tab ############
     ## info boxes
     output$HospBox <- renderValueBox({
       dat <-  dataStats() %>% 
@@ -903,8 +915,8 @@ server <- function(input, output) {
                ncases = ifelse(ncases == "< = 5","5",ncases)) %>%
         mutate(ncases = as.numeric(ncases),
                logcases = log(ncases+1),
-               case_groups = case_when(ncases < 20 ~ "1",
-                                       ncases >= 20 & ncases < 100 ~ "2",
+               case_groups = case_when(ncases < 30 ~ "1",
+                                       ncases >= 30 & ncases < 100 ~ "2",
                                        ncases >= 100 & ncases < 300 ~ "3",
                                        ncases >= 300 ~ "4"))
        
@@ -952,7 +964,7 @@ server <- function(input, output) {
         group_by(date,province) %>%
         summarise(Total_cases = sum(ncases)) %>%
         ggplot(aes(x=date,y=Total_cases,color=province,group=province)) + 
-        geom_line() + geom_point() + labs(y="Cases")
+        geom_line() + geom_point() + theme_bw() + labs(y="Cases")
       ggplotly(g, tooltip = c("date", "province", "Total_cases"))
       
     })   
@@ -987,7 +999,7 @@ server <- function(input, output) {
         summarise(Total_cases = sum(ncases), pop = mean(pop)) %>%
         mutate(Cases_per100k = round2(100000*Total_cases/pop,0)) %>%
         ggplot(aes(x=date,y=Cases_per100k,color=province,group=province)) + 
-        geom_line() + geom_point() + labs(y="Cases per 100,000 population")
+        geom_line() + geom_point() + theme_bw() + labs(y="Cases per 100,000 population")
       ggplotly(g, tooltip = c("date", "province", "Cases_per100k"))
       
     })       
@@ -1029,7 +1041,7 @@ server <- function(input, output) {
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
         filter(date == max(date)) %>%
         ggplot(aes(x=age_group,y=ncase,fill=age_group)) + 
-        geom_col() + labs(y="Cases",x="Age group") + 
+        geom_col() + labs(y="Cases",x="Age group") + theme_bw() +
         theme(axis.text.x = element_text(angle = 45, hjust = 1))
       ggplotly(g)
     })
@@ -1041,7 +1053,7 @@ server <- function(input, output) {
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
         group_by(date,age_group) %>%
         summarise(Total_cases = sum(ncase)) %>%
-        ggplot(aes(x=date,y=Total_cases,color=age_group)) + 
+        ggplot(aes(x=date,y=Total_cases,color=age_group)) + theme_bw() +
         geom_line() + geom_point() + labs(y="Cases")
       ggplotly(g, tooltip = c("date", "age_group", "Total_cases"))
       
