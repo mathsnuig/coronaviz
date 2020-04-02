@@ -99,13 +99,17 @@ body <- dashboardBody(
                    tags$a(href="https://andsim.shinyapps.io/coronamobile", 
                           "try the mobile version here!", 
                           target="_blank") ),
-                h3(paste0("Data (31/03/2020) from Ireland ("),
+                h3(paste0("Data (02/04/2020) from Ireland ("),
                    tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
                           "Department of Health", target="_blank"),
                    paste0("), Northern Ireland ("),
                    tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
                           "NHS", target="_blank"),
                    paste0(") and WHO")),
+                h3(paste0("Please read this "), 
+                          tags$a(href="https://www.statslife.org.uk/features/4474-a-statistician-s-guide-to-coronavirus-numbers", 
+                                 "advice ", target="_blank"),
+                   paste0("before interpreting the data")),
                 valueBoxOutput("CasesBox"),
                 valueBoxOutput("MortBox"),
                 # fluidRow(),
@@ -187,7 +191,7 @@ body <- dashboardBody(
         
         # Weekly Tab
         tabItem("nphet",
-                h3(paste0("Data (midnight 29/03/2020) from Ireland"),
+                h3(paste0("Data (midnight 31/03/2020) from Ireland"),
                    tags$a(href="https://www.gov.ie/en/collection/ef2560-analysis-of-confirmed-cases-of-covid-19-coronavirus-in-ireland/", 
                           "(National Public Health Emergency Team)", target="_blank")),
                 valueBoxOutput("HospBox"),
@@ -199,9 +203,11 @@ body <- dashboardBody(
                 fluidRow(
                   tabBox(title = "Area data over time",
                     width = 12, 
-                    selected = "Case count",
-                    tabPanel("Case count", plotlyOutput("cumulcounty", width = "90%", height = 500)),
-                    tabPanel("Cases per 100000", plotlyOutput("cumulcountyscaled", width = "90%", height = 500))
+                    selected = "Case count (by province)",
+                    tabPanel("Case count (by province)", plotlyOutput("cumulcounty", width = "90%", height = 500)),
+                    tabPanel("Cases per 100000 (by province)", plotlyOutput("cumulcountyscaled", width = "90%", height = 500)),
+                    #tabPanel("Cases per 100000 (border comparison)", plotlyOutput("cumulborderscaled", width = "90%", height = 500)),
+                    tabPanel("Case per 100000 (by county)", plotlyOutput("cumulrealcounty", width = "90%", height = 500))
                   )
                 ),
                 fluidRow(box(width = 12, title = "County data",
@@ -994,7 +1000,7 @@ server <- function(input, output) {
         mutate(pop = case_when(province == "Connacht" ~ 550742,
                                province == "Munster" ~ 1280020,
                                province == "Leinster" ~ 2630720,
-                               province == "Ulster (ROI)" ~ 159192+32044+76176)) %>%
+                               province == "Ulster (ROI)" ~ 159192+61386+76176)) %>%
         group_by(date,province) %>%
         summarise(Total_cases = sum(ncases), pop = mean(pop)) %>%
         mutate(Cases_per100k = round2(100000*Total_cases/pop,0)) %>%
@@ -1002,7 +1008,88 @@ server <- function(input, output) {
         geom_line() + geom_point() + theme_bw() + labs(y="Cases per 100,000 population")
       ggplotly(g, tooltip = c("date", "province", "Cases_per100k"))
       
-    })       
+    })    
+    
+    ## county time
+    output$cumulrealcounty <- renderPlotly({
+      
+      g = dataCounty() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        mutate(ncases = as.character(ncase),
+               ncases = ifelse(ncases == "< = 5","5",ncases)) %>%
+        mutate(ncases = as.numeric(ncases)) %>%
+        mutate(pop = case_when(county == "Carlow" ~ 24272,
+                               county == "Cavan" ~ 76176,
+                               county == "Clare" ~ 118817,
+                               county == "Donegal" ~159192,
+                               county == "Kildare" ~ 222504,
+                               county == "Kilkenny" ~ 99232,
+                               county == "Laois" ~ 84697,
+                               county == "Leitrim" ~32044,
+                               county == "Longford" ~ 40873,
+                               county == "Louth" ~ 128884,
+                               county == "Mayo" ~ 130507,
+                               county == "Meath" ~ 195044,
+                               county == "Monaghan" ~61386,
+                               county == "Offaly" ~ 77961,
+                               county == "Roscommon" ~ 64544,
+                               county == "Sligo" ~ 65535,
+                               county == "Tipperary" ~ 159553,
+                               county == "Wexford" ~ 149722,
+                               county == "Kerry" ~ 147707,
+                               county == "Waterford" ~ 116176,
+                               county == "Westmeath" ~ 88770,
+                               county == "Wicklow" ~ 142425,
+                               county == "Galway" ~ 258058,
+                               county == "Limerick" ~ 194899,
+                               county == "Cork" ~ 542868,
+                               county == "Dublin" ~ 1347359)) %>%
+        group_by(date,county) %>%
+        summarise(Total_cases = sum(ncases), pop = mean(pop)) %>%
+        mutate(Cases_per100k = round2(100000*Total_cases/pop,0)) %>%
+        ggplot(aes(x=date,y=Cases_per100k,color=county,group=county)) + 
+        geom_line() + geom_point() + theme_bw() + labs(y="Cases")
+      ggplotly(g, tooltip = c("date", "county", "Cases_per100k"))
+      
+    })   
+    
+    ## border time scaled
+    output$cumulborderscaled <- renderPlotly({
+
+      g = dataCounty() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        mutate(ncases = as.character(ncase),
+               ncases = ifelse(ncases == "< = 5","5",ncases)) %>%
+        mutate(ncases = as.numeric(ncases)) %>%
+        mutate(province = case_when(county=="Carlow"|county=="Dublin"|
+                                      county=="Kildare"|county=="Kilkenny"|
+                                      county=="Laois"|county=="Longford"|
+                                      county=="Meath"|
+                                      county=="Offaly"|county=="Westmeath"|
+                                      county=="Wexford"|county=="Wicklow" ~ "Leinster without Louth",
+                                    county=="Clare"|county=="Cork"|
+                                      county=="Kerry"|county=="Limerick"|
+                                      county=="Tipperary"|county=="Waterford" ~ "Munster",
+                                    county=="Galway"|
+                                      county=="Mayo"|county=="Roscommon"|
+                                      county=="Sligo" ~ "Connacht without Leitrim",
+                                    county=="Donegal"|county=="Cavan"|
+                                      county=="Monaghan"|
+                                      county=="Louth"|county=="Leitrim" ~
+                                      "Border counties (CN,DL,LH,LM,MN)")) %>%
+        mutate(pop = case_when(province == "Connacht without Leitrim" ~ 550742-32044,
+                               province == "Munster" ~ 1280020,
+                               province == "Leinster without Louth" ~ 2630720-128884,
+                               province == "Border counties (CN,DL,LH,LM,MN)" ~ 159192+61386+76176+128884+32044)) %>%
+        group_by(date,province) %>%
+        summarise(Total_cases = sum(ncases), pop = mean(pop)) %>%
+        mutate(Cases_per100k = round2(100000*Total_cases/pop,0)) %>%
+        ggplot(aes(x=date,y=Cases_per100k,color=province,group=province)) +
+        geom_line() + geom_point() + theme_bw() + labs(y="Cases per 100,000 population")
+      ggplotly(g, tooltip = c("date", "province", "Cases_per100k"))
+
+    })
+    
     
     
     ## patient time raw
