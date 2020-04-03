@@ -451,6 +451,18 @@ date,ncase,ndeath,gender,area,country
 01/04/2020,808,27,unknown,unknown,portugal
 02/04/2020,85,6,unknown,north,ireland
 02/04/2020,402,13,unknown,unknown,ireland
+02/04/2020,4244,569,unknown,unknown,uk
+02/04/2020,2116,1355,unknown,unknown,france
+02/04/2020,6813,176,unknown,unknown,germany
+02/04/2020,4668,760,unknown,unknown,italy
+02/04/2020,7947,961,unknown,unknown,spain
+02/04/2020,270,6,unknown,unknown,norway
+02/04/2020,279,19,unknown,unknown,denmark
+02/04/2020,1384,183,unknown,unknown,belgium
+02/04/2020,1083,166,unknown,unknown,netherlands
+02/04/2020,783,22,unknown,unknown,portugal
+03/04/2020,130,12,unknown,north,ireland
+03/04/2020,424,22,unknown,unknown,ireland
 26/02/2020,1,0,female,Auckland,new zealand
 28/02/2020,1,0,female,Southern,new zealand
 28/02/2020,1,0,male,Southern,new zealand
@@ -480,7 +492,6 @@ date,ncase,ndeath,gender,area,country
 18/03/2020,1,0,male,Canterbury,new zealand
 18/03/2020,1,0,male,Capital and Coast,new zealand
 18/03/2020,2,0,male,Southern,new zealand
-18/03/2020,1,0,male,Taranaki,new zealand
 19/03/2020,2,0,male,Auckland,new zealand
 19/03/2020,1,0,female,Capital and Coast,new zealand
 19/03/2020,1,0,male,Capital and Coast,new zealand
@@ -601,7 +612,7 @@ date,ncase,ndeath,gender,area,country
 25/03/2020,10,0,male,Waikato,new zealand
 25/03/2020,5,0,female,Waitemata,new zealand
 25/03/2020,5,0,male,Waitemata,new zealand
-26/03/2020,7,0,female,Auckland,new zealand
+26/03/2020,8,0,female,Auckland,new zealand
 26/03/2020,3,0,male,Auckland,new zealand
 26/03/2020,1,0,female,Bay of Plenty,new zealand
 26/03/2020,1,0,male,Bay of Plenty,new zealand
@@ -622,7 +633,7 @@ date,ncase,ndeath,gender,area,country
 26/03/2020,2,0,male,Taranaki,new zealand
 26/03/2020,5,0,female,Waikato,new zealand
 26/03/2020,6,0,male,Waikato,new zealand
-26/03/2020,6,0,female,Waitemata,new zealand
+26/03/2020,5,0,female,Waitemata,new zealand
 26/03/2020,3,0,male,Waitemata,new zealand
 26/03/2020,1,0,female,West Coast,new zealand
 26/03/2020,1,0,male,West Coast,new zealand
@@ -722,29 +733,56 @@ date,ncase,ndeath,gender,area,country
 31/03/2020,1,0,female,Northland,new zealand
 31/03/2020,4,0,female,Southern,new zealand
 31/03/2020,3,0,male,Southern,new zealand
-31/03/2020,11,0,female,Waikato,new zealand
+31/03/2020,12,0,female,Waikato,new zealand
 31/03/2020,11,0,male,Waikato,new zealand
 31/03/2020,1,0,female,Wairarapa,new zealand
 31/03/2020,6,0,female,Waitemata,new zealand
 31/03/2020,3,0,male,Waitemata,new zealand
-01/04/2020,5,0,female,Auckland,new zealand
+01/04/2020,4,0,female,Auckland,new zealand
 01/04/2020,3,0,male,Auckland,new zealand
-01/04/2020,3,0,male,Bay of Plenty,new zealand
+01/04/2020,1,0,female,Bay of Plenty,new zealand
+01/04/2020,4,0,male,Bay of Plenty,new zealand
 01/04/2020,1,0,male,Capital and Coast,new zealand
-01/04/2020,1,0,female,Counties Manukau,new zealand
+01/04/2020,2,0,female,Counties Manukau,new zealand
 01/04/2020,1,0,male,Counties Manukau,new zealand
 01/04/2020,2,0,female,Hawke's Bay,new zealand
 01/04/2020,2,0,male,Hawke's Bay,new zealand
-01/04/2020,1,0,female,Hutt Valley,new zealand
 01/04/2020,1,0,female,MidCentral,new zealand
 01/04/2020,1,0,male,MidCentral,new zealand
-01/04/2020,1,0,female,Nelson Marlborough,new zealand
+01/04/2020,2,0,female,Nelson Marlborough,new zealand
 01/04/2020,1,0,unknown,Nelson Marlborough,new zealand
-01/04/2020,11,0,female,Southern,new zealand
-01/04/2020,6,0,male,Southern,new zealand
+01/04/2020,1,0,female,Northland,new zealand
+01/04/2020,10,0,female,Southern,new zealand
+01/04/2020,5,0,male,Southern,new zealand
 01/04/2020,1,0,female,Taranaki,new zealand
-01/04/2020,3,0,female,Waikato,new zealand
-01/04/2020,6,0,male,Waikato,new zealand
+01/04/2020,4,0,female,Waikato,new zealand
+01/04/2020,5,0,male,Waikato,new zealand
 01/04/2020,4,0,female,Waitemata,new zealand
 01/04/2020,3,0,male,Waitemata,new zealand
 01/04/2020,1,0,female,Whanganui,new zealand
+01/04/2020,1,0,male,Whanganui,new zealand
+02/04/2020,2,0,female,Auckland,new zealand
+02/04/2020,2,0,male,Auckland,new zealand
+02/04/2020,1,0,female,Bay of Plenty,new zealand
+02/04/2020,1,0,male,Bay of Plenty,new zealand
+02/04/2020,1,0,female,Canterbury,new zealand
+02/04/2020,1,0,male,Canterbury,new zealand
+02/04/2020,2,0,female,Capital and Coast,new zealand
+02/04/2020,1,0,female,Counties Manukau,new zealand
+02/04/2020,1,0,male,Counties Manukau,new zealand
+02/04/2020,1,0,female,Hawke's Bay,new zealand
+02/04/2020,1,0,male,Hawke's Bay,new zealand
+02/04/2020,2,0,female,Hutt Valley,new zealand
+02/04/2020,1,0,male,Hutt Valley,new zealand
+02/04/2020,1,0,male,MidCentral,new zealand
+02/04/2020,1,0,female,Nelson Marlborough,new zealand
+02/04/2020,1,0,male,Nelson Marlborough,new zealand
+02/04/2020,1,0,male,Northland,new zealand
+02/04/2020,6,0,female,Southern,new zealand
+02/04/2020,7,0,male,Southern,new zealand
+02/04/2020,1,0,female,Waikato,new zealand
+02/04/2020,5,0,male,Waikato,new zealand
+02/04/2020,1,0,female,Waitemata,new zealand
+02/04/2020,2,0,male,Waitemata,new zealand
+02/04/2020,1,0,female,Whanganui,new zealand
+02/04/2020,1,0,male,Whanganui,new zealand
