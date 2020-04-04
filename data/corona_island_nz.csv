@@ -463,6 +463,18 @@ date,ncase,ndeath,gender,area,country
 02/04/2020,783,22,unknown,unknown,portugal
 03/04/2020,130,12,unknown,north,ireland
 03/04/2020,424,22,unknown,unknown,ireland
+03/04/2020,4450,684,unknown,unknown,uk
+03/04/2020,23060,1120,unknown,unknown,france
+03/04/2020,6365,168,unknown,unknown,germany
+03/04/2020,4585,766,unknown,unknown,italy
+03/04/2020,7134,850,unknown,unknown,spain
+03/04/2020,223,9,unknown,unknown,norway
+03/04/2020,371,16,unknown,unknown,denmark
+03/04/2020,1422,132,unknown,unknown,belgium
+03/04/2020,1026,148,unknown,unknown,netherlands
+03/04/2020,852,37,unknown,unknown,portugal
+04/04/2020,94,8,unknown,north,ireland
+04/04/2020,331,17,unknown,unknown,ireland
 26/02/2020,1,0,female,Auckland,new zealand
 28/02/2020,1,0,female,Southern,new zealand
 28/02/2020,1,0,male,Southern,new zealand
@@ -640,7 +652,7 @@ date,ncase,ndeath,gender,area,country
 27/03/2020,4,0,female,Auckland,new zealand
 27/03/2020,3,0,male,Auckland,new zealand
 27/03/2020,1,0,female,Bay of Plenty,new zealand
-27/03/2020,1,0,male,Bay of Plenty,new zealand
+27/03/2020,2,0,male,Bay of Plenty,new zealand
 27/03/2020,1,0,male,Canterbury,new zealand
 27/03/2020,1,0,unknown,Canterbury,new zealand
 27/03/2020,1,0,female,Capital and Coast,new zealand
@@ -721,7 +733,7 @@ date,ncase,ndeath,gender,area,country
 31/03/2020,4,0,female,Auckland,new zealand
 31/03/2020,1,0,female,Bay of Plenty,new zealand
 31/03/2020,1,0,male,Bay of Plenty,new zealand
-31/03/2020,1,0,female,Canterbury,new zealand
+31/03/2020,2,0,female,Canterbury,new zealand
 31/03/2020,2,0,male,Capital and Coast,new zealand
 31/03/2020,3,0,female,Counties Manukau,new zealand
 31/03/2020,2,0,male,Counties Manukau,new zealand
@@ -759,17 +771,18 @@ date,ncase,ndeath,gender,area,country
 01/04/2020,5,0,male,Waikato,new zealand
 01/04/2020,4,0,female,Waitemata,new zealand
 01/04/2020,3,0,male,Waitemata,new zealand
+01/04/2020,1,0,male,West Coast,new zealand
 01/04/2020,1,0,female,Whanganui,new zealand
 01/04/2020,1,0,male,Whanganui,new zealand
 02/04/2020,2,0,female,Auckland,new zealand
-02/04/2020,2,0,male,Auckland,new zealand
+02/04/2020,3,0,male,Auckland,new zealand
 02/04/2020,1,0,female,Bay of Plenty,new zealand
 02/04/2020,1,0,male,Bay of Plenty,new zealand
 02/04/2020,1,0,female,Canterbury,new zealand
 02/04/2020,1,0,male,Canterbury,new zealand
 02/04/2020,2,0,female,Capital and Coast,new zealand
-02/04/2020,1,0,female,Counties Manukau,new zealand
-02/04/2020,1,0,male,Counties Manukau,new zealand
+02/04/2020,2,0,female,Counties Manukau,new zealand
+02/04/2020,2,0,male,Counties Manukau,new zealand
 02/04/2020,1,0,female,Hawke's Bay,new zealand
 02/04/2020,1,0,male,Hawke's Bay,new zealand
 02/04/2020,2,0,female,Hutt Valley,new zealand
@@ -778,11 +791,27 @@ date,ncase,ndeath,gender,area,country
 02/04/2020,1,0,female,Nelson Marlborough,new zealand
 02/04/2020,1,0,male,Nelson Marlborough,new zealand
 02/04/2020,1,0,male,Northland,new zealand
-02/04/2020,6,0,female,Southern,new zealand
-02/04/2020,7,0,male,Southern,new zealand
-02/04/2020,1,0,female,Waikato,new zealand
+02/04/2020,8,0,female,Southern,new zealand
+02/04/2020,9,0,male,Southern,new zealand
+02/04/2020,2,0,female,Waikato,new zealand
 02/04/2020,5,0,male,Waikato,new zealand
 02/04/2020,1,0,female,Waitemata,new zealand
 02/04/2020,2,0,male,Waitemata,new zealand
 02/04/2020,1,0,female,Whanganui,new zealand
 02/04/2020,1,0,male,Whanganui,new zealand
+03/04/2020,2,0,female,Auckland,new zealand
+03/04/2020,1,0,male,Auckland,new zealand
+03/04/2020,2,0,female,Canterbury,new zealand
+03/04/2020,1,0,male,Canterbury,new zealand
+03/04/2020,2,0,male,Capital and Coast,new zealand
+03/04/2020,4,0,female,Counties Manukau,new zealand
+03/04/2020,2,0,female,Hawke's Bay,new zealand
+03/04/2020,2,0,male,Hawke's Bay,new zealand
+03/04/2020,1,0,female,Nelson Marlborough,new zealand
+03/04/2020,9,0,female,Southern,new zealand
+03/04/2020,5,0,male,Southern,new zealand
+03/04/2020,3,0,female,Waikato,new zealand
+03/04/2020,3,0,male,Waikato,new zealand
+03/04/2020,2,0,female,Waitemata,new zealand
+03/04/2020,3,0,male,Waitemata,new zealand
+03/04/2020,1,0,unknown,Waitemata,new zealand
