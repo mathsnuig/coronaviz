@@ -5,11 +5,13 @@ library(shinyjs)
 library(readr)
 library(leaflet)
 library(leaflet.extras)
-library(dplyr)
+library(tidyverse)
 library(plotly)
-library(ggplot2)
 library(DT)
 library(googleVis)
+library(rvest)
+library(httr)
+library(readxl)
 
 # Set range for day shifts considered in comparison
 minshift = -20
@@ -99,13 +101,15 @@ body <- dashboardBody(
                    tags$a(href="https://andsim.shinyapps.io/coronamobile", 
                           "try the mobile version here!", 
                           target="_blank") ),
-                h3(paste0("Data (04/04/2020) from Ireland ("),
+                h3(paste0("Data (05/04/2020) from Ireland ("),
                    tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
-                          "Department of Health", target="_blank"),
+                          "HSE Health Protection Surveillance Centre", target="_blank"),
                    paste0("), Northern Ireland ("),
                    tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
                           "NHS", target="_blank"),
-                   paste0(") and WHO")),
+                   paste0(") and "),
+                   tags$a(href="https://www.ecdc.europa.eu/en/geographical-distribution-2019-ncov-cases",
+                          "ECDC", target="_blank")),
                 h3(paste0("Please read this "), 
                           tags$a(href="https://www.statslife.org.uk/features/4474-a-statistician-s-guide-to-coronavirus-numbers", 
                                  "advice ", target="_blank"),
@@ -137,18 +141,17 @@ body <- dashboardBody(
                           target="_blank")),
                 h3(paste0("Data from Ireland ("),
                    tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
-                          "Department of Health", target="_blank"),
+                          "HSE Health Protection Surveillance Centre", target="_blank"),
                    paste0("), Northern Ireland ("),
                    tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
                           "NHS", target="_blank"),
-                   paste0(") and WHO")),
+                   paste0(") and "),
+                   tags$a(href="https://www.ecdc.europa.eu/en/geographical-distribution-2019-ncov-cases",
+                          "ECDC", target="_blank")),
                 h3("Number of cases from other countries are scaled to reflect the Irish population. For example: ROI+NI (6.712 million people) is about 11% of Italy's population (60.48m), so 100 cases in Italy is equivalent to 11 cases in Ireland"),
                 fluidRow(
                   column(width=6,
-                         selectInput("place", "Country to compare", 
-                                     choices = c("belgium", "denmark", "france", "germany", "italy", 
-                                                 "netherlands", "new zealand", "norway", "portugal", "spain", "uk"), 
-                                     selected = "france")),
+                         uiOutput("country_choice")),
                   column(width=6,
                          sliderInput("days","Decide the time difference",min = minshift, max = maxshift, value=0)
                   )
@@ -174,7 +177,7 @@ body <- dashboardBody(
         tabItem("data",
                 h3(paste0("Data from Ireland ("),
                    tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
-                          "Department of Health", target="_blank"),
+                          "HSE Health Protection Surveillance Centre", target="_blank"),
                    paste0("), Northern Ireland ("),
                    tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
                                  "NHS", target="_blank"),
@@ -191,9 +194,9 @@ body <- dashboardBody(
         
         # Weekly Tab
         tabItem("nphet",
-                h3(paste0("Data (midnight 02/04/2020) from Ireland"),
+                h3(paste0("Data (midnight 03/04/2020) from Ireland"),
                    tags$a(href="https://www.gov.ie/en/collection/ef2560-analysis-of-confirmed-cases-of-covid-19-coronavirus-in-ireland/", 
-                          "(National Public Health Emergency Team)", target="_blank")),
+                          "(HSE Health Protection Surveillance Centre)", target="_blank")),
                 valueBoxOutput("HospBox"),
                 valueBoxOutput("ICUBox"),
                 valueBoxOutput("CFRBox"),
@@ -221,15 +224,15 @@ body <- dashboardBody(
                          tabPanel("Percentage", plotlyOutput("patienttimepercent", width = "70%", height = 600))
                                   
                 )),
-                fluidRow(box(title = "Cases by Age Group", width = 12,
-                             plotlyOutput("ageplot", width = "70%", height = 600)
-                )),
-                fluidRow(box(title = "Cases by Age Group over time", width = 12,
-                             plotlyOutput("cumulage", width = "70%", height = 600)
-                )),
-                fluidRow(box(width = 12, title = "Age groups",
-                             column(10, DTOutput("weekage"))
-                )),
+                # fluidRow(box(title = "Cases by Age Group", width = 12,
+                #              plotlyOutput("ageplot", width = "70%", height = 600)
+                # )),
+                # fluidRow(box(title = "Cases by Age Group over time", width = 12,
+                #              plotlyOutput("cumulage", width = "70%", height = 600)
+                # )),
+                # fluidRow(box(width = 12, title = "Age groups",
+                #              column(10, DTOutput("weekage"))
+                # )),
                 h3(paste0("Developed by Dr. Andrew Simpkin "),
                    tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
                    paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
@@ -246,34 +249,12 @@ server <- function(input, output) {
     
     # read in all data
     dataRaw <- reactive({
-      dat1 <- read.csv("data/corona_island_nz.csv") %>% 
-        mutate(pop = case_when(country=="ireland"~6.804,
-                               country=="belgium"~11.575,
-                               country=="denmark"~5.786,
-                               country=="france"~65.233,
-                               country=="germany"~83.710,
-                               country=="italy"~60.486,
-                               country=="netherlands"~17.124,
-                               country=="new zealand"~4.972,
-                               country=="norway"~5.409,
-                               country=="portugal"~10.204,
-                               country=="spain"~46.749,
-                               country=="uk"~67.787))
+      dat1 <- read.csv("data/corona_ireland.csv") %>% 
+        mutate(pop = case_when(country=="ireland"~6804000)) 
 
-      dat2 <- read.csv("data/corona_island_nz.csv") %>% 
-        mutate(pop = case_when(country=="ireland"~4.922,
-                               country=="belgium"~11.575,
-                               country=="denmark"~5.786,
-                               country=="france"~65.233,
-                               country=="germany"~83.710,
-                               country=="italy"~60.486,
-                               country=="netherlands"~17.124,
-                               country=="new zealand"~4.972,
-                               country=="norway"~5.409,
-                               country=="portugal"~10.204,
-                               country=="spain"~46.749,
-                               country=="uk"~67.787)) %>%
-          filter(area!="north")
+      dat2 <- read.csv("data/corona_ireland.csv") %>% 
+        mutate(pop = case_when(country=="ireland"~4922000)) %>%
+          filter(area!="north") 
 
       if(input$partition == "Island of Ireland") return(dat1)
       if(input$partition == "Republic of Ireland") return(dat2)
@@ -287,7 +268,50 @@ server <- function(input, output) {
 
     # Country comparison data
     dataCountry <- reactive({
-      dataRaw() %>% filter(country=="ireland" | country == input$place)
+      # Website and filename for European Centre for Disease Prevention and Control Covid-19 data
+      todaysdate = format(as.Date(Sys.time()) - 1, "%Y-%m-%d") # NZ is always ahead!
+      ecdpcurl = paste("https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-", todaysdate, ".xlsx", sep = "")
+      ecdpcfn = rev(strsplit(ecdpcurl, "/")[[1]])[1]
+      
+      # Download the dataset from the website to a local temporary file
+      GET(ecdpcurl, authenticate(":", ":", type = "ntlm"), write_disk(ecdpcfn, overwrite = TRUE))
+      
+      # Read dataset
+      ecdpcdata = read_excel(ecdpcfn)
+      
+      # Date object
+      # Have checked that Day/Month/Year is same as DateRep
+      ecdpcdata$dateRep = as.Date(ecdpcdata$dateRep, format = "%d/%m/%Y")
+      
+      # Factors and replace "_" with " "
+      ecdpcdata$countriesAndTerritories = gsub("_",  " ", ecdpcdata$countriesAndTerritories)
+      ecdpcdata$countriesAndTerritories = factor(ecdpcdata$countriesAndTerritories)
+      
+      ecdpcdata$geoId = factor(ecdpcdata$geoId)
+      ecdpcdata$countryterritoryCode = factor(ecdpcdata$countryterritoryCode)
+      
+      
+      # Cumulative count (dates are reverse order in dataset)
+      ecdpcdata$TotalCases = rev(cumsum(rev(ecdpcdata$cases)))
+      ecdpcdata$TotalDeaths = rev(cumsum(rev(ecdpcdata$deaths)))
+      
+      
+      # Firstly group by date, region and gender and put in date order
+      ecdpcdata = ecdpcdata %>%
+        mutate(country = tolower(countriesAndTerritories), 
+               gender = "unknown", area = "unknown", pop = popData2018) %>%
+        filter(country != "ireland") %>%
+        select(date = dateRep, ncase = cases, ndeath = deaths, gender, area, country, pop)
+      
+      # Make into data.frame and start from date of first case/death
+      ecdpcdata = data.frame(ecdpcdata)
+      ecdpcdata = ecdpcdata[1:max(which((ecdpcdata$ncase + ecdpcdata$ndeath) > 0)),]
+      
+      ecdpcdata <- ecdpcdata %>% filter(!(ncase == 0 & ndeath == 0))
+      
+      dataRaw() %>% 
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        rbind(ecdpcdata)
     })
     
     
@@ -315,6 +339,14 @@ server <- function(input, output) {
     dataStats <- reactive({
       read.csv("data/corona_stats.csv") %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y"))
+    })
+    
+    ## country selector
+    output$country_choice <- renderUI({
+      selectInput("place", "Country to compare", 
+                  choices = unique(dataCountry()$country), 
+                  selected = "france",
+                  multiple = FALSE)
     })
 
     ################### Info boxes ##########
@@ -430,11 +462,12 @@ server <- function(input, output) {
     
     output$irelandcompare <- renderPlotly({
       
-      dat <- dataCountry()
+      dat <- dataCountry() %>% 
+        filter(country=="ireland" | country == input$place)
       dat <- dat %>% mutate(date = as.Date(date, format = "%d/%m/%Y"), country = as.character(country))
       
       # scale comparator country to Ireland based on population size (dat$pop)
-      irelandpop = mean(dat$pop[dat$country == "ireland"])
+      irelandpop = max(dat$pop[dat$country == "ireland"])
       dat <- dat %>% mutate(prop = irelandpop / pop)
 
       # Function to calculate MSE in cumulative cases for a particular shift
@@ -513,7 +546,8 @@ server <- function(input, output) {
     ## compare countries on the log10 scale
     output$logcompare <- renderPlotly({
       
-      dat <- dataCountry()
+      dat <- dataCountry() %>% 
+        filter(country=="ireland" | country == input$place)
       dat <- dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"), country = as.character(country)) 
       
       # scale comparator country to Ireland based on population size (dat$pop)
@@ -596,8 +630,9 @@ server <- function(input, output) {
     ## compare countries on the per 1m of pop scale
     output$permillioncompare <- renderPlotly({
 
-      dat <- dataCountry()
-      dat <- dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"), country = as.character(country))
+      dat <- dataCountry() %>% 
+        filter(country=="ireland" | country == input$place)
+      dat <- dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"), country = as.character(country), pop = pop/1e6)
 
       # scale comparator country to Ireland based on population size (dat$pop)
       irelandpop = mean(dat$pop[dat$country == "ireland"])
@@ -681,7 +716,8 @@ server <- function(input, output) {
     
     output$irecompdeath <- renderPlotly({
       
-      dat <- dataCountry()
+      dat <- dataCountry() %>% 
+        filter(country=="ireland" | country == input$place)
       dat <- dat %>% mutate(date = as.Date(date, format = "%d/%m/%Y"), country = as.character(country))
       
       # scale comparator country to Ireland based on population size (dat$pop) 
@@ -769,7 +805,8 @@ server <- function(input, output) {
     
     output$irecompdeathcase <- renderPlotly({
       
-      dat <- dataCountry()
+      dat <- dataCountry() %>% 
+        filter(country=="ireland" | country == input$place)
       dat <- dat %>% mutate(date = as.Date(date, format = "%d/%m/%Y"), country = as.character(country))
       
       # DO NOT NEED TO SCALE WHEN CALCULATING RATES
@@ -848,7 +885,7 @@ server <- function(input, output) {
       dat <-  dataStats() %>% 
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
         filter(date == max(date))
-      valueBox(paste0(dat$CFR, "%"), "Case fatality rate",
+      valueBox(paste0(dat$CFR, "%"), "Diagnosed case fatality rate",
                color = "red"
       )
     })

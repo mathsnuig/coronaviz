@@ -6,11 +6,13 @@ library(shinyMobile)
 library(readr)
 library(leaflet)
 library(leaflet.extras)
-library(dplyr)
 library(plotly)
-library(ggplot2)
+library(tidyverse)
 library(DT)
 library(googleVis)
+library(rvest)
+library(httr)
+library(readxl)
 
 # Set range for day shifts considered in comparison
 minshift = -5
@@ -42,13 +44,15 @@ ui = f7Page(
         h4(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
                   "HSE Coronavirus information", 
                   target="_blank"),
-           paste0(". Data (04/04/2020) from Ireland ("),
+           paste0(". Data (05/04/2020) from Ireland ("),
            tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
-                  "Department of Health", target="_blank"),
+                  "HSE Health Protection Surveillance Centre", target="_blank"),
            paste0("), Northern Ireland ("),
            tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
                   "NHS", target="_blank"),
-           paste0(") and WHO")),
+           paste0(") and "),
+           tags$a(href="https://www.ecdc.europa.eu/en/geographical-distribution-2019-ncov-cases",
+                  "ECDC", target="_blank")),
         h4(paste0("Please read this "), 
            tags$a(href="https://www.statslife.org.uk/features/4474-a-statistician-s-guide-to-coronavirus-numbers", 
                   "advice ", target="_blank"),
@@ -68,17 +72,17 @@ ui = f7Page(
         icon = f7Icon("calendar"),
         active = FALSE,
         # Tab 5 content
-        h3(paste0("Report data (midnight 02/04/20) from Republic of Ireland only"),
+        h3(paste0("Report data (midnight 03/04/20) from Republic of Ireland only"),
            tags$a(href="https://www.gov.ie/en/collection/ef2560-analysis-of-confirmed-cases-of-covid-19-coronavirus-in-ireland/", 
-                  "(National Public Health Emergency Team)", target="_blank")),
+                  "HSE Health Protection Surveillance Centre", target="_blank")),
         valueBoxOutput("HospBox"),
         valueBoxOutput("ICUBox"),
         valueBoxOutput("CFRBox"),
         leafletOutput("map", width = "90%", height = 600),
         h4(tags$caption("Cumulative cases by province, per 100,000 population")),
         plotOutput("cumulcountyscaled", width = "70%", height = 600),
-        h4(tags$caption("Cumulative cases by age group")),
-        plotOutput("cumulage", width = "70%", height = 600),
+        # h4(tags$caption("Cumulative cases by age group")),
+        # plotOutput("cumulage", width = "70%", height = 600),
         h4(tags$caption("Cases hospitalised and in intensive care")),
         plotOutput("patienttime", width = "70%", height = 600)
       ),
@@ -92,10 +96,7 @@ ui = f7Page(
         h4("Compare (island of) Ireland trajectory with other countries (scaled by population). 
            Number of cases from other countries are scaled to reflect the Irish population. 
            For example, ROI+NI (6.712 million people) is about 11% of Italy's population (60.48m), so 100 cases in Italy is equivalent to 11 cases in Ireland"),
-        f7SmartSelect("place", "Country to compare", 
-                      choices = c("belgium", "denmark", "france", "germany", "italy", 
-                                  "netherlands", "norway", "portugal", "spain", "uk"), 
-                      selected = "france"),
+        uiOutput("country_choice"),
         h4("Decide how many days behind/ahead Ireland is to your selected country"),
         f7Slider("days","Decide the time difference",min = -5,max=30,value=0,scale = TRUE,step = 1),
         h4("Compare cumulative growth"),
@@ -111,47 +112,70 @@ server <- function(input, output) {
     
   # read in all data
   dataRaw <- reactive({
-    dat1 <- read.csv("data/corona_island.csv") %>% 
-      mutate(pop = case_when(country=="ireland"~6.804,
-                             country=="belgium"~11.4,
-                             country=="denmark"~5.786,
-                             country=="france"~66.99,
-                             country=="germany"~82.79,
-                             country=="italy"~60.48,
-                             country=="netherlands"~17.18,
-                             country=="norway"~5.368,
-                             country=="portugal"~10.29,
-                             country=="spain"~46.66,
-                             country=="uk"~66.44)) 
+    dat1 <- read.csv("data/corona_ireland.csv") %>% 
+      mutate(pop = case_when(country=="ireland"~6804000)) 
     
-    dat2 <- read.csv("data/corona_island.csv") %>% 
-      mutate(pop = case_when(country=="ireland"~4.922,
-                             country=="belgium"~11.575,
-                             country=="denmark"~5.786,
-                             country=="france"~65.233,
-                             country=="germany"~83.710,
-                             country=="italy"~60.486,
-                             country=="netherlands"~17.124,
-                             country=="norway"~5.409,
-                             country=="portugal"~10.204,
-                             country=="spain"~46.749,
-                             country=="uk"~67.787)) %>%
-      filter(area!="north")
+    dat2 <- read.csv("data/corona_ireland.csv") %>% 
+      mutate(pop = case_when(country=="ireland"~4922000)) %>%
+      filter(area!="north") 
     
     if(input$partition == TRUE) return(dat1)
     if(input$partition == FALSE) return(dat2)
     
   })
+  
+  # irish data only
+  dataIreland <- reactive({
+    dataRaw() %>% filter(country == "ireland")
+  })
+  
+  # Country comparison data
+  dataCountry <- reactive({
+    # Website and filename for European Centre for Disease Prevention and Control Covid-19 data
+    todaysdate = format(as.Date(Sys.time()) - 1, "%Y-%m-%d") # NZ is always ahead!
+    ecdpcurl = paste("https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-", todaysdate, ".xlsx", sep = "")
+    ecdpcfn = rev(strsplit(ecdpcurl, "/")[[1]])[1]
     
-    # irish data only
-    dataIreland <- reactive({
-      dataRaw() %>% filter(country == "ireland")
-    })
-
-    # Country comparison data
-    dataCountry <- reactive({
-      dataRaw() %>% filter(country=="ireland" | country == input$place)
-    })
+    # Download the dataset from the website to a local temporary file
+    GET(ecdpcurl, authenticate(":", ":", type = "ntlm"), write_disk(ecdpcfn, overwrite = TRUE))
+    
+    # Read dataset
+    ecdpcdata = read_excel(ecdpcfn)
+    
+    # Date object
+    # Have checked that Day/Month/Year is same as DateRep
+    ecdpcdata$dateRep = as.Date(ecdpcdata$dateRep, format = "%d/%m/%Y")
+    
+    # Factors and replace "_" with " "
+    ecdpcdata$countriesAndTerritories = gsub("_",  " ", ecdpcdata$countriesAndTerritories)
+    ecdpcdata$countriesAndTerritories = factor(ecdpcdata$countriesAndTerritories)
+    
+    ecdpcdata$geoId = factor(ecdpcdata$geoId)
+    ecdpcdata$countryterritoryCode = factor(ecdpcdata$countryterritoryCode)
+    
+    
+    # Cumulative count (dates are reverse order in dataset)
+    ecdpcdata$TotalCases = rev(cumsum(rev(ecdpcdata$cases)))
+    ecdpcdata$TotalDeaths = rev(cumsum(rev(ecdpcdata$deaths)))
+    
+    
+    # Firstly group by date, region and gender and put in date order
+    ecdpcdata = ecdpcdata %>%
+      mutate(country = tolower(countriesAndTerritories), 
+             gender = "unknown", area = "unknown", pop = popData2018) %>%
+      filter(country != "ireland") %>%
+      select(date = dateRep, ncase = cases, ndeath = deaths, gender, area, country, pop)
+    
+    # Make into data.frame and start from date of first case/death
+    ecdpcdata = data.frame(ecdpcdata)
+    ecdpcdata = ecdpcdata[1:max(which((ecdpcdata$ncase + ecdpcdata$ndeath) > 0)),]
+    
+    ecdpcdata <- ecdpcdata %>% filter(!(ncase == 0 & ndeath == 0))
+    
+    dataRaw() %>% 
+      mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+      rbind(ecdpcdata)
+  })
     
     # Work out growth rate and save for plotting
     dataGrowth <- reactive({
@@ -165,6 +189,15 @@ server <- function(input, output) {
         mutate(Growth = round(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
         mutate(median = median(Growth,na.rm=TRUE))
     })
+    
+    ## country selector
+    output$country_choice <- renderUI({
+      f7SmartSelect("place", "Country to compare", 
+                    choices = unique(dataCountry()$country), 
+                    selected = "france",
+                    multiple = FALSE)
+    })
+
     
     ################### Info boxes ##########
     ## Info box
@@ -239,7 +272,8 @@ server <- function(input, output) {
     output$irelandcompare <- renderPlot({
       
       
-      dat <- dataCountry()
+      dat <- dataCountry() %>% 
+        filter(country=="ireland" | country == input$place)
       dat <- dat %>% mutate(date = as.Date(date, format = "%d/%m/%Y"), country = as.character(country))
       
       # use round away from zero form of rounding (sometimes called banker's rounding)
