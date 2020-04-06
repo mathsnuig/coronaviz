@@ -5,7 +5,8 @@ library(shinyjs)
 library(readr)
 library(leaflet)
 library(leaflet.extras)
-library(tidyverse)
+library(ggplot2)
+library(dplyr)
 library(plotly)
 library(DT)
 library(googleVis)
@@ -101,8 +102,8 @@ body <- dashboardBody(
                    tags$a(href="https://andsim.shinyapps.io/coronamobile", 
                           "try the mobile version here!", 
                           target="_blank") ),
-                h3(paste0("Data (05/04/2020) from Ireland ("),
-                   tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
+                h3(paste0("Data (06/04/2020) from Ireland ("),
+                   tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
                           "HSE Health Protection Surveillance Centre", target="_blank"),
                    paste0("), Northern Ireland ("),
                    tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
@@ -116,13 +117,11 @@ body <- dashboardBody(
                    paste0("before interpreting the data")),
                 valueBoxOutput("CasesBox"),
                 valueBoxOutput("MortBox"),
-                # fluidRow(),
-                # valueBoxOutput("GrowthBox"),
-                # valueBoxOutput("DoublingBox"),
                 fluidRow(
                   tabBox(
                   width = 12, 
-                  selected = "Case count",
+                  selected = "New Cases",
+                  tabPanel("New Cases", plotlyOutput("newcases", width = "80%", height = 400)),
                   tabPanel("Case count", plotlyOutput("cumulcases", width = "80%", height = 400)),
                   tabPanel("Log cases", plotlyOutput("cumullog", width = "80%", height = 400)),
                   tabPanel("Growth Rate", plotlyOutput("growth", width = "80%", height = 400)),
@@ -140,7 +139,7 @@ body <- dashboardBody(
                           "HSE Coronavirus information", 
                           target="_blank")),
                 h3(paste0("Data from Ireland ("),
-                   tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
+                   tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
                           "HSE Health Protection Surveillance Centre", target="_blank"),
                    paste0("), Northern Ireland ("),
                    tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
@@ -176,7 +175,7 @@ body <- dashboardBody(
         # Data view Tab #
         tabItem("data",
                 h3(paste0("Data from Ireland ("),
-                   tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
+                   tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
                           "HSE Health Protection Surveillance Centre", target="_blank"),
                    paste0("), Northern Ireland ("),
                    tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
@@ -194,8 +193,8 @@ body <- dashboardBody(
         
         # Weekly Tab
         tabItem("nphet",
-                h3(paste0("Data (midnight 03/04/2020) from Ireland"),
-                   tags$a(href="https://www.gov.ie/en/collection/ef2560-analysis-of-confirmed-cases-of-covid-19-coronavirus-in-ireland/", 
+                h3(paste0("Data (midnight 04/04/2020) from Ireland"),
+                   tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
                           "(HSE Health Protection Surveillance Centre)", target="_blank")),
                 valueBoxOutput("HospBox"),
                 valueBoxOutput("ICUBox"),
@@ -386,6 +385,22 @@ server <- function(input, output) {
     })
     
     ################### Time series plots ##############
+    output$newcases <- renderPlotly({
+      
+      g = dataIreland() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        group_by(date) %>%
+        summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
+        na.omit() %>%
+        mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases))  %>%
+        mutate(Growth_Percentage = round2(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
+        ggplot(aes(x=Date,y=New_cases,label=Date,label1=Total_cases, label2=Growth_Percentage)) + 
+        geom_col() +
+        theme(legend.position="none") + theme_bw() + labs(y="Daily New Cases")
+      ggplotly(g, tooltip = c("Date", "New_cases", "Total_cases", "Growth_Percentage"))
+      
+    })
+    
     output$cumulcases <- renderPlotly({
       
       g = dataIreland() %>%

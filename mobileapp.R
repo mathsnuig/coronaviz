@@ -7,7 +7,8 @@ library(readr)
 library(leaflet)
 library(leaflet.extras)
 library(plotly)
-library(tidyverse)
+library(ggplot2)
+library(dplyr)
 library(DT)
 library(googleVis)
 library(rvest)
@@ -15,7 +16,7 @@ library(httr)
 library(readxl)
 
 # Set range for day shifts considered in comparison
-minshift = -5
+minshift = -20
 maxshift = 30
                             
            
@@ -44,8 +45,8 @@ ui = f7Page(
         h4(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
                   "HSE Coronavirus information", 
                   target="_blank"),
-           paste0(". Data (05/04/2020) from Ireland ("),
-           tags$a(href="https://www.gov.ie/en/news/7e0924-latest-updates-on-covid-19-coronavirus/", 
+           paste0(". Data (06/04/2020) from Ireland ("),
+           tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
                   "HSE Health Protection Surveillance Centre", target="_blank"),
            paste0("), Northern Ireland ("),
            tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
@@ -59,6 +60,8 @@ ui = f7Page(
            paste0("before interpreting the data")),
         infoBoxOutput("CasesBox"),
         infoBoxOutput("MortBox"),
+        h4("New cases per day"),
+        plotOutput("newcases", width = "90%", height = 400),
         h4("New and cumulative cases per day"),
         plotOutput("cumulcases", width = "90%", height = 400),
         h4("Percentage growth per day"),
@@ -72,8 +75,8 @@ ui = f7Page(
         icon = f7Icon("calendar"),
         active = FALSE,
         # Tab 5 content
-        h3(paste0("Report data (midnight 03/04/20) from Republic of Ireland only"),
-           tags$a(href="https://www.gov.ie/en/collection/ef2560-analysis-of-confirmed-cases-of-covid-19-coronavirus-in-ireland/", 
+        h3(paste0("Report data (midnight 04/04/20) from Republic of Ireland only"),
+           tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
                   "HSE Health Protection Surveillance Centre", target="_blank")),
         valueBoxOutput("HospBox"),
         valueBoxOutput("ICUBox"),
@@ -96,7 +99,10 @@ ui = f7Page(
         h4("Compare (island of) Ireland trajectory with other countries (scaled by population). 
            Number of cases from other countries are scaled to reflect the Irish population. 
            For example, ROI+NI (6.712 million people) is about 11% of Italy's population (60.48m), so 100 cases in Italy is equivalent to 11 cases in Ireland"),
-        uiOutput("country_choice"),
+        uiOutput("country_choice"), 
+        # f7SmartSelect("place", "Country to compare", 
+        #               choices = c("france","italy","germany", "spain", "united kingdom"), 
+        #               selected = "france"),
         h4("Decide how many days behind/ahead Ireland is to your selected country"),
         f7Slider("days","Decide the time difference",min = -5,max=30,value=0,scale = TRUE,step = 1),
         h4("Compare cumulative growth"),
@@ -190,10 +196,10 @@ server <- function(input, output) {
         mutate(median = median(Growth,na.rm=TRUE))
     })
     
-    ## country selector
+    ## country selector: causes issues with mobile app
     output$country_choice <- renderUI({
-      f7SmartSelect("place", "Country to compare", 
-                    choices = unique(dataCountry()$country), 
+      f7SmartSelect("place", "Country to compare",
+                    choices = unique(dataCountry()$country),
                     selected = "france",
                     multiple = FALSE)
     })
@@ -238,7 +244,19 @@ server <- function(input, output) {
 
     
     ################### Time series plots ##############
+    
     #### Plot cases per day
+    output$newcases <- renderPlot({
+      
+      dataIreland() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        group_by(date) %>%
+        summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
+        ggplot(aes(x=Date,y=New_cases)) + geom_col() +
+        theme(legend.position="none") + theme_bw() + labs(y="Daily New Cases")
+      
+    })
+    
     output$cumulcases <- renderPlot({
       
       dataIreland() %>%
@@ -353,8 +371,7 @@ server <- function(input, output) {
         geom_line() + geom_point() + labs(y = "Cases (scaled to Ireland)") + theme_bw() + 
         ggtitle(paste0("Mean daily difference is ", round2(mean(comp$diff, na.rm = TRUE), 0), " cases ")) +
         annotate("text", x = xnote, y = ynote, 
-                 label = paste0("Closest trajectory at ", bestshift, " days")) + 
-        theme(legend.position = "bottom") + theme_bw()
+                 label = paste0("Closest trajectory at ", bestshift, " days")) + theme(legend.position = "bottom")
       
     })
     
