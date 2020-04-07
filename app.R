@@ -102,7 +102,7 @@ body <- dashboardBody(
                    tags$a(href="https://andsim.shinyapps.io/coronamobile", 
                           "try the mobile version here!", 
                           target="_blank") ),
-                h3(paste0("Data (06/04/2020) from Ireland ("),
+                h3(paste0("Data (",Sys.Date(),") from Ireland ("),
                    tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
                           "HSE Health Protection Surveillance Centre", target="_blank"),
                    paste0("), Northern Ireland ("),
@@ -193,7 +193,7 @@ body <- dashboardBody(
         
         # Weekly Tab
         tabItem("nphet",
-                h3(paste0("Data (midnight 04/04/2020) from Ireland"),
+                h3(paste0("Data (midnight ",Sys.Date()-2,") from Ireland"),
                    tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
                           "(HSE Health Protection Surveillance Centre)", target="_blank")),
                 valueBoxOutput("HospBox"),
@@ -209,7 +209,15 @@ body <- dashboardBody(
                     tabPanel("Case count (by province)", plotlyOutput("cumulcounty", width = "90%", height = 500)),
                     tabPanel("Cases per 100000 (by province)", plotlyOutput("cumulcountyscaled", width = "90%", height = 500)),
                     #tabPanel("Cases per 100000 (border comparison)", plotlyOutput("cumulborderscaled", width = "90%", height = 500)),
-                    tabPanel("Case per 100000 (by county)", plotlyOutput("cumulrealcounty", width = "90%", height = 500))
+                    tabPanel("Case per 100000 (by county)", 
+                             selectInput("county", "Counties to compare",
+                                         choices = c("Carlow","Cavan","Clare","Cork","Donegal","Dublin",
+                                                     "Galway","Kerry","Kildare","Kilkenny","Laois","Leitrim","Limerick",
+                                                     "Longford","Louth","Mayo","Meath","Monaghan","Offaly","Roscommon",
+                                                     "Sligo","Tipperary","Waterford","Westmeath","Wexford","Wicklow"),
+                                         selected = "Westmeath",
+                                         multiple = TRUE),
+                             plotlyOutput("cumulrealcounty", width = "90%", height = 500))
                   )
                 ),
                 fluidRow(box(width = 12, title = "County data",
@@ -991,7 +999,7 @@ server <- function(input, output) {
           addCircleMarkers(lng= ~long, 
                            lat= ~lat, 
                            layerId = ~county,
-                           radius = ~6*log(ncases),
+                           radius = ~5*log(ncases),
                            color = ~pal(case_groups),
                            label = lapply(labs, htmltools::HTML),
                            fillOpacity = 0.9)
@@ -1063,9 +1071,21 @@ server <- function(input, output) {
     })    
     
     ## county time
+    ## county selector
+    output$county_choice <- renderUI({
+      selectInput("county", "Counties to compare",
+                   choices = c("Carlow","Cavan","Clare","Cork","Donegal","Dublin",
+                               "Galway","Kerry","Kildare","Kilkenny","Laois","Leitrim","Limerick",
+                               "Longford","Louth","Mayo","Meath","Monaghan","Offaly","Roscommon",
+                               "Sligo","Tipperary","Waterford","Westmeath","Wexford","Wicklow"),
+                   selected = "Westmeath",
+                   multiple = TRUE)
+    })
+    
     output$cumulrealcounty <- renderPlotly({
       
       g = dataCounty() %>%
+        filter(county %in% input$county) %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
         mutate(ncases = as.character(ncase),
                ncases = ifelse(ncases == "< = 5","5",ncases)) %>%
@@ -1100,7 +1120,7 @@ server <- function(input, output) {
         summarise(Total_cases = sum(ncases), pop = mean(pop)) %>%
         mutate(Cases_per100k = round2(100000*Total_cases/pop,0)) %>%
         ggplot(aes(x=date,y=Cases_per100k,color=county,group=county)) + 
-        geom_line() + geom_point() + theme_bw() + labs(y="Cases")
+        geom_line() + geom_point() + theme_bw() + labs(y="Cases per 100,000")
       ggplotly(g, tooltip = c("date", "county", "Cases_per100k"))
       
     })   

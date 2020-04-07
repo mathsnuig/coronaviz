@@ -45,7 +45,7 @@ ui = f7Page(
         h4(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
                   "HSE Coronavirus information", 
                   target="_blank"),
-           paste0(". Data (06/04/2020) from Ireland ("),
+           paste0(". Data (",Sys.Date(),") from Ireland ("),
            tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
                   "HSE Health Protection Surveillance Centre", target="_blank"),
            paste0("), Northern Ireland ("),
@@ -61,11 +61,11 @@ ui = f7Page(
         infoBoxOutput("CasesBox"),
         infoBoxOutput("MortBox"),
         h4("New cases per day"),
-        plotOutput("newcases", width = "90%", height = 400),
+        plotOutput("newcases", width = "95%", height = 400),
         h4("New and cumulative cases per day"),
-        plotOutput("cumulcases", width = "90%", height = 400),
+        plotOutput("cumulcases", width = "95%", height = 400),
         h4("Percentage growth per day"),
-        plotOutput("growth", width = "90%", height = 400)
+        plotOutput("growth", width = "95%", height = 400)
         
       ),
       
@@ -75,19 +75,28 @@ ui = f7Page(
         icon = f7Icon("calendar"),
         active = FALSE,
         # Tab 5 content
-        h3(paste0("Report data (midnight 04/04/20) from Republic of Ireland only"),
+        h3(paste0("Report data (midnight ", Sys.Date()-2, ") from Republic of Ireland only"),
            tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
                   "HSE Health Protection Surveillance Centre", target="_blank")),
         valueBoxOutput("HospBox"),
         valueBoxOutput("ICUBox"),
         valueBoxOutput("CFRBox"),
-        leafletOutput("map", width = "90%", height = 600),
+        leafletOutput("map", width = "90%", height = 550),
         h4(tags$caption("Cumulative cases by province, per 100,000 population")),
-        plotOutput("cumulcountyscaled", width = "70%", height = 600),
+        plotOutput("cumulcountyscaled", width = "95%", height = 400),
+        #uiOutput("county_choice"), 
+        f7SmartSelect("county", "Counties to compare",
+                      choices = c("Carlow","Cavan","Clare","Cork","Donegal","Dublin",
+                                  "Galway","Kerry","Kildare","Kilkenny","Laois","Leitrim","Limerick",
+                                  "Longford","Louth","Mayo","Meath","Monaghan","Offaly","Roscommon",
+                                  "Sligo","Tipperary","Waterford","Westmeath","Wexford","Wicklow"),
+                      selected = "Westmeath",
+                      multiple = TRUE),
+        plotOutput("cumulrealcounty", width = "95%", height = 400),
         # h4(tags$caption("Cumulative cases by age group")),
         # plotOutput("cumulage", width = "70%", height = 600),
         h4(tags$caption("Cases hospitalised and in intensive care")),
-        plotOutput("patienttime", width = "70%", height = 600)
+        plotOutput("patienttime", width = "95%", height = 400)
       ),
       
       # Compare tab
@@ -106,7 +115,7 @@ ui = f7Page(
         h4("Decide how many days behind/ahead Ireland is to your selected country"),
         f7Slider("days","Decide the time difference",min = -5,max=30,value=0,scale = TRUE,step = 1),
         h4("Compare cumulative growth"),
-        plotOutput("irelandcompare", width = "90%", height = 500)
+        plotOutput("irelandcompare", width = "95%", height = 400)
       )
 
     )
@@ -196,7 +205,7 @@ server <- function(input, output) {
         mutate(median = median(Growth,na.rm=TRUE))
     })
     
-    ## country selector: causes issues with mobile app
+    ## country selector
     output$country_choice <- renderUI({
       f7SmartSelect("place", "Country to compare",
                     choices = unique(dataCountry()$country),
@@ -529,9 +538,59 @@ server <- function(input, output) {
         summarise(Total_cases = sum(ncases), pop = mean(pop)) %>%
         mutate(Cases_per100k = round(100000*Total_cases/pop,0)) %>%
         ggplot(aes(x=date,y=Cases_per100k,color=province,group=province)) + 
-        geom_line() + geom_point() + labs(y="Cases per 100,000 population") + theme_bw()
+        geom_line() + geom_point() + labs(y="Cases per 100,000 population") + theme(legend.position = "bottom")
       
     })  
+    
+    ## county time
+    output$county_selector <- renderUI({
+        f7SmartSelect("county", "Counties to compare",
+                      choices = unique(dataCounty()$county),
+                      selected = "Westmeath",
+                      multiple = TRUE)
+    })
+    
+    output$cumulrealcounty <- renderPlot({
+      
+      dataCounty() %>%
+        filter(county %in% input$county) %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        mutate(ncases = as.character(ncase),
+               ncases = ifelse(ncases == "< = 5","5",ncases)) %>%
+        mutate(ncases = as.numeric(ncases)) %>%
+        mutate(pop = case_when(county == "Carlow" ~ 24272,
+                               county == "Cavan" ~ 76176,
+                               county == "Clare" ~ 118817,
+                               county == "Donegal" ~159192,
+                               county == "Kildare" ~ 222504,
+                               county == "Kilkenny" ~ 99232,
+                               county == "Laois" ~ 84697,
+                               county == "Leitrim" ~32044,
+                               county == "Longford" ~ 40873,
+                               county == "Louth" ~ 128884,
+                               county == "Mayo" ~ 130507,
+                               county == "Meath" ~ 195044,
+                               county == "Monaghan" ~61386,
+                               county == "Offaly" ~ 77961,
+                               county == "Roscommon" ~ 64544,
+                               county == "Sligo" ~ 65535,
+                               county == "Tipperary" ~ 159553,
+                               county == "Wexford" ~ 149722,
+                               county == "Kerry" ~ 147707,
+                               county == "Waterford" ~ 116176,
+                               county == "Westmeath" ~ 88770,
+                               county == "Wicklow" ~ 142425,
+                               county == "Galway" ~ 258058,
+                               county == "Limerick" ~ 194899,
+                               county == "Cork" ~ 542868,
+                               county == "Dublin" ~ 1347359)) %>%
+        group_by(date,county) %>%
+        summarise(Total_cases = sum(ncases), pop = mean(pop)) %>%
+        mutate(Cases_per100k = round(100000*Total_cases/pop,0)) %>%
+        ggplot(aes(x=date,y=Cases_per100k,color=county,group=county)) + 
+        geom_line() + geom_point() + theme(legend.position = "bottom") + labs(y="Cases per 100k")
+      
+    })   
 
 
     
@@ -557,7 +616,7 @@ server <- function(input, output) {
         geom_point(aes(x=date,y=ICU),color="red") + 
         geom_line(aes(x=date,y=ICU),color="red") + 
         theme_bw() + 
-        labs(y="Hospitalised and ICU patients")
+        labs(y="Hospitalised (orange) and ICU (red) patients")
     })
     
     ## patient time percentage
