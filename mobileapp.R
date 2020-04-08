@@ -83,7 +83,7 @@ ui = f7Page(
         valueBoxOutput("CFRBox"),
         leafletOutput("map", width = "90%", height = 550),
         h4(tags$caption("Cumulative cases by province, per 100,000 population")),
-        plotOutput("cumulcountyscaled", width = "95%", height = 400),
+        plotOutput("cumulcountyscaled", width = "90%", height = 400),
         #uiOutput("county_choice"), 
         f7SmartSelect("county", "Counties to compare",
                       choices = c("Carlow","Cavan","Clare","Cork","Donegal","Dublin",
@@ -92,11 +92,11 @@ ui = f7Page(
                                   "Sligo","Tipperary","Waterford","Westmeath","Wexford","Wicklow"),
                       selected = "Westmeath",
                       multiple = TRUE),
-        plotOutput("cumulrealcounty", width = "95%", height = 400),
+        plotOutput("cumulrealcounty", width = "90%", height = 400),
         # h4(tags$caption("Cumulative cases by age group")),
         # plotOutput("cumulage", width = "70%", height = 600),
         h4(tags$caption("Cases hospitalised and in intensive care")),
-        plotOutput("patienttime", width = "95%", height = 400)
+        plotOutput("patienttime", width = "90%", height = 400)
       ),
       
       # Compare tab
@@ -115,7 +115,7 @@ ui = f7Page(
         h4("Decide how many days behind/ahead Ireland is to your selected country"),
         f7Slider("days","Decide the time difference",min = -5,max=30,value=0,scale = TRUE,step = 1),
         h4("Compare cumulative growth"),
-        plotOutput("irelandcompare", width = "95%", height = 400)
+        plotOutput("irelandcompare", width = "90%", height = 400)
       )
 
     )
