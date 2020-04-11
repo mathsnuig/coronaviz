@@ -188,6 +188,7 @@ server <- function(input, output) {
     ecdpcdata <- ecdpcdata %>% filter(!(ncase == 0 & ndeath == 0))
     
     dataRaw() %>% 
+      select(-lab_location) %>%
       mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
       rbind(ecdpcdata)
   })
@@ -257,12 +258,18 @@ server <- function(input, output) {
     #### Plot cases per day
     output$newcases <- renderPlot({
       
+      # dataIreland() %>%
+      #   mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+      #   group_by(date) %>%
+      #   summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
+      #   ggplot(aes(x=Date,y=New_cases)) + geom_col() +
+      #   theme(legend.position="none") + theme_bw() + labs(y="Daily New Cases")
       dataIreland() %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        group_by(date) %>%
+        group_by(date,lab_location) %>%
         summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
-        ggplot(aes(x=Date,y=New_cases)) + geom_col() +
-        theme(legend.position="none") + theme_bw() + labs(y="Daily New Cases")
+        ggplot(aes(x=Date,y=New_cases,fill=lab_location)) + geom_col() + 
+        theme(legend.position="bottom") + labs(y="Daily New Cases")
       
     })
     

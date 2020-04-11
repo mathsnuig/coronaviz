@@ -77,10 +77,8 @@ sidebar <- dashboardSidebar(disable=FALSE,width='190px',
                                                     choices = c("Republic of Ireland", "Island of Ireland"),
                                                     selected = "Island of Ireland"),
                                         menuItem("Time", icon = icon("line-chart"), tabName = "time"),
-                                        menuItem("Map and reports", icon = icon("list"), tabName = "nphet"),
-                                        menuItem("Compare", icon = icon("globe"), tabName = "compare"),
-                                        # menuItem("Map", icon = icon("map"), tabName = "map"),
-                                        menuItem("Daily Data", icon = icon("eye"), tabName = "data")
+                                        menuItem("Map", icon = icon("list"), tabName = "nphet"),
+                                        menuItem("Compare", icon = icon("globe"), tabName = "compare")
                             )
                             
                             
@@ -125,7 +123,15 @@ body <- dashboardBody(
                   tabPanel("Case count", plotlyOutput("cumulcases", width = "80%", height = 400)),
                   tabPanel("Log cases", plotlyOutput("cumullog", width = "80%", height = 400)),
                   tabPanel("Growth Rate", plotlyOutput("growth", width = "80%", height = 400)),
-                  tabPanel("Deaths", plotlyOutput("cumuldeaths", width = "80%", height = 400)))
+                  tabPanel("Deaths", plotlyOutput("cumuldeaths", width = "80%", height = 400)),
+                  # tabPanel("Testing", h4("Official testing data are presented in the table below."), 
+                  #          DTOutput("testdata", width = "80%"), 
+                  #          h4("Assuming an equal number of tests on days between these announcements 
+                  #             and given the known number of daily cases, we can estimate the percentage 
+                  #             of positive test results each day:"),
+                  #          plotlyOutput("tests", width = "80%", height = 400)),
+                  tabPanel("Daily data", DTOutput("dattable"))
+                    )
                   ),
                 h3(paste0("Developed by Dr. Andrew Simpkin "),
                             tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1", target="_blank"),
@@ -172,26 +178,8 @@ body <- dashboardBody(
                    tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
         ),
         
-        # Data view Tab #
-        tabItem("data",
-                h3(paste0("Data from Ireland ("),
-                   tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
-                          "HSE Health Protection Surveillance Centre", target="_blank"),
-                   paste0("), Northern Ireland ("),
-                   tags$a(href="https://www.arcgis.com/apps/opsdashboard/index.html#/f94c3c90da5b4e9f9a0b19484dd4bb14", 
-                                 "NHS", target="_blank"),
-                   paste0(") and WHO")),
-                fluidRow(box(width = 12, title = "Raw data",
-                             column(10, DTOutput("dattable"))
-                )),
-                h3(paste0("Developed by Dr. Andrew Simpkin "),
-                   tags$a(href="https://twitter.com/AndrewSimpkin1", "@AndrewSimpkin1"),
-                   paste0(", Prof. Derek O'Keeffe (Galway University Hosptial)"),
-                   tags$a(href="https://twitter.com/Physicianeer", "@Physicianeer"))
-              ),
-        
-        
-        # Weekly Tab
+  
+        # Detailed Tab
         tabItem("nphet",
                 h3(paste0("Data (midnight ",Sys.Date()-2,") from Ireland"),
                    tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
@@ -317,6 +305,7 @@ server <- function(input, output) {
       ecdpcdata <- ecdpcdata %>% filter(!(ncase == 0 & ndeath == 0))
       
       dataRaw() %>% 
+        select(-lab_location) %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
         rbind(ecdpcdata)
     })
@@ -345,6 +334,10 @@ server <- function(input, output) {
     })
     dataStats <- reactive({
       read.csv("data/corona_stats.csv") %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y"))
+    })
+    dataTest <- reactive({
+      read.csv("data/corona_testing.csv") %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y"))
     })
     
@@ -397,18 +390,53 @@ server <- function(input, output) {
       
       g = dataIreland() %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        group_by(date) %>%
+        group_by(date,lab_location) %>%
         summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
         na.omit() %>%
         mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases))  %>%
-        mutate(Growth_Percentage = round2(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
-        ggplot(aes(x=Date,y=New_cases,label=Date,label1=Total_cases, label2=Growth_Percentage)) + 
-        geom_col() +
+        #mutate(Growth_Percentage = round2(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
+        ggplot(aes(x=Date,y=New_cases,fill=lab_location,label=Date,label1=Total_cases)) + 
+        geom_col() + 
         theme(legend.position="none") + theme_bw() + labs(y="Daily New Cases")
-      ggplotly(g, tooltip = c("Date", "New_cases", "Total_cases", "Growth_Percentage"))
+      ggplotly(g, tooltip = c("Date", "New_cases"))
       
     })
     
+    ## testing
+    output$testdata <- renderDT({
+      tests <- c(397,1784,6636,
+                 17992,30213,42484)
+      date <- c("02/03/2020","09/03/2020", "17/03/2020", 
+                "23/03/2020", "30/03/2020", "06/04/2020")
+      links <- c("https://bit.ly/2wpipR2", "https://bit.ly/2wpipR2", "https://bit.ly/3c83Twp", 
+                 "https://bit.ly/2XmjlAE", "https://bit.ly/2UVD7l9", "https://bit.ly/34rdXOu")
+      refs <- paste0("<a href='",links,"' target='_blank'>",links,"</a>")
+      
+      df <- data.frame(date = as.Date(date, format = "%d/%m/%Y"), Total_tests = tests, Test_data = refs)
+      datatable(df, escape = FALSE)
+    })
+    
+    # tests over time
+    output$tests <- renderPlotly({
+      # merge with new cases in ROI only
+      # work out diagnosis rate per day
+      # plot this over time
+      g = dataIreland()  %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        filter(area!= "north") %>%         
+        group_by(date) %>%
+        summarise(New_cases = sum(ncase)) %>%
+        na.omit() %>%
+        left_join(dataTest()) %>% 
+        mutate(Percentage_Positive = round(100*New_cases/tests,1), New_tests = tests) %>%
+        #mutate(Percentage_Positive = zoo::rollmean(Percentage_Positive, 2, na.pad = T)) %>%
+        ggplot(aes(x=date,y=Percentage_Positive, label1 = New_cases, label2 = New_tests)) + 
+        geom_line() + labs(y="Estimated positive test rate (%)")
+      ggplotly(g, tooltip = c("date", "Percentage_Positive", "New_cases", "New_tests"))
+      
+    })
+    
+    # cumulative cases over time
     output$cumulcases <- renderPlotly({
       
       g = dataIreland() %>%
