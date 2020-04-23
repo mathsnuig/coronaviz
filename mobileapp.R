@@ -18,6 +18,10 @@ library(readxl)
 # Set range for day shifts considered in comparison
 minshift = -20
 maxshift = 30
+
+# Data dates
+daily_date = "22/4/20"
+lag_date = "20/4/20"
                             
            
 ui = f7Page(
@@ -26,7 +30,7 @@ ui = f7Page(
   f7TabLayout(
       navbar = f7Navbar(
         title = "COVID19 Ireland",
-        f7Toggle("partition", "Include NI", checked = TRUE, color = NULL),
+        f7Toggle("partition", "Include NI", checked = FALSE, color = NULL),
         # enable both panels
         left_panel = FALSE,
         right_panel = FALSE
@@ -45,7 +49,7 @@ ui = f7Page(
         h4(tags$a(href="https://www2.hse.ie/conditions/coronavirus/coronavirus.html", 
                   "HSE Coronavirus information", 
                   target="_blank"),
-           paste0(". Data (",Sys.Date(),") from Ireland ("),
+           paste0(". Data (",daily_date,") from Ireland ("),
            tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
                   "HSE Health Protection Surveillance Centre", target="_blank"),
            paste0("), Northern Ireland ("),
@@ -75,7 +79,7 @@ ui = f7Page(
         icon = f7Icon("calendar"),
         active = FALSE,
         # Tab 5 content
-        h3(paste0("Report data (midnight ", Sys.Date()-2, ") from Republic of Ireland only"),
+        h3(paste0("Report data (midnight ", lag_date, ") from Republic of Ireland only"),
            tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
                   "HSE Health Protection Surveillance Centre", target="_blank")),
         valueBoxOutput("HospBox"),
@@ -90,7 +94,7 @@ ui = f7Page(
                                   "Galway","Kerry","Kildare","Kilkenny","Laois","Leitrim","Limerick",
                                   "Longford","Louth","Mayo","Meath","Monaghan","Offaly","Roscommon",
                                   "Sligo","Tipperary","Waterford","Westmeath","Wexford","Wicklow"),
-                      selected = "Westmeath",
+                      selected = c("Cork","Dublin","Galway","Limerick","Westmeath"),
                       multiple = TRUE),
         plotOutput("cumulrealcounty", width = "90%", height = 400),
         # h4(tags$caption("Cumulative cases by age group")),
@@ -417,8 +421,9 @@ server <- function(input, output) {
     output$CFRBox <- renderValueBox({
       dat <-  dataStats() %>% 
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
-        filter(date == max(date))
-      valueBox(paste0(dat$CFR, "%"), "Case fatality rate",
+        filter(date == max(date)) %>%
+      mutate(Percentage = round(100*Deaths/Cases,1))
+      valueBox(paste0(dat$Percentage, "%"), "diagnosed case fatality rate",
                color = "red"
       )
     })
@@ -491,10 +496,10 @@ server <- function(input, output) {
                ncases = ifelse(ncases == "< = 5","5",ncases)) %>%
         mutate(ncases = as.numeric(ncases),
                logcases = log(ncases+1),
-               case_groups = case_when(ncases < 20 ~ "1",
-                                       ncases >= 20 & ncases < 100 ~ "2",
-                                       ncases >= 100 & ncases < 300 ~ "3",
-                                       ncases >= 300 ~ "4"))
+               case_groups = case_when(ncases < 100 ~ "1",
+                                       ncases >= 100 & ncases < 200 ~ "2",
+                                       ncases >= 200 & ncases < 750 ~ "3",
+                                       ncases >= 750 ~ "4"))
       
       pal <- colorFactor("YlOrRd", counties$case_groups)
       

@@ -13,10 +13,16 @@ library(googleVis)
 library(rvest)
 library(httr)
 library(readxl)
+library(zoo)
+library(tidyr)
 
 # Set range for day shifts considered in comparison
 minshift = -20
 maxshift = 30
+
+# Data dates
+daily_date = "22/4/20"
+lag_date = "20/4/20"
 
 # use round away from zero form of rounding (sometimes called banker's rounding)
 # what many of us learnt in school!
@@ -75,7 +81,7 @@ sidebar <- dashboardSidebar(disable=FALSE,width='190px',
                             sidebarMenu(id = 'tabs', 
                                         selectInput("partition", "Area", 
                                                     choices = c("Republic of Ireland", "Island of Ireland"),
-                                                    selected = "Island of Ireland"),
+                                                    selected = "Republic of Ireland"),
                                         menuItem("Time", icon = icon("line-chart"), tabName = "time"),
                                         menuItem("Map", icon = icon("list"), tabName = "nphet"),
                                         menuItem("Compare", icon = icon("globe"), tabName = "compare")
@@ -100,7 +106,7 @@ body <- dashboardBody(
                    tags$a(href="https://andsim.shinyapps.io/coronamobile", 
                           "try the mobile version here!", 
                           target="_blank") ),
-                h3(paste0("Data (",Sys.Date(),") from Ireland ("),
+                h3(paste0("Data (",daily_date,") from Ireland ("),
                    tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
                           "HSE Health Protection Surveillance Centre", target="_blank"),
                    paste0("), Northern Ireland ("),
@@ -181,7 +187,7 @@ body <- dashboardBody(
   
         # Detailed Tab
         tabItem("nphet",
-                h3(paste0("Data (midnight ",Sys.Date()-2,") from Ireland"),
+                h3(paste0("Data (midnight ",lag_date,") from Ireland"),
                    tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
                           "(HSE Health Protection Surveillance Centre)", target="_blank")),
                 valueBoxOutput("HospBox"),
@@ -203,7 +209,7 @@ body <- dashboardBody(
                                                      "Galway","Kerry","Kildare","Kilkenny","Laois","Leitrim","Limerick",
                                                      "Longford","Louth","Mayo","Meath","Monaghan","Offaly","Roscommon",
                                                      "Sligo","Tipperary","Waterford","Westmeath","Wexford","Wicklow"),
-                                         selected = "Westmeath",
+                                         selected = c("Cork","Dublin","Galway","Limerick","Westmeath"),
                                          multiple = TRUE),
                              plotlyOutput("cumulrealcounty", width = "90%", height = 500))
                   )
@@ -214,7 +220,8 @@ body <- dashboardBody(
                 fluidRow(
                   tabBox(title = "Hospital and ICU cases over time", 
                          width = 12,
-                         selected = "Counts",
+                         selected = "New",
+                         tabPanel("New", plotlyOutput("newpatients", width = "70%", height = 600)),
                          tabPanel("Counts", plotlyOutput("patienttime", width = "70%", height = 600)),
                          tabPanel("Percentage", plotlyOutput("patienttimepercent", width = "70%", height = 600))
                                   
@@ -321,7 +328,9 @@ server <- function(input, output) {
         na.omit() %>%
         mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
         mutate(Growth = round2(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
-        mutate(median = median(Growth,na.rm=TRUE))
+        mutate(median = median(Growth,na.rm=TRUE)) %>%
+        mutate(roll = c(NA,rollmean(Growth[2:50], k=5, na.pad = TRUE, align = "right"))) %>% 
+        filter(Total_cases > 100)
     })
 
     ## detailed data read in
@@ -486,7 +495,7 @@ server <- function(input, output) {
         mutate(Date = as.Date(date,format = "%d/%m/%Y")) %>%
         filter(Date >= as.Date("13/03/2020",format = "%d/%m/%Y")) %>%
         ggplot(aes(x=Date,y=Growth,label1=New_cases,label2=Total_cases)) + 
-        geom_line() + geom_point() + theme_bw() +
+        geom_point() + theme_bw() + geom_line() +
         theme(legend.position="none") + labs(y="Growth in Total Cases per day (%)")
       ggplotly(g, tooltip = c("Date", "Growth", "Total_cases", "New_cases"))
       
@@ -935,8 +944,9 @@ server <- function(input, output) {
     output$CFRBox <- renderValueBox({
       dat <-  dataStats() %>% 
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
-        filter(date == max(date))
-      valueBox(paste0(dat$CFR, "%"), "Diagnosed case fatality rate",
+        filter(date == max(date)) %>%
+        mutate(Percentage = round(100*Deaths/Cases,1))
+      valueBox(paste0(dat$Percentage, "%"), "diagnosed case fatality rate",
                color = "red"
       )
     })
@@ -1009,10 +1019,10 @@ server <- function(input, output) {
                ncases = ifelse(ncases == "< = 5","5",ncases)) %>%
         mutate(ncases = as.numeric(ncases),
                logcases = log(ncases+1),
-               case_groups = case_when(ncases < 30 ~ "1",
-                                       ncases >= 30 & ncases < 100 ~ "2",
-                                       ncases >= 100 & ncases < 300 ~ "3",
-                                       ncases >= 300 ~ "4"))
+               case_groups = case_when(ncases < 100 ~ "1",
+                                       ncases >= 100 & ncases < 200 ~ "2",
+                                       ncases >= 200 & ncases < 750 ~ "3",
+                                       ncases >= 750 ~ "4"))
        
        pal <- colorFactor('YlOrRd', counties$case_groups)
        
@@ -1153,45 +1163,6 @@ server <- function(input, output) {
       
     })   
     
-    ## border time scaled
-    output$cumulborderscaled <- renderPlotly({
-
-      g = dataCounty() %>%
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        mutate(ncases = as.character(ncase),
-               ncases = ifelse(ncases == "< = 5","5",ncases)) %>%
-        mutate(ncases = as.numeric(ncases)) %>%
-        mutate(province = case_when(county=="Carlow"|county=="Dublin"|
-                                      county=="Kildare"|county=="Kilkenny"|
-                                      county=="Laois"|county=="Longford"|
-                                      county=="Meath"|
-                                      county=="Offaly"|county=="Westmeath"|
-                                      county=="Wexford"|county=="Wicklow" ~ "Leinster without Louth",
-                                    county=="Clare"|county=="Cork"|
-                                      county=="Kerry"|county=="Limerick"|
-                                      county=="Tipperary"|county=="Waterford" ~ "Munster",
-                                    county=="Galway"|
-                                      county=="Mayo"|county=="Roscommon"|
-                                      county=="Sligo" ~ "Connacht without Leitrim",
-                                    county=="Donegal"|county=="Cavan"|
-                                      county=="Monaghan"|
-                                      county=="Louth"|county=="Leitrim" ~
-                                      "Border counties (CN,DL,LH,LM,MN)")) %>%
-        mutate(pop = case_when(province == "Connacht without Leitrim" ~ 550742-32044,
-                               province == "Munster" ~ 1280020,
-                               province == "Leinster without Louth" ~ 2630720-128884,
-                               province == "Border counties (CN,DL,LH,LM,MN)" ~ 159192+61386+76176+128884+32044)) %>%
-        group_by(date,province) %>%
-        summarise(Total_cases = sum(ncases), pop = mean(pop)) %>%
-        mutate(Cases_per100k = round2(100000*Total_cases/pop,0)) %>%
-        ggplot(aes(x=date,y=Cases_per100k,color=province,group=province)) +
-        geom_line() + geom_point() + theme_bw() + labs(y="Cases per 100,000 population")
-      ggplotly(g, tooltip = c("date", "province", "Cases_per100k"))
-
-    })
-    
-    
-    
     ## patient time raw
     output$patienttime <- renderPlotly({
       g = dataStats() %>% 
@@ -1219,6 +1190,23 @@ server <- function(input, output) {
         geom_line(aes(x=date,y=ICU_percent),color="red") + theme_bw() + 
         labs(y="Hospitalised and ICU patients (% of total cases)")
       ggplotly(g)
+    })
+    
+    ## new icu, death
+    output$newpatients <- renderPlotly({
+      
+      g = dataStats() %>% 
+        mutate(date = as.Date(date,format = "%d/%m/%Y"),
+               Cases = c(NA,diff(Cases)),
+               Hospitalised = c(NA,diff(Hospitalised)),
+               ICU = c(NA,diff(ICU)),
+               Deaths = c(NA,diff(Deaths))) %>%
+        gather(type, count, Cases:Deaths, factor_key=TRUE) %>% 
+        filter(type!="Cases") %>%
+        ggplot(aes(x=date, y=count, color = type)) + geom_line() + 
+        geom_point() + labs(y="New daily counts") + theme_bw()
+      ggplotly(g)
+      
     })
     
     
