@@ -14,14 +14,21 @@ library(googleVis)
 library(rvest)
 library(httr)
 library(readxl)
+library(tidyr)
 
 # Set range for day shifts considered in comparison
 minshift = -20
 maxshift = 30
 
 # Data dates
-daily_date = "22/4/20"
-lag_date = "20/4/20"
+daily_date = "25/4/20"
+lag_date = "23/4/20"
+
+# use round away from zero form of rounding (sometimes called banker's rounding)
+# what many of us learnt in school!
+# check out the "round" package to find out more than you ever wanted to know about the complexities of rounding
+round2 <- function(x, n = 0) (trunc((abs(x) * 10 ^ n) + 0.5) / 10 ^ n) * sign(x)
+
                             
            
 ui = f7Page(
@@ -66,8 +73,8 @@ ui = f7Page(
         infoBoxOutput("MortBox"),
         h4("New cases per day"),
         plotOutput("newcases", width = "95%", height = 400),
-        h4("New and cumulative cases per day"),
-        plotOutput("cumulcases", width = "95%", height = 400),
+        h4("New and cumulative deaths per day"),
+        plotOutput("cumuldeaths", width = "95%", height = 400),
         h4("Percentage growth per day"),
         plotOutput("growth", width = "95%", height = 400)
         
@@ -100,7 +107,8 @@ ui = f7Page(
         # h4(tags$caption("Cumulative cases by age group")),
         # plotOutput("cumulage", width = "70%", height = 600),
         h4(tags$caption("Cases hospitalised and in intensive care")),
-        plotOutput("patienttime", width = "90%", height = 400)
+        #plotOutput("patienttime", width = "90%", height = 400)
+        plotOutput("newpatients", width = "90%", height = 600)
       ),
       
       # Compare tab
@@ -244,16 +252,109 @@ server <- function(input, output) {
 
 
     ### detailed data
-    
+    ## detailed data read in
     dataCounty <- reactive({
-      read.csv("data/corona_county.csv")
-    })
-    dataAge <- reactive({
-      read.csv("data/corona_age.csv") %>%
-        mutate(age_group = factor(age_group, levels(age_group)[c(1,2,7,3:6,8,9)]))
+      read.csv("data/corona_county.csv") %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y"),
+               ncases = as.character(ncase),
+               ncases = ifelse(ncases == "< = 5","5",ncases),
+               ncases = as.numeric(ncases),
+               pop = case_when(county == "Carlow" ~ 24272,
+                               county == "Cavan" ~ 76176,
+                               county == "Clare" ~ 118817,
+                               county == "Donegal" ~159192,
+                               county == "Kildare" ~ 222504,
+                               county == "Kilkenny" ~ 99232,
+                               county == "Laois" ~ 84697,
+                               county == "Leitrim" ~32044,
+                               county == "Longford" ~ 40873,
+                               county == "Louth" ~ 128884,
+                               county == "Mayo" ~ 130507,
+                               county == "Meath" ~ 195044,
+                               county == "Monaghan" ~61386,
+                               county == "Offaly" ~ 77961,
+                               county == "Roscommon" ~ 64544,
+                               county == "Sligo" ~ 65535,
+                               county == "Tipperary" ~ 159553,
+                               county == "Wexford" ~ 149722,
+                               county == "Kerry" ~ 147707,
+                               county == "Waterford" ~ 116176,
+                               county == "Westmeath" ~ 88770,
+                               county == "Wicklow" ~ 142425,
+                               county == "Galway" ~ 258058,
+                               county == "Limerick" ~ 194899,
+                               county == "Cork" ~ 542868,
+                               county == "Dublin" ~ 1347359),
+               long = case_when(county == "Carlow" ~ -6.9261098,
+                                county == "Cavan" ~ -7.3605599,
+                                county == "Clare" ~ -8.9811,
+                                county == "Donegal" ~ -8.1041,
+                                county == "Kildare" ~ -6.9144402,
+                                county == "Kilkenny" ~ -7.2448,
+                                county == "Laois" ~ -7.3323,
+                                county == "Leitrim" ~ -8.0020,
+                                county == "Longford" ~ -7.7933,
+                                county == "Louth" ~ -6.4889,
+                                county == "Mayo" ~ -9.4289,
+                                county == "Meath" ~ -6.6564,
+                                county == "Monaghan" ~ -6.9683,
+                                county == "Offaly" ~ -7.7122,
+                                county == "Roscommon" ~ -8.1891,
+                                county == "Sligo" ~ -8.4761,
+                                county == "Tipperary" ~ -8.1619,
+                                county == "Wexford" ~ -6.4633,
+                                county == "Kerry" ~ -9.5669,
+                                county == "Waterford" ~ -7.1101,
+                                county == "Westmeath" ~ -7.4653,
+                                county == "Wicklow" ~ -6.0446,
+                                county == "Galway" ~ -9.0568,
+                                county == "Limerick" ~ -8.6267,
+                                county == "Cork" ~ -8.4756,
+                                county == "Dublin" ~ -6.2603),
+               lat = case_when(county == "Carlow" ~ 52.8408318,
+                               county == "Cavan" ~ 53.9908295,
+                               county == "Clare" ~ 52.9045,
+                               county == "Donegal" ~ 54.6549,
+                               county == "Kildare" ~ 53.1561089,
+                               county == "Kilkenny" ~ 52.6541,
+                               county == "Laois" ~ 52.9943,
+                               county == "Leitrim" ~ 54.1247,
+                               county == "Longford" ~ 53.7276,
+                               county == "Louth" ~ 53.9252,
+                               county == "Mayo" ~ 54.0153,
+                               county == "Meath" ~ 53.6055,
+                               county == "Monaghan" ~ 54.2492,
+                               county == "Offaly" ~ 53.2357,
+                               county == "Roscommon" ~ 53.6276,
+                               county == "Sligo" ~ 54.2766,
+                               county == "Tipperary" ~ 52.4738,
+                               county == "Wexford" ~ 52.3369,
+                               county == "Kerry" ~ 52.1545,
+                               county == "Waterford" ~ 52.2593,
+                               county == "Westmeath" ~ 53.5345,
+                               county == "Wicklow" ~ 52.9808,
+                               county == "Galway" ~ 53.2707,
+                               county == "Limerick" ~ 52.6638,
+                               county == "Cork" ~ 51.8985,
+                               county == "Dublin" ~ 53.3498),
+               province = case_when(county=="Carlow"|county=="Dublin"|
+                                      county=="Kildare"|county=="Kilkenny"|
+                                      county=="Laois"|county=="Longford"|
+                                      county=="Louth"|county=="Meath"|
+                                      county=="Offaly"|county=="Westmeath"|
+                                      county=="Wexford"|county=="Wicklow" ~ "Leinster",
+                                    county=="Clare"|county=="Cork"|
+                                      county=="Kerry"|county=="Limerick"|
+                                      county=="Tipperary"|county=="Waterford" ~ "Munster",
+                                    county=="Galway"|county=="Leitrim"|
+                                      county=="Mayo"|county=="Roscommon"|
+                                      county=="Sligo" ~ "Connacht",
+                                    county=="Donegal"|county=="Cavan"|
+                                      county=="Monaghan" ~ "Ulster (ROI)"))
     })
     dataStats <- reactive({
-      read.csv("data/corona_stats.csv")
+      read.csv("data/corona_stats.csv") %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y"))
     })
 
     
@@ -262,12 +363,6 @@ server <- function(input, output) {
     #### Plot cases per day
     output$newcases <- renderPlot({
       
-      # dataIreland() %>%
-      #   mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-      #   group_by(date) %>%
-      #   summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
-      #   ggplot(aes(x=Date,y=New_cases)) + geom_col() +
-      #   theme(legend.position="none") + theme_bw() + labs(y="Daily New Cases")
       dataIreland() %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
         group_by(date,lab_location) %>%
@@ -290,6 +385,20 @@ server <- function(input, output) {
         theme(legend.position="none") + labs(y="Cases") + theme_bw()
       
     })
+    
+    output$cumuldeaths <- renderPlot({
+      
+      dataIreland() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        group_by(date) %>%
+        summarise(ndeaths = sum(ndeath), New_deaths = sum(ndeath), Date = min(date)) %>%
+        na.omit() %>%
+        mutate(cdeaths = cumsum(ndeaths), Total_deaths= cumsum(ndeaths))  %>%
+        ggplot(aes(x=Date,y=cdeaths,label=Date,label1=Total_deaths,label2=New_deaths)) + 
+        geom_line() + geom_point() + geom_col(aes(x=Date,y=ndeaths)) + theme_bw() +
+        theme(legend.position="none") + labs(y="Deaths")
+      
+    })  
     
     # Growth rate
     output$growth <- renderPlot({
@@ -428,9 +537,8 @@ server <- function(input, output) {
       )
     })
     
-    ## Plot weekly data
-    
-    ### map
+    ## Plot detailed data
+    ### Map
     output$map <-  renderLeaflet({
       
       labs <- lapply(seq(nrow(dataCounty())), function(i) {
@@ -440,68 +548,13 @@ server <- function(input, output) {
       counties <- dataCounty()  %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
         filter(date == max(date)) %>%
-        mutate(long = case_when(county == "Carlow" ~ -6.9261098,
-                                county == "Cavan" ~ -7.3605599,
-                                county == "Clare" ~ -8.9811,
-                                county == "Donegal" ~ -8.11667,
-                                county == "Kildare" ~ -6.9144402,
-                                county == "Kilkenny" ~ -7.2448,
-                                county == "Laois" ~ -7.3323,
-                                county == "Leitrim" ~ -8.0020,
-                                county == "Longford" ~ -7.7933,
-                                county == "Louth" ~ -6.4889,
-                                county == "Mayo" ~ -9.4289,
-                                county == "Meath" ~ -6.6564,
-                                county == "Monaghan" ~ -6.9683,
-                                county == "Offaly" ~ -7.7122,
-                                county == "Roscommon" ~ -8.5792,
-                                county == "Sligo" ~ -8.4761,
-                                county == "Tipperary" ~ -8.1619,
-                                county == "Wexford" ~ -6.4633,
-                                county == "Kerry" ~ -9.5669,
-                                county == "Waterford" ~ -7.1101,
-                                county == "Westmeath" ~ -7.4653,
-                                county == "Wicklow" ~ -6.0446,
-                                county == "Galway" ~ -9.0568,
-                                county == "Limerick" ~ -8.6267,
-                                county == "Cork" ~ -8.4756,
-                                county == "Dublin" ~ -6.2603),
-               lat = case_when(county == "Carlow" ~ 52.8408318,
-                               county == "Cavan" ~ 53.9908295,
-                               county == "Clare" ~ 52.9045,
-                               county == "Donegal" ~ 54.65,
-                               county == "Kildare" ~ 53.1561089,
-                               county == "Kilkenny" ~ 52.6541,
-                               county == "Laois" ~ 52.9943,
-                               county == "Leitrim" ~ 54.1247,
-                               county == "Longford" ~ 53.7276,
-                               county == "Louth" ~ 53.9252,
-                               county == "Mayo" ~ 54.0153,
-                               county == "Meath" ~ 53.6055,
-                               county == "Monaghan" ~ 54.2492,
-                               county == "Offaly" ~ 53.2357,
-                               county == "Roscommon" ~ 53.9017,
-                               county == "Sligo" ~ 54.2766,
-                               county == "Tipperary" ~ 52.4738,
-                               county == "Wexford" ~ 52.3369,
-                               county == "Kerry" ~ 52.1545,
-                               county == "Waterford" ~ 52.2593,
-                               county == "Westmeath" ~ 53.5345,
-                               county == "Wicklow" ~ 52.9808,
-                               county == "Galway" ~ 53.2707,
-                               county == "Limerick" ~ 52.6638,
-                               county == "Cork" ~ 51.8985,
-                               county == "Dublin" ~ 53.3498)) %>%
-        mutate(ncases = as.character(ncase),
-               ncases = ifelse(ncases == "< = 5","5",ncases)) %>%
-        mutate(ncases = as.numeric(ncases),
-               logcases = log(ncases+1),
-               case_groups = case_when(ncases < 100 ~ "1",
-                                       ncases >= 100 & ncases < 200 ~ "2",
-                                       ncases >= 200 & ncases < 750 ~ "3",
+        mutate(logcases = log(ncases+1),
+               case_groups = case_when(ncases < 200 ~ "1",
+                                       ncases >= 200 & ncases < 300 ~ "2",
+                                       ncases >= 300 & ncases < 750 ~ "3",
                                        ncases >= 750 ~ "4"))
       
-      pal <- colorFactor("YlOrRd", counties$case_groups)
+      pal <- colorFactor('YlOrRd', counties$case_groups)
       
       counties %>%
         leaflet() %>%
@@ -514,108 +567,65 @@ server <- function(input, output) {
         addCircleMarkers(lng= ~long, 
                          lat= ~lat, 
                          layerId = ~county,
-                         radius = ~6*log(ncases),
+                         radius = ~5*log(ncases),
                          color = ~pal(case_groups),
                          label = lapply(labs, htmltools::HTML),
                          fillOpacity = 0.9)
     })
+    
+    ## province time
+    output$cumulcounty <- renderPlot({
+      
+      dataCounty() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        group_by(date,province) %>%
+        summarise(Total_cases = sum(ncases)) %>%
+        ggplot(aes(x=date,y=Total_cases,color=province,group=province)) + 
+        geom_line() + geom_point() + theme(legend.position = "bottom") + labs(y="Cases")
+      
+    })   
     
     ## province time scaled
     output$cumulcountyscaled <- renderPlot({
       
       dataCounty() %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        mutate(ncases = as.character(ncase),
-               ncases = ifelse(ncases == "< = 5","5",ncases)) %>%
-        mutate(ncases = as.numeric(ncases)) %>%
-        mutate(province = case_when(county=="Carlow"|county=="Dublin"|
-                                      county=="Kildare"|county=="Kilkenny"|
-                                      county=="Laois"|county=="Longford"|
-                                      county=="Louth"|county=="Meath"|
-                                      county=="Offaly"|county=="Westmeath"|
-                                      county=="Wexford"|county=="Wicklow" ~ "Leinster",
-                                    county=="Clare"|county=="Cork"|
-                                      county=="Kerry"|county=="Limerick"|
-                                      county=="Tipperary"|county=="Waterford" ~ "Munster",
-                                    county=="Galway"|county=="Leitrim"|
-                                      county=="Mayo"|county=="Roscommon"|
-                                      county=="Sligo" ~ "Connacht",
-                                    county=="Donegal"|county=="Cavan"|
-                                      county=="Monaghan" ~ "Ulster (ROI)")) %>% 
-        mutate(pop = case_when(province == "Connacht" ~ 550742,
-                               province == "Munster" ~ 1280020,
-                               province == "Leinster" ~ 2630720,
-                               province == "Ulster (ROI)" ~ 159192+32044+76176)) %>%
         group_by(date,province) %>%
-        summarise(Total_cases = sum(ncases), pop = mean(pop)) %>%
-        mutate(Cases_per100k = round(100000*Total_cases/pop,0)) %>%
+        summarise(Total_cases = sum(ncases), pop = sum(pop)) %>%
+        mutate(Cases_per100k = round2(100000*Total_cases/pop,0)) %>%
         ggplot(aes(x=date,y=Cases_per100k,color=province,group=province)) + 
-        geom_line() + geom_point() + labs(y="Cases per 100,000 population") + theme(legend.position = "bottom")
+        geom_line() + geom_point() + labs(y="Cases per 100,000 population") +
+        theme(legend.position = "bottom")
       
-    })  
+    })    
     
     ## county time
-    output$county_selector <- renderUI({
-        f7SmartSelect("county", "Counties to compare",
-                      choices = unique(dataCounty()$county),
-                      selected = "Westmeath",
-                      multiple = TRUE)
-    })
     
+    # county cumulative
     output$cumulrealcounty <- renderPlot({
       
       dataCounty() %>%
         filter(county %in% input$county) %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        mutate(ncases = as.character(ncase),
-               ncases = ifelse(ncases == "< = 5","5",ncases)) %>%
-        mutate(ncases = as.numeric(ncases)) %>%
-        mutate(pop = case_when(county == "Carlow" ~ 24272,
-                               county == "Cavan" ~ 76176,
-                               county == "Clare" ~ 118817,
-                               county == "Donegal" ~159192,
-                               county == "Kildare" ~ 222504,
-                               county == "Kilkenny" ~ 99232,
-                               county == "Laois" ~ 84697,
-                               county == "Leitrim" ~32044,
-                               county == "Longford" ~ 40873,
-                               county == "Louth" ~ 128884,
-                               county == "Mayo" ~ 130507,
-                               county == "Meath" ~ 195044,
-                               county == "Monaghan" ~61386,
-                               county == "Offaly" ~ 77961,
-                               county == "Roscommon" ~ 64544,
-                               county == "Sligo" ~ 65535,
-                               county == "Tipperary" ~ 159553,
-                               county == "Wexford" ~ 149722,
-                               county == "Kerry" ~ 147707,
-                               county == "Waterford" ~ 116176,
-                               county == "Westmeath" ~ 88770,
-                               county == "Wicklow" ~ 142425,
-                               county == "Galway" ~ 258058,
-                               county == "Limerick" ~ 194899,
-                               county == "Cork" ~ 542868,
-                               county == "Dublin" ~ 1347359)) %>%
         group_by(date,county) %>%
         summarise(Total_cases = sum(ncases), pop = mean(pop)) %>%
-        mutate(Cases_per100k = round(100000*Total_cases/pop,0)) %>%
+        mutate(Cases_per100k = round2(100000*Total_cases/pop,0)) %>%
         ggplot(aes(x=date,y=Cases_per100k,color=county,group=county)) + 
-        geom_line() + geom_point() + theme(legend.position = "bottom") + labs(y="Cases per 100k")
+        geom_line() + geom_point() + labs(y="Cases per 100,000") + 
+        theme(legend.position = "bottom")
       
     })   
-
-
     
-    # age spaghetti chart
-    output$cumulage <- renderPlot({
-      
-      dataAge() %>%
+    # county new
+    output$newcounty <- renderPlot({
+       dataCounty() %>%
+        filter(county %in% input$county2) %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        group_by(date,age_group) %>%
-        summarise(Total_cases = sum(ncase)) %>%
-        ggplot(aes(x=date,y=Total_cases,color=age_group)) + 
-        geom_line() + geom_point() + labs(y="Cases") + theme_bw()
-      
+        group_by(county) %>% 
+        mutate(New_cases = c(NA,diff(ncases)),
+               New_cases_per100k = round2(1e5*New_cases/pop,0)) %>%
+        ggplot(aes(x=date, y=New_cases_per100k, color = county, label1 = New_cases)) + 
+        geom_line() + geom_point() + theme(legend.position = "bottom") + labs(y="Cases per 100,000")
     })
 
     ## patient time raw
@@ -627,7 +637,7 @@ server <- function(input, output) {
         geom_line(aes(x=date,y=Hospitalised),color="orange") + 
         geom_point(aes(x=date,y=ICU),color="red") + 
         geom_line(aes(x=date,y=ICU),color="red") + 
-        theme_bw() + 
+        theme(legend.position = "bottom") +
         labs(y="Hospitalised (orange) and ICU (red) patients")
     })
     
@@ -643,6 +653,22 @@ server <- function(input, output) {
         geom_point(aes(x=date,y=ICU_percent),color="red") + 
         geom_line(aes(x=date,y=ICU_percent),color="red") + theme_bw() + 
         labs(y="Hospitalised and ICU patients (% of total cases)")
+    })
+    
+    ## new icu, death
+    output$newpatients <- renderPlot({
+      
+      dataStats() %>% 
+        mutate(date = as.Date(date,format = "%d/%m/%Y"),
+               Cases = c(NA,diff(Cases)),
+               Hospitalised = c(NA,diff(Hospitalised)),
+               ICU = c(NA,diff(ICU)),
+               Deaths = c(NA,diff(Deaths))) %>%
+        gather(type, count, Cases:Deaths, factor_key=TRUE) %>% 
+        filter(type!="Cases") %>%
+        ggplot(aes(x=date, y=count, color = type)) + geom_line() + 
+        geom_point() + labs(y="New daily counts") + theme(legend.position = "bottom")
+      
     })
 
     
