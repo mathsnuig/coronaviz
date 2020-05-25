@@ -25,8 +25,8 @@ minshift = -20
 maxshift = 30
 
 # Data dates
-daily_date = "12/05/2020"
-lag_date = "10/05/2020"
+daily_date = "24/05/2020"
+lag_date = "22/05/2020"
 
 # use round away from zero form of rounding (sometimes called banker's rounding)
 # what many of us learnt in school!
@@ -162,6 +162,7 @@ body <- dashboardBody(
                                        selected = "Confirmed cases only"),
                            plotlyOutput("dailyicu", width = "90%", height = 400)),
                   tabPanel("Testing", 
+                           plotlyOutput("tests", width = "90%", height = 400),
                            h4("Official testing data are presented in the table below. 
                               Positive percentage is calculated using ROI cases only, 
                               excluding those from the German lab, and assuming that 
@@ -472,10 +473,6 @@ server <- function(input, output) {
       read.csv("data/corona_stats.csv") %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y"))
     })
-    dataTest <- reactive({
-      read.csv("data/corona_testing.csv") %>%
-        mutate(date = as.Date(date,format = "%d/%m/%Y"))
-    })
     
     ## country selector
     output$country_choice <- renderUI({
@@ -516,80 +513,12 @@ server <- function(input, output) {
         #mutate(Growth_Percentage = round2(((Total_cases/c(NA,Total_cases[1:(length(Total_cases)-1)]))-1)*100,0)) %>%
         ggplot(aes(x=Date,y=New_cases,fill=lab_location,label=Date,label1=Total_cases)) + 
         geom_col() + 
+        scale_fill_manual(values=wes_palette("GrandBudapest1", n=3))+
         theme(legend.position="none") + theme_bw() + labs(y="Daily New Cases")
       ggplotly(g, tooltip = c("Date", "New_cases"))
       
     })
     
-    ## testing
-    output$testdata <- renderDT({
-      tests <- c(397,1784,6636,
-                 17992,30213,42484,
-                 90646,111584,153954,
-                 214761,258808)
-      dates <- as.Date(c("02/03/2020","09/03/2020", "17/03/2020", 
-                "23/03/2020", "30/03/2020", "06/04/2020", 
-                "13/04/2020", "20/04/2020", "27/04/2020", 
-                "04/05/2020", "11/05/2020"),format="%d/%m/%Y")
-      tests_pw <- c(NA,diff(tests))
-      tests_pd <- c(80, 198, 606, 1892, 1746, 1753, 6880, 2991, 6053, 8687, 6292)
-      links <- c("https://bit.ly/2wpipR2", "https://bit.ly/2wpipR2", "https://bit.ly/3c83Twp", 
-                 "https://bit.ly/2XmjlAE", "https://bit.ly/2UVD7l9", "https://bit.ly/34rdXOu",
-                 "https://bit.ly/2XZeiXe", "https://bit.ly/34YHCyu", "https://bit.ly/3aHIk4J",
-                 "https://bit.ly/3c8kpwO", "https://bit.ly/2YWB6HJ")
-      refs <- paste0("<a href='",links,"' target='_blank'>",links,"</a>")
-      
-      # weekly tests
-      dat <- read.csv("data/corona_ireland.csv") %>% 
-        mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
-        filter(lab_location !="germany") %>%
-        filter(area!="north")  %>%
-        mutate(week = case_when(date > dates[1] & date <= dates[2] ~ 1,
-                                date > dates[2] & date <= dates[3] ~ 2,
-                                date > dates[3] & date <= dates[4] ~ 3,
-                                date > dates[4] & date <= dates[5] ~ 4,
-                                date > dates[5] & date <= dates[6] ~ 5,
-                                date > dates[6] & date <= dates[7] ~ 6,
-                                date > dates[7] & date <= dates[8] ~ 7,
-                                date > dates[8] & date <= dates[9] ~ 8,
-                                date > dates[9] & date <= dates[10] ~ 9,
-                                date > dates[10] & date <= dates[11] ~ 10
-        )) %>%
-        group_by(week) %>%
-        summarise(new_cases = sum(ncase)) %>%
-        na.omit() 
-      
-      df <- data.frame(date = as.Date(dates, format = "%d/%m/%Y"), 
-                       Total_tests = tests,
-                       Source = refs, 
-                       Tests_between_updates = tests_pw,
-                       Cases_between_updates = c(NA, as.vector(dat$new_cases)),
-                       Positive_percentage = round(100*c(NA, as.vector(dat$new_cases))/tests_pw,1),
-                       Daily_tests_between_updates = tests_pd)
-      datatable(df, escape = FALSE, options = list(pageLength = 15))
-    })
-    
-    # tests over time
-    output$tests <- renderPlotly({
-      # merge with new cases in ROI only
-      # work out diagnosis rate per day
-      # plot this over time
-      g = dataIreland()  %>%
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
-        filter(date > "02/03/2020",
-               area!= "north",
-               lab_location != "germany") %>%         
-        group_by(date) %>%
-        summarise(New_cases = sum(ncase)) %>%
-        na.omit() %>%
-        left_join(dataTest()) %>% 
-        mutate(Percentage_Positive = round2(100*New_cases/tests,1), Estimated_tests = tests) %>%
-        #mutate(Percentage_Positive = zoo::rollmean(Percentage_Positive, 2, na.pad = T)) %>%
-        ggplot(aes(x=date,y=Percentage_Positive, label1 = New_cases, label2 = Estimated_tests)) + 
-        geom_col() + labs(y="Estimated positive test rate (%)") + theme_bw()
-      ggplotly(g, tooltip = c("date", "New_cases", "Estimated_tests", "Percentage_Positive"))
-      
-    })
     
     # cumulative cases over time
     output$cumulcases <- renderPlotly({
@@ -716,7 +645,74 @@ server <- function(input, output) {
         na.omit() %>%
         filter(type == conf | type == paste0(conf,"_ventilated")) %>%
         ggplot(aes(x=datetime, y=ncase, color = type)) + geom_line() + 
+        scale_color_manual(values=wes_palette("GrandBudapest1", n=2)) +
         labs(y="Patients in intensive care") + theme_bw()
+    })
+    
+    ## testing
+    dataTest <- reactive({
+      tests <- c(397,1784,6636,
+                 17992,30213,42484,
+                 90646,111584,153954,
+                 214761,258808,295626)
+      dates <- as.Date(c("02/03/2020","09/03/2020", "17/03/2020", 
+                         "23/03/2020", "30/03/2020", "06/04/2020", 
+                         "13/04/2020", "20/04/2020", "27/04/2020", 
+                         "04/05/2020", "11/05/2020", "18/05/2020"),format="%d/%m/%Y")
+      tests_pw <- c(NA,diff(tests))
+      tests_pd <- c(80, 198, 606, 1892, 1746, 1753, 6880, 2991, 6053, 8687, 6292, 5260)
+      links <- c("https://bit.ly/2wpipR2", "https://bit.ly/2wpipR2", "https://bit.ly/3c83Twp", 
+                 "https://bit.ly/2XmjlAE", "https://bit.ly/2UVD7l9", "https://bit.ly/34rdXOu",
+                 "https://bit.ly/2XZeiXe", "https://bit.ly/34YHCyu", "https://bit.ly/3aHIk4J",
+                 "https://bit.ly/3c8kpwO", "https://bit.ly/2YWB6HJ", "https://bit.ly/2AJObtX")
+      refs <- paste0("<a href='",links,"' target='_blank'>",links,"</a>")
+      
+      # weekly tests
+      dat <- read.csv("data/corona_ireland.csv") %>% 
+        mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
+        filter(lab_location !="germany") %>%
+        filter(area!="north")  %>%
+        mutate(week = case_when(date > dates[1] & date <= dates[2] ~ 1,
+                                date > dates[2] & date <= dates[3] ~ 2,
+                                date > dates[3] & date <= dates[4] ~ 3,
+                                date > dates[4] & date <= dates[5] ~ 4,
+                                date > dates[5] & date <= dates[6] ~ 5,
+                                date > dates[6] & date <= dates[7] ~ 6,
+                                date > dates[7] & date <= dates[8] ~ 7,
+                                date > dates[8] & date <= dates[9] ~ 8,
+                                date > dates[9] & date <= dates[10] ~ 9,
+                                date > dates[10] & date <= dates[11] ~ 10,
+                                date > dates[11] & date <= dates[12] ~ 11
+        )) %>%
+        group_by(week) %>%
+        summarise(new_cases = sum(ncase)) %>%
+        na.omit() 
+      
+      data.frame(date = as.Date(dates, format = "%d/%m/%Y"), 
+                 Total_tests = tests,
+                 Source = refs, 
+                 Tests_between_updates = tests_pw,
+                 Cases_between_updates = c(NA, as.vector(dat$new_cases)),
+                 Positive_percentage = round(100*c(NA, as.vector(dat$new_cases))/tests_pw,1),
+                 Daily_tests_between_updates = tests_pd)
+    })
+    
+    # table of data
+    output$testdata <- renderDT({
+      datatable(dataTest(), escape = FALSE, options = list(pageLength = 15))
+    })
+    
+    # bar plot of positive tests over week
+    output$tests <- renderPlotly({
+      
+      g = ggplot(dataTest(), aes(x=date,y=Positive_percentage,
+                                 label1 = Cases_between_updates, 
+                                 label2 = Tests_between_updates,
+                                 fill=as.factor(1))) + 
+        scale_fill_manual(values=wes_palette("GrandBudapest1", n=1))+
+        geom_col() + theme_bw() + labs(y="Positive test (%)") + theme(legend.position = "none")
+      ggplotly(g, tooltip = c("date", "Cases_between_updates", "Tests_between_updates", "Positive_percentage"))
+      
     })
     
     ################### Comparison tabs ############
@@ -1214,6 +1210,7 @@ server <- function(input, output) {
         gather(type, count, Cases:Deaths, factor_key=TRUE) %>% 
         filter(type!="Cases") %>%
         ggplot(aes(x=date, y=count, color = type)) + geom_line() + 
+        scale_color_manual(values=wes_palette("GrandBudapest1", n=3)) +
         geom_point() + labs(y="New daily counts") + theme_bw()
       ggplotly(g)
       
