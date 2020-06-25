@@ -22,8 +22,8 @@ minshift = -20
 maxshift = 30
 
 # Data dates
-daily_date = "24/05/2020"
-lag_date = "22/05/2020"
+daily_date = "24/06/2020"
+lag_date = "22/06/2020"
 
 # use round away from zero form of rounding (sometimes called banker's rounding)
 # what many of us learnt in school!
@@ -80,7 +80,7 @@ ui = f7Page(
         plotOutput("newdeaths", width = "90%", height = 400),
         h4("Growth rate of deaths"),
         plotOutput("growthdeath", width = "90%", height = 400),
-        h4("Patients in intensive care"),
+        h4("Patients in hospital"),
         h5(paste0("Data taken from "),
            tags$a(href="https://www.hse.ie/eng/services/news/newsfeatures/covid19-updates/",
                   "HSE daily updates", target="_blank")),
@@ -100,7 +100,7 @@ ui = f7Page(
       
       # Map, report tab
       f7Tab(
-        tabName = "map",
+        tabName = "ireland",
         icon = f7Icon("calendar"),
         active = FALSE,
         # Tab 5 content
@@ -124,7 +124,7 @@ ui = f7Page(
       
       # Compare tab
       f7Tab(
-        tabName = "compare",
+        tabName = "worldwide",
         icon = f7Icon("layers"),
         active = FALSE,
         # Tab 3 content
@@ -203,7 +203,7 @@ server <- function(input, output) {
     # Firstly group by date, region and gender and put in date order
     ecdpcdata = ecdpcdata %>%
       mutate(country = tolower(countriesAndTerritories), 
-             gender = "unknown", area = "unknown", pop = popData2018) %>%
+             gender = "unknown", area = "unknown", pop = popData2019) %>%
       filter(country != "ireland") %>%
       select(date = dateRep, ncase = cases, ndeath = deaths, gender, area, country, pop)
     
@@ -214,7 +214,7 @@ server <- function(input, output) {
     ecdpcdata <- ecdpcdata %>% filter(!(ncase == 0 & ndeath == 0))
     
     dataRaw() %>% 
-      select(-c(lab_location,death)) %>%
+      select(-c(type,death)) %>%
       mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
       rbind(ecdpcdata)
   })
@@ -381,11 +381,13 @@ server <- function(input, output) {
       
       dataIreland() %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        group_by(date,lab_location) %>%
+        group_by(date,type) %>%
         summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
-        ggplot(aes(x=Date,y=New_cases,fill=lab_location)) + geom_col() + 
-        scale_fill_manual(values=wes_palette("GrandBudapest1", n=3)) +
-        theme(legend.position="bottom") + labs(y="Daily New Cases")
+        ggplot(aes(x=Date,y=New_cases,fill=type)) + geom_col() + 
+        scale_fill_manual(values=wes_palette("GrandBudapest1", n=4)) +
+        theme(legend.position="bottom") + labs(y="Daily New Cases")+
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
+        scale_x_date(date_breaks = "3 days")
       
     })
     
@@ -400,7 +402,9 @@ server <- function(input, output) {
         mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases)) %>%
         ggplot(aes(x=date,y=ccases,label=Date,label1=Total_cases,label2=New_cases)) + 
         geom_line() + geom_point() + geom_col(aes(x=date,y=ncases)) +
-        theme(legend.position="none") + labs(y="Cases") + theme_bw()
+        theme(legend.position="none") + labs(y="Cases") + theme_bw()+
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
+        scale_x_date(date_breaks = "3 days")
       
     })
     
@@ -415,7 +419,9 @@ server <- function(input, output) {
         mutate(cdeaths = cumsum(ndeaths), Total_deaths= cumsum(ndeaths))  %>%
         ggplot(aes(x=Date,y=cdeaths,label=Date,label1=Total_deaths,label2=New_deaths)) + 
         geom_line() + geom_point() + geom_col(aes(x=Date,y=ndeaths)) + theme_bw() +
-        theme(legend.position="none") + labs(y="Deaths")
+        theme(legend.position="none") + labs(y="Deaths")+
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
+        scale_x_date(date_breaks = "3 days")
       
     })  
     
@@ -430,7 +436,9 @@ server <- function(input, output) {
         arrange(death,.by_group=TRUE) %>%
         ggplot(aes(x=Date,y=New,fill=death)) + 
         scale_fill_manual(values=wes_palette("GrandBudapest1", n=3))+
-        geom_col() + theme(legend.position = "bottom") + labs(y="Daily death notifications")
+        geom_col() + theme(legend.position = "bottom") + labs(y="Daily death notifications")+
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
+        scale_x_date(date_breaks = "3 days")
       
     })  
     
@@ -442,7 +450,9 @@ server <- function(input, output) {
         filter(Date >= as.Date("13/03/2020",format = "%d/%m/%Y")) %>%
         ggplot(aes(x=Date,y=Growth)) + 
         geom_line() + geom_point() +
-        theme(legend.position="none") + labs(y="Growth in Total Cases per day (%)") + theme_bw()
+        theme(legend.position="none") + labs(y="Growth in Total Cases per day (%)") + theme_bw()+
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
+        scale_x_date(date_breaks = "3 days")
       
     })
     
@@ -456,7 +466,9 @@ server <- function(input, output) {
         filter(Date >= as.Date("28/03/2020",format = "%d/%m/%Y")) %>%
         ggplot(aes(x=Date,y=Growth,label1=New_deaths,label2=Total_deaths)) + 
         geom_point() + geom_line() + theme_bw() +
-        theme(legend.position="none") + labs(y="Growth in Total Deaths per day (%)")
+        theme(legend.position="none") + labs(y="Growth in Total Deaths per day (%)")+
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
+        scale_x_date(date_breaks = "3 days")
       
     })
     
@@ -465,23 +477,30 @@ server <- function(input, output) {
       tests <- c(397,1784,6636,
                  17992,30213,42484,
                  90646,111584,153954,
-                 214761,258808,295626)
+                 214761,258808,295626,
+                 325795,348416, 367780,
+                 386572)
       dates <- as.Date(c("02/03/2020","09/03/2020", "17/03/2020", 
                          "23/03/2020", "30/03/2020", "06/04/2020", 
                          "13/04/2020", "20/04/2020", "27/04/2020", 
-                         "04/05/2020", "11/05/2020", "18/05/2020"),format="%d/%m/%Y")
+                         "04/05/2020", "11/05/2020", "18/05/2020",
+                         "25/05/2020", "01/06/2020", "08/06/2020",
+                         "15/06/2020"),format="%d/%m/%Y")
       tests_pw <- c(NA,diff(tests))
-      tests_pd <- c(80, 198, 606, 1892, 1746, 1753, 6880, 2991, 6053, 8687, 6292, 5260)
+      tests_pd <- c(80, 198, 606, 1892, 1746, 1753, 6880, 2991, 6053, 8687, 6292, 
+                    5260, 4310, 3232, 2766, 2685)
       links <- c("https://bit.ly/2wpipR2", "https://bit.ly/2wpipR2", "https://bit.ly/3c83Twp", 
                  "https://bit.ly/2XmjlAE", "https://bit.ly/2UVD7l9", "https://bit.ly/34rdXOu",
                  "https://bit.ly/2XZeiXe", "https://bit.ly/34YHCyu", "https://bit.ly/3aHIk4J",
-                 "https://bit.ly/3c8kpwO", "https://bit.ly/2YWB6HJ", "https://bit.ly/2AJObtX")
+                 "https://bit.ly/3c8kpwO", "https://bit.ly/2YWB6HJ", "https://bit.ly/2AJObtX",
+                 "https://bit.ly/3efuKYi", "https://bit.ly/3gWRqPo", "https://bit.ly/3d7l1CE",
+                 "https://bit.ly/3egfYkn")
       refs <- paste0("<a href='",links,"' target='_blank'>",links,"</a>")
       
       # weekly tests
       dat <- read.csv("data/corona_ireland.csv") %>% 
         mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
-        filter(lab_location !="germany") %>%
+        filter(type !="german_lab") %>%
         filter(area!="north")  %>%
         mutate(week = case_when(date > dates[1] & date <= dates[2] ~ 1,
                                 date > dates[2] & date <= dates[3] ~ 2,
@@ -493,7 +512,11 @@ server <- function(input, output) {
                                 date > dates[8] & date <= dates[9] ~ 8,
                                 date > dates[9] & date <= dates[10] ~ 9,
                                 date > dates[10] & date <= dates[11] ~ 10,
-                                date > dates[11] & date <= dates[12] ~ 11
+                                date > dates[11] & date <= dates[12] ~ 11,
+                                date > dates[12] & date <= dates[13] ~ 12,
+                                date > dates[13] & date <= dates[14] ~ 13,
+                                date > dates[14] & date <= dates[15] ~ 14,
+                                date > dates[15] & date <= dates[16] ~ 15
         )) %>%
         group_by(week) %>%
         summarise(new_cases = sum(ncase)) %>%
@@ -510,7 +533,7 @@ server <- function(input, output) {
     
     # table of data
     output$testdata <- renderDT({
-      datatable(dataTest(), escape = FALSE, options = list(pageLength = 15))
+      datatable(dataTest(), escape = FALSE, options = list(pageLength = 25))
     })
     
     # bar plot of positive tests over week
@@ -519,28 +542,29 @@ server <- function(input, output) {
       ggplot(dataTest(), aes(x=date,y=Positive_percentage,
                                  fill=as.factor(1))) + 
         scale_fill_manual(values=wes_palette("GrandBudapest1", n=1))+
-        geom_col() + theme_bw() + labs(y="Positive test (%)") + theme(legend.position = "none")
+        geom_col() + theme_bw() + labs(y="Positive test (%)") + theme(legend.position = "none") +
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
+        scale_x_date(date_breaks = "7 days") 
       
     })
     
     ### ICU trends
     output$dailyicu <- renderPlot({
+      lims <- as.POSIXct(strptime(c("29/02/2020 00:00",paste0(daily_date, " 00:00")), format = "%d/%m/%Y %H:%M"))    
       conf <- ifelse(input$confirmed == "Confirmed cases only", "confirmed", "total")
       dataICU() %>% 
         spread(type, ncase) %>% 
-        filter(date > "2020-03-30") %>% 
-        mutate(total = confirmed + suspected,
-               confirmed_ventilated_percentage = round(100*confirmed_ventilated/confirmed,1),
-               total_ventilated = confirmed_ventilated + suspected_ventilated,
-               total_ventilated_percentage = round(100*(confirmed_ventilated + suspected_ventilated) / total , 1)) %>%
+        mutate(icu_total = icu_confirmed + icu_suspected,
+               ventilated_total = ventilated_confirmed + ventilated_suspected) %>%
         gather(type, ncase, -c(datetime,date,time)) %>%
         na.omit() %>%
-        filter(type == conf | type == paste0(conf,"_ventilated")) %>%
+        filter(type == "hospitalised" | type == paste0("icu_",conf) | type == paste0("ventilated_",conf)) %>%
         ggplot(aes(x=datetime, y=ncase, color = type)) + geom_line() + 
-        scale_color_manual(values=wes_palette("GrandBudapest1", n=2))+
-        labs(y="Patients in intensive care") + theme(legend.position = "bottom")
+        scale_color_manual(values=wes_palette("GrandBudapest1", n=3)) +
+        labs(y="Patients") + theme_bw() +
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
+        scale_x_datetime(date_breaks = "3 days", date_labels = "%Y-%m-%d", limits = lims)
     })
-    
 
     ################### Comparison plots ############
     ## compare countries on the per 1m of pop scale
@@ -622,7 +646,9 @@ server <- function(input, output) {
                    label4 = Actual_total , label5 = Actual_new_cases)) +
         geom_line() + geom_point() + labs(y = "Cases (per million of population)") + theme(legend.position = "bottom") + 
         annotate("text", x = xnote, y = ynote, 
-                 label = paste0("Closest trajectory at ", bestshift, " days"))
+                 label = paste0("Closest trajectory at ", bestshift, " days"))+
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
+        scale_x_date(date_breaks = "3 days")
 
     })
     
@@ -707,7 +733,9 @@ server <- function(input, output) {
                    label4 = Actual_total , label5 = Actual_new_deaths)) +
         geom_line() + geom_point() + labs(y = "Deaths (per million of population)") + theme(legend.position = "botoom") + 
         annotate("text", x = xnote, y = ynote, 
-                 label = paste0("Closest trajectory at ", bestshift, " days"))
+                 label = paste0("Closest trajectory at ", bestshift, " days"))+
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
+        scale_x_date(date_breaks = "3 days")
 
     })
     
@@ -779,19 +807,7 @@ server <- function(input, output) {
                          label = lapply(labs, htmltools::HTML),
                          fillOpacity = 0.9)
     })
-    
-    ## province time
-    output$cumulcounty <- renderPlot({
-      
-      dataCounty() %>%
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        group_by(date,province) %>%
-        summarise(Total_cases = sum(ncases)) %>%
-        ggplot(aes(x=date,y=Total_cases,color=province,group=province)) + 
-        geom_line() + geom_point() + theme(legend.position = "bottom") + labs(y="Cases")
-      
-    })   
-    
+
     ## province time scaled
     output$cumulcountyscaled <- renderPlot({
       
@@ -802,13 +818,13 @@ server <- function(input, output) {
         mutate(Cases_per100k = round2(100000*Total_cases/pop,0)) %>%
         ggplot(aes(x=date,y=Cases_per100k,color=province,group=province)) + 
         geom_line() + geom_point() + labs(y="Cases per 100,000 population") +
-        theme(legend.position = "bottom")
+        theme(legend.position = "bottom")+
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
+        scale_x_date(date_breaks = "3 days")
       
     })    
     
     ## county time
-    
-    # county cumulative
     output$cumulrealcounty <- renderPlot({
       
       dataCounty() %>%
@@ -819,21 +835,12 @@ server <- function(input, output) {
         mutate(Cases_per100k = round2(100000*Total_cases/pop,0)) %>%
         ggplot(aes(x=date,y=Cases_per100k,color=county,group=county)) + 
         geom_line() + geom_point() + labs(y="Cases per 100,000") + 
-        theme(legend.position = "bottom")
+        theme(legend.position = "bottom")+
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
+        scale_x_date(date_breaks = "3 days")
       
     })   
-    
-    # county new
-    output$newcounty <- renderPlot({
-       dataCounty() %>%
-        filter(county %in% input$county2) %>%
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        group_by(county) %>% 
-        mutate(New_cases = c(NA,diff(ncases)),
-               New_cases_per100k = round2(1e5*New_cases/pop,0)) %>%
-        ggplot(aes(x=date, y=New_cases_per100k, color = county, label1 = New_cases)) + 
-        geom_line() + geom_point() + theme(legend.position = "bottom") + labs(y="Cases per 100,000")
-    })
+
 
     ## patient time raw
     output$patienttime <- renderPlot({
@@ -845,7 +852,9 @@ server <- function(input, output) {
         geom_point(aes(x=date,y=ICU),color="red") + 
         geom_line(aes(x=date,y=ICU),color="red") + 
         theme(legend.position = "bottom") +
-        labs(y="Hospitalised (orange) and intensive care (red) patients")
+        labs(y="Hospitalised (orange) and intensive care (red) patients")+
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
+        scale_x_date(date_breaks = "3 days")
     })
     
     ## patient time percentage
@@ -859,7 +868,9 @@ server <- function(input, output) {
         geom_line(aes(x=date,y=Hospitalised_percent), color="orange") + 
         geom_point(aes(x=date,y=ICU_percent),color="red") + 
         geom_line(aes(x=date,y=ICU_percent),color="red") + theme_bw() + 
-        labs(y="Hospitalised and intensive care patients (% of total cases)")
+        labs(y="Hospitalised and intensive care patients (% of total cases)")+
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
+        scale_x_date(date_breaks = "3 days")
     })
     
     ## new icu, death
@@ -875,7 +886,9 @@ server <- function(input, output) {
         filter(type!="Cases") %>%
         ggplot(aes(x=date, y=count, color = type)) + geom_line() + 
         scale_color_manual(values=wes_palette("GrandBudapest1", n=3)) +
-        geom_point() + labs(y="New daily counts") + theme(legend.position = "bottom")
+        geom_point() + labs(y="New daily counts") + theme(legend.position = "bottom")+
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
+        scale_x_date(date_breaks = "3 days")
       
     })
 
