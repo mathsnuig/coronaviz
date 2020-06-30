@@ -8,6 +8,7 @@ library(leaflet)
 library(leaflet.extras)
 library(plotly)
 library(ggplot2)
+library(prettyunits)
 library(dplyr)
 library(DT)
 library(googleVis)
@@ -22,8 +23,9 @@ minshift = -20
 maxshift = 30
 
 # Data dates
-daily_date = "24/06/2020"
-lag_date = "22/06/2020"
+daily_date = "30/06/2020"
+lag_date = "28/06/2020"
+maxdays = 150
 
 # use round away from zero form of rounding (sometimes called banker's rounding)
 # what many of us learnt in school!
@@ -108,8 +110,6 @@ ui = f7Page(
            tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
                   "HSE Health Protection Surveillance Centre", target="_blank")),
         leafletOutput("map", width = "90%", height = 550),
-        h4(tags$caption("Cumulative cases by province, per 100,000 population")),
-        plotOutput("cumulcountyscaled", width = "90%", height = 400),
         f7SmartSelect("county", "Counties to compare",
                       choices = c("Carlow","Cavan","Clare","Cork","Donegal","Dublin",
                                   "Galway","Kerry","Kildare","Kilkenny","Laois","Leitrim","Limerick",
@@ -117,6 +117,9 @@ ui = f7Page(
                                   "Sligo","Tipperary","Waterford","Westmeath","Wexford","Wicklow"),
                       selected = c("Cavan","Cork","Dublin","Galway","Limerick","Monaghan","Westmeath"),
                       multiple = TRUE),
+        h4(tags$caption("New cases by county, per million population")),
+        plotOutput("newcountyscaled", width = "90%", height = 400),
+        h4(tags$caption("Cumulative cases by county, per million population")),
         plotOutput("cumulrealcounty", width = "90%", height = 400),
         h4(tags$caption("Cases hospitalised and in intensive care")),
         plotOutput("newpatients", width = "90%", height = 600)
@@ -130,7 +133,7 @@ ui = f7Page(
         # Tab 3 content
         uiOutput("country_choice"), 
         h4("Decide how many days behind/ahead Ireland is to your selected country"),
-        f7Slider("days","Decide the time difference",min = -5,max=30,value=0,scale = TRUE,step = 1),
+        f7checkBox("log","Compare on log scale",value=FALSE),
         h4("Compare cases per million"),
         plotOutput("casecompare", width = "90%", height = 400),
         h4("Compare deaths per million"),
@@ -238,8 +241,8 @@ server <- function(input, output) {
     output$country_choice <- renderUI({
       f7SmartSelect("place", "Country to compare",
                     choices = unique(dataCountry()$country),
-                    selected = "france",
-                    multiple = FALSE)
+                    selected = c("ireland","united kingdom","united states of america"),
+                    multiple = TRUE)
     })
 
     
@@ -387,7 +390,7 @@ server <- function(input, output) {
         scale_fill_manual(values=wes_palette("GrandBudapest1", n=4)) +
         theme(legend.position="bottom") + labs(y="Daily New Cases")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       
     })
     
@@ -404,7 +407,7 @@ server <- function(input, output) {
         geom_line() + geom_point() + geom_col(aes(x=date,y=ncases)) +
         theme(legend.position="none") + labs(y="Cases") + theme_bw()+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       
     })
     
@@ -421,7 +424,7 @@ server <- function(input, output) {
         geom_line() + geom_point() + geom_col(aes(x=Date,y=ndeaths)) + theme_bw() +
         theme(legend.position="none") + labs(y="Deaths")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       
     })  
     
@@ -438,7 +441,7 @@ server <- function(input, output) {
         scale_fill_manual(values=wes_palette("GrandBudapest1", n=3))+
         geom_col() + theme(legend.position = "bottom") + labs(y="Daily death notifications")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       
     })  
     
@@ -452,7 +455,7 @@ server <- function(input, output) {
         geom_line() + geom_point() +
         theme(legend.position="none") + labs(y="Growth in Total Cases per day (%)") + theme_bw()+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       
     })
     
@@ -479,22 +482,22 @@ server <- function(input, output) {
                  90646,111584,153954,
                  214761,258808,295626,
                  325795,348416, 367780,
-                 386572)
+                 386572, 404989)
       dates <- as.Date(c("02/03/2020","09/03/2020", "17/03/2020", 
                          "23/03/2020", "30/03/2020", "06/04/2020", 
                          "13/04/2020", "20/04/2020", "27/04/2020", 
                          "04/05/2020", "11/05/2020", "18/05/2020",
                          "25/05/2020", "01/06/2020", "08/06/2020",
-                         "15/06/2020"),format="%d/%m/%Y")
+                         "15/06/2020", "22/06/2020"),format="%d/%m/%Y")
       tests_pw <- c(NA,diff(tests))
       tests_pd <- c(80, 198, 606, 1892, 1746, 1753, 6880, 2991, 6053, 8687, 6292, 
-                    5260, 4310, 3232, 2766, 2685)
+                    5260, 4310, 3232, 2766, 2685, 2631)
       links <- c("https://bit.ly/2wpipR2", "https://bit.ly/2wpipR2", "https://bit.ly/3c83Twp", 
                  "https://bit.ly/2XmjlAE", "https://bit.ly/2UVD7l9", "https://bit.ly/34rdXOu",
                  "https://bit.ly/2XZeiXe", "https://bit.ly/34YHCyu", "https://bit.ly/3aHIk4J",
                  "https://bit.ly/3c8kpwO", "https://bit.ly/2YWB6HJ", "https://bit.ly/2AJObtX",
                  "https://bit.ly/3efuKYi", "https://bit.ly/3gWRqPo", "https://bit.ly/3d7l1CE",
-                 "https://bit.ly/3egfYkn")
+                 "https://bit.ly/3egfYkn", "https://bit.ly/3etmTqC")
       refs <- paste0("<a href='",links,"' target='_blank'>",links,"</a>")
       
       # weekly tests
@@ -516,7 +519,8 @@ server <- function(input, output) {
                                 date > dates[12] & date <= dates[13] ~ 12,
                                 date > dates[13] & date <= dates[14] ~ 13,
                                 date > dates[14] & date <= dates[15] ~ 14,
-                                date > dates[15] & date <= dates[16] ~ 15
+                                date > dates[15] & date <= dates[16] ~ 15,
+                                date > dates[16] & date <= dates[17] ~ 16
         )) %>%
         group_by(week) %>%
         summarise(new_cases = sum(ncase)) %>%
@@ -562,181 +566,70 @@ server <- function(input, output) {
         ggplot(aes(x=datetime, y=ncase, color = type)) + geom_line() + 
         scale_color_manual(values=wes_palette("GrandBudapest1", n=3)) +
         labs(y="Patients") + theme_bw() +
-        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_datetime(date_breaks = "3 days", date_labels = "%Y-%m-%d", limits = lims)
+        theme(axis.text.x = element_text(angle=45, hjust = 1), legend.position = "bottom") + 
+        scale_x_datetime(date_breaks = "7 days", date_labels = "%Y-%m-%d", limits = lims)
     })
 
     ################### Comparison plots ############
     ## compare countries on the per 1m of pop scale
+    ## compare countries on the per 1m of pop scale
     output$casecompare <- renderPlot({
       
-      dat <- dataCountry() %>% 
-        filter(country=="ireland" | country == input$place)
-      dat <- dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"), country = as.character(country), pop = pop/1e6)
-      
-      # scale comparator country to Ireland based on population size (dat$pop)
-      irelandpop = mean(dat$pop[dat$country == "ireland"])
-      dat <- dat %>% mutate(prop = irelandpop / pop)
-      
-      # Function to calculate MSE in cumulative cases for a particular shift
-      
-      cdiffmad <- function(dayshift, dat) { # dat is input, so only locally defined
-        
-        dat$date[dat$country == input$place] <- dat$date[dat$country == input$place] + dayshift
-        
-        # extract Ireland and comparator data and calculate cumulative cases
-        diffdat = dat %>%
-          mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
-          filter(country == "ireland" | country == input$place) %>%
-          group_by(country, date) %>%
-          summarise(ncases = sum(ncase), Date = min(date), Country = country[1], Pop = mean(pop)) %>% # sum up over all people
-          na.omit() %>%
-          mutate(ccases = round2(cumsum(ncases) / Pop, 0)) # cumulative count upto each day (scaled)
-        
-        # Calculate difference in number of cases when shifted and scaled to Ireland
-        ireland <- diffdat %>% filter(country == "ireland")
-        comp <- diffdat %>% filter(country == input$place)
-        comp <- merge(ireland, comp, by = "date") %>%
-          mutate(diff = abs(ccases.x - ccases.y)) %>% # absolute differences
-          select(date, diff)
-        
-        cmad = mean(comp$diff, na.rm = T) # MAD estimator
-        ifelse(is.na(cmad), Inf, cmad) # allow search to ignore the shift with no overlapping data
-      }
-      
-      allshifts = minshift:maxshift
-      allmads = sapply(allshifts, cdiffmad, dat)
-      cmad <- allmads[which.min(allmads)]
-      bestshift <- allshifts[which.min(allmads)] # must change slider if want this to be default behaviour
-      
-      # apply the shift to non-Ireland input country
-      dayshift = input$days
-      dat$date[dat$country==input$place] <- dat$date[dat$country==input$place] + dayshift
-      
-      # extract Ireland and comparator data and calculate cumulative cases
-      diffdat = dat %>%
-        mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
-        filter(country == "ireland" | country == input$place) %>%
-        group_by(country, date) %>%
-        summarise(ncases = sum(ncase), Date = min(date), Country = country[1], Pop = mean(pop)) %>% # sum up over all people
-        na.omit() %>%
-        mutate(ccases = round2(cumsum(ncases) / Pop, 0)) # cumulative count upto each day
-      
-      # Calculate difference in number of cases when shifted and scaled to Ireland
-      ireland <- diffdat %>% filter(country == "ireland")
-      comp <- diffdat %>% filter(country == input$place)
-      comp <- merge(ireland,comp, by = "date") %>%
-        mutate(diff = abs(ccases.x - ccases.y)) %>%  # absolute differences
-        select(date, diff)
-      
-      # change text label for comparator to say indicate shift and scale
-      dat$country[dat$country == input$place] <- paste(input$place, "+", input$days, "days")
-      
-      xnote = min(dat$date) + diff(range(dat$date)) * 0.5
-      ynote = max(diffdat$ccases)
-      dat %>% mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
+      dataCountry() %>% 
+        filter(country %in% input$place) %>% 
+        mutate(pop = pop/1e6) %>%
         group_by(country, date) %>%
         summarise(Actual_new_cases = sum(ncase), Date = min(date), Country = country[1], Pop = mean(pop)) %>%
         na.omit() %>%
-        mutate(Actual_total = cumsum(Actual_new_cases)) %>%
-        mutate(New_cases_per_million = round2(Actual_new_cases / Pop, 0), 
-               Total_cases_per_million = round2(Actual_total / Pop, 0)) %>%
-        ggplot(aes(x = Date, y = Total_cases_per_million, color = country, fill = country, label = Date,
-                   label1 = Country, label2 = Total_cases_per_million, label3 = New_cases_per_million, 
-                   label4 = Actual_total , label5 = Actual_new_cases)) +
-        geom_line() + geom_point() + labs(y = "Cases (per million of population)") + theme(legend.position = "bottom") + 
-        annotate("text", x = xnote, y = ynote, 
-                 label = paste0("Closest trajectory at ", bestshift, " days"))+
-        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
-
+        mutate(New_cases_per_million = round(Actual_new_cases / Pop, 0)) %>%
+        filter(New_cases_per_million > 0.1) %>%
+        mutate(Days = as.numeric(Date - min(Date)),
+               roll = rollmean(New_cases_per_million, k=7, na.pad = TRUE, align = "right")) %>%
+        ggplot(aes(x = Days, y = New_cases_per_million, color = country, fill = country, label = Date,
+                   label1 = Country, label2 = New_cases_per_million , label3 = Actual_new_cases)) +
+        geom_line(aes(y=roll)) + 
+        geom_point() + 
+        geom_text(data = . %>% filter(Days == max(Days)) %>% mutate(Days = Days + 2),
+                  aes(y=roll,label = country), hjust = 0, size = 4) +
+        labs(title = "Seven day rolling average (line) and actual (points) cases per million by days since 0.1 cases per million first recorded", 
+             x = "Days since 0.1 daily cases (per million) first recorded", 
+             y = ifelse(input$log == TRUE, "Log cases (per million of population)", "Cases (per million of population)")) + 
+        theme_bw() + 
+        theme(axis.text.x = element_text(angle=45, hjust = 1), legend.position = "none") +
+        scale_y_continuous(trans = ifelse(input$log == TRUE, "log10", "identity")) +
+        lims(x=c(0,maxdays))
+      
     })
     
     
-    ###### comparing deaths per million
+    
+    
     ## compare countries on the per 1m of pop scale
     output$deathcompare <- renderPlot({
       
-      dat <- dataCountry() %>% 
-        filter(country=="ireland" | country == input$place)
-      dat <- dat %>% mutate(date = as.Date(date,format = "%d/%m/%Y"), country = as.character(country), pop = pop/1e6)
-      
-      # scale comparator country to Ireland based on population size (dat$pop)
-      irelandpop = mean(dat$pop[dat$country == "ireland"])
-      dat <- dat %>% mutate(prop = irelandpop / pop)
-      
-      # Function to calculate MSE in cumulative cases for a particular shift
-      
-      cdiffmad <- function(dayshift, dat) { # dat is input, so only locally defined
-        
-        dat$date[dat$country == input$place] <- dat$date[dat$country == input$place] + dayshift
-        
-        # extract Ireland and comparator data and calculate cumulative cases
-        diffdat = dat %>%
-          mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
-          filter(country == "ireland" | country == input$place) %>%
-          group_by(country, date) %>%
-          summarise(ncases = sum(ndeath), Date = min(date), Country = country[1], Pop = mean(pop)) %>% # sum up over all people
-          na.omit() %>%
-          mutate(ccases = round2(cumsum(ncases) / Pop, 0)) # cumulative count upto each day (scaled)
-        
-        # Calculate difference in number of cases when shifted and scaled to Ireland
-        ireland <- diffdat %>% filter(country == "ireland")
-        comp <- diffdat %>% filter(country == input$place)
-        comp <- merge(ireland, comp, by = "date") %>%
-          mutate(diff = abs(ccases.x - ccases.y)) %>% # absolute differences
-          select(date, diff)
-        
-        cmad = mean(comp$diff, na.rm = T) # MAD estimator
-        ifelse(is.na(cmad), Inf, cmad) # allow search to ignore the shift with no overlapping data
-      }
-      
-      allshifts = minshift:maxshift
-      allmads = sapply(allshifts, cdiffmad, dat)
-      cmad <- allmads[which.min(allmads)]
-      bestshift <- allshifts[which.min(allmads)] # must change slider if want this to be default behaviour
-      
-      # apply the shift to non-Ireland input country
-      dayshift = input$days
-      dat$date[dat$country==input$place] <- dat$date[dat$country==input$place] + dayshift
-      
-      # extract Ireland and comparator data and calculate cumulative cases
-      diffdat = dat %>%
-        mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
-        filter(country == "ireland" | country == input$place) %>%
-        group_by(country, date) %>%
-        summarise(ncases = sum(ndeath), Date = min(date), Country = country[1], Pop = mean(pop)) %>% # sum up over all people
-        na.omit() %>%
-        mutate(ccases = round2(cumsum(ncases) / Pop, 0)) # cumulative count upto each day
-      
-      # Calculate difference in number of cases when shifted and scaled to Ireland
-      ireland <- diffdat %>% filter(country == "ireland")
-      comp <- diffdat %>% filter(country == input$place)
-      comp <- merge(ireland,comp, by = "date") %>%
-        mutate(diff = abs(ccases.x - ccases.y)) %>%  # absolute differences
-        select(date, diff)
-      
-      # change text label for comparator to say indicate shift and scale
-      dat$country[dat$country == input$place] <- paste(input$place, "+", input$days, "days")
-      
-      xnote = min(dat$date) + diff(range(dat$date)) * 0.5
-      ynote = max(diffdat$ccases)
-      dat %>% mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
+      dataCountry() %>% 
+        filter(country %in% input$place) %>% 
+        mutate(pop = pop/1e6) %>%
         group_by(country, date) %>%
         summarise(Actual_new_deaths = sum(ndeath), Date = min(date), Country = country[1], Pop = mean(pop)) %>%
         na.omit() %>%
-        mutate(Actual_total = cumsum(Actual_new_deaths)) %>%
-        mutate(New_deaths_per_million = round2(Actual_new_deaths / Pop, 0), 
-               Total_deaths_per_million = round2(Actual_total / Pop, 0)) %>%
-        ggplot(aes(x = Date, y = Total_deaths_per_million, color = country, fill = country, label = Date,
-                   label1 = Country, label2 = Total_deaths_per_million, label3 = New_deaths_per_million, 
-                   label4 = Actual_total , label5 = Actual_new_deaths)) +
-        geom_line() + geom_point() + labs(y = "Deaths (per million of population)") + theme(legend.position = "botoom") + 
-        annotate("text", x = xnote, y = ynote, 
-                 label = paste0("Closest trajectory at ", bestshift, " days"))+
-        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
-
+        mutate(New_deaths_per_million = round(Actual_new_deaths / Pop, 0)) %>%
+        filter(New_deaths_per_million > 0.1) %>%
+        mutate(Days = as.numeric(Date - min(Date)),
+               roll = round(rollmean(New_deaths_per_million, k=7, na.pad = TRUE, align = "right"),0)) %>%
+        ggplot(aes(x = Days, y = New_deaths_per_million, color = country, fill = country)) +
+        geom_line(aes(y=roll)) + 
+        geom_point() + 
+        geom_text(data = . %>% filter(Days == max(Days)) %>% mutate(Days = Days + 2),
+                  aes(y=roll,label = country), hjust = 0, size = 4) +
+        labs(title = "Seven day rolling average (line) and actual (points) deaths per million by days since 0.1 deaths per million first recorded", 
+             x = "Days since 0.1 daily deaths (per million) first recorded", 
+             y = ifelse(input$log == TRUE, "Log deaths (per million of population)", "Deaths (per million of population)")) + 
+        theme_bw() + 
+        theme(axis.text.x = element_text(angle=45, hjust = 1), legend.position = "none") +
+        scale_y_continuous(trans = ifelse(input$log == TRUE, "log10", "identity")) +
+        lims(x=c(0,maxdays))
+      
     })
     
     
@@ -808,19 +701,21 @@ server <- function(input, output) {
                          fillOpacity = 0.9)
     })
 
-    ## province time scaled
-    output$cumulcountyscaled <- renderPlot({
+    ## new county scaled
+    output$newcountyscaled <- renderPlot({
       
       dataCounty() %>%
+        filter(county %in% input$county) %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        group_by(date,province) %>%
-        summarise(Total_cases = sum(ncases), pop = sum(pop)) %>%
-        mutate(Cases_per100k = round2(100000*Total_cases/pop,0)) %>%
-        ggplot(aes(x=date,y=Cases_per100k,color=province,group=province)) + 
-        geom_line() + geom_point() + labs(y="Cases per 100,000 population") +
+        group_by(county) %>% 
+        mutate(New_cases = c(NA,diff(ncases)),
+               New_cases = ifelse(New_cases < 0, 0, New_cases),
+               New_cases_permillion = round2(1e6*New_cases/pop,0)) %>%
+        ggplot(aes(x=date, y=New_cases_permillion, color = county)) + 
+        geom_line() + labs(y="New cases (per million)")+
         theme(legend.position = "bottom")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       
     })    
     
@@ -832,12 +727,12 @@ server <- function(input, output) {
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
         group_by(date,county) %>%
         summarise(Total_cases = sum(ncases), pop = mean(pop)) %>%
-        mutate(Cases_per100k = round2(100000*Total_cases/pop,0)) %>%
-        ggplot(aes(x=date,y=Cases_per100k,color=county,group=county)) + 
-        geom_line() + geom_point() + labs(y="Cases per 100,000") + 
+        mutate(Cases_permillion = round2(1e6*Total_cases/pop,0)) %>%
+        ggplot(aes(x=date,y=Cases_permillion,color=county,group=county)) + 
+        geom_line() + geom_point() + labs(y="Cases per million") + 
         theme(legend.position = "bottom")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       
     })   
 
@@ -854,7 +749,7 @@ server <- function(input, output) {
         theme(legend.position = "bottom") +
         labs(y="Hospitalised (orange) and intensive care (red) patients")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
     })
     
     ## patient time percentage
@@ -870,7 +765,7 @@ server <- function(input, output) {
         geom_line(aes(x=date,y=ICU_percent),color="red") + theme_bw() + 
         labs(y="Hospitalised and intensive care patients (% of total cases)")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
     })
     
     ## new icu, death
@@ -888,7 +783,7 @@ server <- function(input, output) {
         scale_color_manual(values=wes_palette("GrandBudapest1", n=3)) +
         geom_point() + labs(y="New daily counts") + theme(legend.position = "bottom")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       
     })
 
