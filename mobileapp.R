@@ -18,13 +18,9 @@ library(readxl)
 library(tidyr)
 library(wesanderson)
 
-# Set range for day shifts considered in comparison
-minshift = -20
-maxshift = 30
-
 # Data dates
-daily_date = "30/06/2020"
-lag_date = "28/06/2020"
+daily_date = "08/07/2020"
+lag_date = "06/07/2020"
 maxdays = 150
 
 # use round away from zero form of rounding (sometimes called banker's rounding)
@@ -32,7 +28,6 @@ maxdays = 150
 # check out the "round" package to find out more than you ever wanted to know about the complexities of rounding
 round2 <- function(x, n = 0) (trunc((abs(x) * 10 ^ n) + 0.5) / 10 ^ n) * sign(x)
 
-                            
            
 ui = f7Page(
   title = "Coronavirus Ireland",

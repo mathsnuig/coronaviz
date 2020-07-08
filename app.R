@@ -7,6 +7,7 @@ library(leaflet)
 library(leaflet.extras)
 library(ggplot2)
 library(gganimate)
+library(gifski)
 library(prettyunits)
 library(dplyr)
 library(plotly)
@@ -19,16 +20,9 @@ library(zoo)
 library(tidyr)
 library(wesanderson)
 
-## moving plot(s)
-## modelling tab
-
-# Set range for day shifts considered in comparison
-minshift = -20
-maxshift = 30
-
 # Data dates
-daily_date = "30/06/2020"
-lag_date = "28/06/2020"
+daily_date = "08/07/2020"
+lag_date = "06/07/2020"
 maxdays = 150
 
 # use round away from zero form of rounding (sometimes called banker's rounding)
@@ -211,8 +205,8 @@ body <- dashboardBody(
                   width = 12, 
                   selected = "Cases per million",
                   tabPanel("Cases per million", plotOutput("casecompare", width = "90%", height = 500))
-                  # ,
-                  # tabPanel("Animation (slow but it'll get there)", imageOutput("caseanim", width = "90%", height = 500))
+                  ,
+                  tabPanel("Animation (slow but it'll get there)", imageOutput("caseanim", width = "90%", height = 500))
                   )
                 ),
                 fluidRow(
@@ -834,10 +828,9 @@ server <- function(input, output) {
                roll = rollmean(New_cases_per_million, k=7, na.pad = TRUE, align = "right")) %>%
         ggplot(aes(x = Days, y = New_cases_per_million, color = country, fill = country)) +
         geom_line(aes(y=roll)) + 
-        geom_point() + 
         geom_text(data = . %>% mutate(Days = Days + 2),
                   aes(y=roll,label = country), hjust = 0, size = 4) +
-        labs(title = "Seven day rolling average (line) and actual (points) cases per million", 
+        labs(title = "Seven day rolling average cases per million", 
              x = "Days since 0.1 daily cases (per million) first recorded", 
              y = ifelse(input$log == TRUE, "Log cases (per million of population)", "Cases (per million of population)")) + 
         theme_bw() + 
