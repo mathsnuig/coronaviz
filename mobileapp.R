@@ -19,8 +19,8 @@ library(tidyr)
 library(wesanderson)
 
 # Data dates
-daily_date = "08/07/2020"
-lag_date = "06/07/2020"
+daily_date = "13/07/2020"
+lag_date = "11/07/2020"
 maxdays = 150
 
 # use round away from zero form of rounding (sometimes called banker's rounding)
