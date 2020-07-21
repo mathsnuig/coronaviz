@@ -19,8 +19,8 @@ library(tidyr)
 library(wesanderson)
 
 # Data dates
-daily_date = "13/07/2020"
-lag_date = "11/07/2020"
+daily_date = "20/07/2020"
+lag_date = "18/07/2020"
 maxdays = 150
 
 # use round away from zero form of rounding (sometimes called banker's rounding)
@@ -69,6 +69,9 @@ ui = f7Page(
            paste0("before interpreting the data")),
         infoBoxOutput("CasesBox"),
         infoBoxOutput("MortBox"),
+        h4("Recent cases with seven day rolling average"),
+        plotOutput("recentplot", width = "90%", height = 400),
+        sliderInput("recent", "Choose how many days to display", value = 30, min = 7, max = 200),
         h4("New cases per day"),
         plotOutput("newcases", width = "90%", height = 400),
         h4("Growth rate of cases"),
@@ -373,6 +376,24 @@ server <- function(input, output) {
 
     
     ################### Time series plots ##############
+    
+    # recent cases
+    output$recentplot <- renderPlot({
+      
+      dataIreland() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        filter(date > as.Date(daily_date,format="%d/%m/%Y")-input$recent) %>%
+        group_by(date) %>%
+        summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
+        na.omit() %>%
+        mutate(roll = rollmean(New_cases, k=7, na.pad = TRUE, align = "right"))  %>%
+        ggplot(aes(x=Date,y=New_cases)) + 
+        geom_point() + geom_line(aes(y=roll)) +
+        theme(legend.position="none") + theme_bw() + labs(y="Daily New Cases")+
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
+        scale_x_date(date_breaks = "3 days")
+      
+    })
     
     # new cases per day
     output$newcases <- renderPlot({

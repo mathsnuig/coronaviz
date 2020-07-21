@@ -21,8 +21,8 @@ library(tidyr)
 library(wesanderson)
 
 # Data dates
-daily_date = "13/07/2020"
-lag_date = "11/07/2020"
+daily_date = "20/07/2020"
+lag_date = "18/07/2020"
 maxdays = 150
 
 # use round away from zero form of rounding (sometimes called banker's rounding)
@@ -129,6 +129,13 @@ body <- dashboardBody(
                 valueBoxOutput("HospBox"),
                 valueBoxOutput("ICUBox"),
                 fluidRow(
+                  box(
+                    title = "Recent new cases and seven day rolling average", 
+                    width = 12,
+                    plotlyOutput("recentplot", width = "90%", height = 400),
+                    sliderInput("recent", "Choose how many days to display", value = 30, min = 7, max = 200)
+                  )),
+                fluidRow(
                   tabBox(
                   title = "Cases",
                   width = 12, 
@@ -160,7 +167,8 @@ body <- dashboardBody(
                            selectInput("confirmed", "Include suspected cases", 
                                        choices = c("Confirmed cases only","Include suspected cases"),
                                        selected = "Confirmed cases only"),
-                           plotlyOutput("dailyicu", width = "90%", height = 400)),
+                           plotlyOutput("dailyicu", width = "90%", height = 400),
+                           sliderInput("recent2", "Choose how many days to display", value = 30, min = 1, max = 100)),
                   tabPanel("Testing", 
                            plotlyOutput("tests", width = "90%", height = 400),
                            h4("Official testing data are presented in the table below. 
@@ -524,8 +532,39 @@ server <- function(input, output) {
       )
     })
 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     ################### Time series plots ##############
+    output$recentplot <- renderPlotly({
+      
+      g = dataIreland() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        filter(date > as.Date(daily_date,format="%d/%m/%Y")-input$recent) %>%
+        group_by(date) %>%
+        summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
+        na.omit() %>%
+        mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases),
+               roll = rollmean(New_cases, k=7, na.pad = TRUE, align = "right"))  %>%
+        ggplot(aes(x=Date,y=New_cases,label=Date,label1=Total_cases)) + 
+        geom_point() + geom_line(aes(y=roll)) +
+        theme(legend.position="none") + theme_bw() + labs(y="Daily New Cases")+
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
+        scale_x_date(date_breaks = "3 days")
+      ggplotly(g, tooltip = c("Date", "New_cases"))
+      
+    })
+    
+    
     output$newcases <- renderPlotly({
       
       g = dataIreland() %>%
@@ -539,7 +578,7 @@ server <- function(input, output) {
         scale_fill_manual(values=wes_palette("GrandBudapest1", n=4))+
         theme(legend.position="none") + theme_bw() + labs(y="Daily New Cases")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       ggplotly(g, tooltip = c("Date", "New_cases", "type"))
       
     })
@@ -559,7 +598,7 @@ server <- function(input, output) {
         geom_line() + geom_point() + geom_col(aes(y=ncases)) +
         theme(legend.position="none") + theme_bw() + labs(y="Cases")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       ggplotly(g, tooltip = c("Date", "Total_cases","New_cases", "Growth_Percentage"))
       
     })
@@ -579,7 +618,7 @@ server <- function(input, output) {
         theme(legend.position="none") + labs(y="Cases (axis shows log10 scale)") +
         scale_y_continuous(trans='log10')+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       ggplotly(g, tooltip = c("Date","Total_cases","New_cases", "Growth_Percentage"))
       
     })
@@ -596,7 +635,7 @@ server <- function(input, output) {
         geom_point() + theme_bw() + geom_line() +
         theme(legend.position="none") + labs(y="Growth in Total Cases per day (%)")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       ggplotly(g, tooltip = c("Date", "Growth", "Total_cases", "New_cases"))
       
     })
@@ -612,7 +651,7 @@ server <- function(input, output) {
         geom_point() + theme_bw() + geom_line() +
         theme(legend.position="none") + labs(y="Growth in Total Deaths per day (%)")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       ggplotly(g, tooltip = c("Date", "Growth", "Total_deaths", "New_deaths"))
       
     })
@@ -629,7 +668,7 @@ server <- function(input, output) {
         geom_line() + geom_point() + geom_col(aes(x=Date,y=New_deaths)) + theme_bw() +
         labs(y="Deaths")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       ggplotly(g, tooltip = c("Date","death","Total_deaths","New_deaths"))
       
     })    
@@ -646,7 +685,7 @@ server <- function(input, output) {
         scale_fill_manual(values=wes_palette("GrandBudapest1", n=3))+
         geom_col() + theme_bw() + labs(y="Daily death notifications")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       ggplotly(g, tooltip = c("Date","death","New"))
       
     })  
@@ -665,14 +704,14 @@ server <- function(input, output) {
         theme(legend.position="none") + labs(y="Deaths (axis shows log10 scale)") +
         scale_y_continuous(trans='log10')+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       ggplotly(g, tooltip = c("Date","Total_deaths","New_deaths"))
       
     }) 
     
     ### ICU trends
     output$dailyicu <- renderPlotly({
-      lims <- as.POSIXct(strptime(c("29/02/2020 00:00",paste0(daily_date, " 23:59")), format = "%d/%m/%Y %H:%M"))    
+      startdate <- as.POSIXct(strptime(paste0(daily_date, " 23:59"), format = "%d/%m/%Y %H:%M")) - input$recent2*(60*60*24)
       conf <- ifelse(input$confirmed == "Confirmed cases only", "confirmed", "total")
       g = dataICU() %>% 
         spread(type, ncase) %>% 
@@ -680,12 +719,13 @@ server <- function(input, output) {
                ventilated_total = ventilated_confirmed + ventilated_suspected) %>%
         gather(type, ncase, -c(datetime,date,time)) %>%
         na.omit() %>%
-        filter(type == "hospitalised" | type == paste0("icu_",conf) | type == paste0("ventilated_",conf)) %>%
+        filter(type == "hospitalised" | type == paste0("icu_",conf) | type == paste0("ventilated_",conf),
+               datetime > startdate) %>%
         ggplot(aes(x=datetime, y=ncase, color = type)) + geom_line() + 
         scale_color_manual(values=wes_palette("GrandBudapest1", n=3)) +
         labs(y="Patients") + theme_bw() +
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_datetime(date_breaks = "3 days", date_labels = "%Y-%m-%d", limits = lims)
+        scale_x_datetime(date_breaks = "3 days", date_labels = "%Y-%m-%d")
     })
     
     ## testing
@@ -768,6 +808,23 @@ server <- function(input, output) {
       ggplotly(g, tooltip = c("date", "Cases_between_updates", "Tests_between_updates", "Positive_percentage"))
       
     })
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     ################### Comparison tabs ############
     
@@ -986,7 +1043,7 @@ server <- function(input, output) {
         ggplot(aes(x=date,y=Cases_permillion,color=province,group=province)) + 
         geom_line() + geom_point() + theme_bw() + labs(y="Cases per million population")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       ggplotly(g, tooltip = c("date", "province", "Cases_permillion", "Total_cases"))
       
     })    
@@ -1019,7 +1076,7 @@ server <- function(input, output) {
         ggplot(aes(x=date,y=Cases_permillion,color=county,group=county)) + 
         geom_line() + geom_point() + theme_bw() + labs(y="Cases per million")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       ggplotly(g, tooltip = c("date", "county", "Cases_permillion", "Total_cases"))
       
     })   
@@ -1096,7 +1153,7 @@ server <- function(input, output) {
         theme_bw() + 
         labs(y="Cumulative Hospitalised and ICU patients")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       ggplotly(g)
     })
     
@@ -1113,7 +1170,7 @@ server <- function(input, output) {
         geom_line(aes(x=date,y=ICU_percent),color="red") + theme_bw() + 
         labs(y="Hospitalised and ICU patients (% of total cases)")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       ggplotly(g)
     })
     
@@ -1132,7 +1189,7 @@ server <- function(input, output) {
         scale_color_manual(values=wes_palette("GrandBudapest1", n=3)) +
         geom_point() + labs(y="New daily counts") + theme_bw()+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "3 days")
+        scale_x_date(date_breaks = "7 days")
       ggplotly(g)
       
     })

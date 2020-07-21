@@ -5,9 +5,9 @@ account: andsim
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1935554
-bundleId: 3373634
+bundleId: 3416668
 url: https://andsim.shinyapps.io/Corona/
-when: 1594329511.99954
+when: 1595336404.95629
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: mobileapp.R
