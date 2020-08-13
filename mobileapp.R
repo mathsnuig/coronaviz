@@ -17,11 +17,12 @@ library(httr)
 library(readxl)
 library(tidyr)
 library(wesanderson)
+library(zoo)
 
 # Data dates
-daily_date = "20/07/2020"
-lag_date = "18/07/2020"
-maxdays = 150
+daily_date = "13/08/2020"
+lag_date = "11/08/2020"
+maxdays = 180
 
 # use round away from zero form of rounding (sometimes called banker's rounding)
 # what many of us learnt in school!
@@ -360,14 +361,15 @@ server <- function(input, output) {
                                       county=="Louth"|county=="Meath"|
                                       county=="Offaly"|county=="Westmeath"|
                                       county=="Wexford"|county=="Wicklow" ~ "Leinster",
-                                    county=="Clare"|county=="Cork"|
+                                      county=="Clare"|county=="Cork"|
                                       county=="Kerry"|county=="Limerick"|
                                       county=="Tipperary"|county=="Waterford" ~ "Munster",
-                                    county=="Galway"|county=="Leitrim"|
+                                      county=="Galway"|county=="Leitrim"|
                                       county=="Mayo"|county=="Roscommon"|
                                       county=="Sligo" ~ "Connacht",
-                                    county=="Donegal"|county=="Cavan"|
-                                      county=="Monaghan" ~ "Ulster (ROI)"))
+                                      county=="Donegal"|county=="Cavan"|
+                                      county=="Monaghan" ~ "Ulster (ROI)"),
+               cases_per100k = round(1e5*ncases/pop,0))
     })
     dataStats <- reactive({
       read.csv("data/corona_stats.csv") %>%
@@ -498,22 +500,25 @@ server <- function(input, output) {
                  90646,111584,153954,
                  214761,258808,295626,
                  325795,348416, 367780,
-                 386572, 404989)
+                 386572, 404989, 523277,
+                 574487)
       dates <- as.Date(c("02/03/2020","09/03/2020", "17/03/2020", 
                          "23/03/2020", "30/03/2020", "06/04/2020", 
                          "13/04/2020", "20/04/2020", "27/04/2020", 
                          "04/05/2020", "11/05/2020", "18/05/2020",
                          "25/05/2020", "01/06/2020", "08/06/2020",
-                         "15/06/2020", "22/06/2020"),format="%d/%m/%Y")
+                         "15/06/2020", "22/06/2020", "14/07/2020",
+                         "21/07/2020"),format="%d/%m/%Y")
       tests_pw <- c(NA,diff(tests))
       tests_pd <- c(80, 198, 606, 1892, 1746, 1753, 6880, 2991, 6053, 8687, 6292, 
-                    5260, 4310, 3232, 2766, 2685, 2631)
+                    5260, 4310, 3232, 2766, 2685, 2631, 7037, 7304)
       links <- c("https://bit.ly/2wpipR2", "https://bit.ly/2wpipR2", "https://bit.ly/3c83Twp", 
                  "https://bit.ly/2XmjlAE", "https://bit.ly/2UVD7l9", "https://bit.ly/34rdXOu",
                  "https://bit.ly/2XZeiXe", "https://bit.ly/34YHCyu", "https://bit.ly/3aHIk4J",
                  "https://bit.ly/3c8kpwO", "https://bit.ly/2YWB6HJ", "https://bit.ly/2AJObtX",
                  "https://bit.ly/3efuKYi", "https://bit.ly/3gWRqPo", "https://bit.ly/3d7l1CE",
-                 "https://bit.ly/3egfYkn", "https://bit.ly/3etmTqC")
+                 "https://bit.ly/3egfYkn", "https://bit.ly/3etmTqC", "https://bit.ly/3jpflYN",
+                 "https://bit.ly/2WKwB0Z")
       refs <- paste0("<a href='",links,"' target='_blank'>",links,"</a>")
       
       # weekly tests
@@ -536,7 +541,9 @@ server <- function(input, output) {
                                 date > dates[13] & date <= dates[14] ~ 13,
                                 date > dates[14] & date <= dates[15] ~ 14,
                                 date > dates[15] & date <= dates[16] ~ 15,
-                                date > dates[16] & date <= dates[17] ~ 16
+                                date > dates[16] & date <= dates[17] ~ 16,
+                                date > dates[17] & date <= dates[18] ~ 17,
+                                date > dates[18] & date <= dates[19] ~ 18
         )) %>%
         group_by(week) %>%
         summarise(new_cases = sum(ncase)) %>%
@@ -652,51 +659,21 @@ server <- function(input, output) {
     ######################### weekly tab
 
     
-    ## info boxes
-    output$HospBox <- renderValueBox({
-      dat <-  dataStats() %>% 
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
-        filter(date == max(date)) %>%
-        mutate(Percentage = round(100*Hospitalised/Cases,1))
-      valueBox(paste0(dat$Hospitalised, "(", dat$Percentage, "%)"), "Hospitalised",
-               color = "blue"
-      )
-    })
-    output$ICUBox <- renderValueBox({
-      dat <-  dataStats() %>% 
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
-        filter(date == max(date)) %>%
-        mutate(Percentage = round(100*ICU/Cases,1))
-      valueBox(paste0(dat$ICU, "(", dat$Percentage, "%)"), "in Intensive Care",
-               color = "purple"
-      )
-    })
-    output$CFRBox <- renderValueBox({
-      dat <-  dataStats() %>% 
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
-        filter(date == max(date)) %>%
-      mutate(Percentage = round(100*Deaths/Cases,1))
-      valueBox(paste0(dat$Percentage, "%"), "diagnosed case fatality rate",
-               color = "red"
-      )
-    })
-    
     ## Plot detailed data
     ### Map
     output$map <-  renderLeaflet({
       
       labs <- lapply(seq(nrow(dataCounty())), function(i) {
-        paste0( '<p>', dataCounty()[i, "ncase"],' cases in ', dataCounty()[i, "county"], '</p><p>') 
+        paste0( '<p>', dataCounty()[i, "cases_per100k"],' cases/100k in ', dataCounty()[i, "county"], '</p><p>') 
       })
       
       counties <- dataCounty()  %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
         filter(date == max(date)) %>%
-        mutate(logcases = log(ncases+1),
-               case_groups = case_when(ncases < 200 ~ "1",
-                                       ncases >= 200 & ncases < 300 ~ "2",
-                                       ncases >= 300 & ncases < 750 ~ "3",
-                                       ncases >= 750 ~ "4"))
+        mutate(case_groups = case_when(cases_per100k < 200 ~ "1",
+                                       cases_per100k >= 200 & cases_per100k < 350 ~ "2",
+                                       cases_per100k >= 350 & cases_per100k < 500 ~ "3",
+                                       cases_per100k >= 500 ~ "4"))
       
       pal <- colorFactor('YlOrRd', counties$case_groups)
       
@@ -711,7 +688,7 @@ server <- function(input, output) {
         addCircleMarkers(lng= ~long, 
                          lat= ~lat, 
                          layerId = ~county,
-                         radius = ~4*log(ncases),
+                         radius = ~cases_per100k/25,
                          color = ~pal(case_groups),
                          label = lapply(labs, htmltools::HTML),
                          fillOpacity = 0.9)
@@ -726,9 +703,9 @@ server <- function(input, output) {
         group_by(county) %>% 
         mutate(New_cases = c(NA,diff(ncases)),
                New_cases = ifelse(New_cases < 0, 0, New_cases),
-               New_cases_permillion = round2(1e6*New_cases/pop,0)) %>%
-        ggplot(aes(x=date, y=New_cases_permillion, color = county)) + 
-        geom_line() + labs(y="New cases (per million)")+
+               New_cases_per100k = round2(1e5*New_cases/pop,0)) %>%
+        ggplot(aes(x=date, y=New_cases_per100k, color = county)) + 
+        geom_line() + labs(y="New cases (per 100k)")+
         theme(legend.position = "bottom")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
         scale_x_date(date_breaks = "7 days")
@@ -743,9 +720,9 @@ server <- function(input, output) {
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
         group_by(date,county) %>%
         summarise(Total_cases = sum(ncases), pop = mean(pop)) %>%
-        mutate(Cases_permillion = round2(1e6*Total_cases/pop,0)) %>%
-        ggplot(aes(x=date,y=Cases_permillion,color=county,group=county)) + 
-        geom_line() + geom_point() + labs(y="Cases per million") + 
+        mutate(Cases_per100k = round2(1e5*Total_cases/pop,0)) %>%
+        ggplot(aes(x=date,y=Cases_per100k,color=county,group=county)) + 
+        geom_line() + geom_point() + labs(y="Cases per 100k") + 
         theme(legend.position = "bottom")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
         scale_x_date(date_breaks = "7 days")
