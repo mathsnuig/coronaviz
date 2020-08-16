@@ -451,6 +451,12 @@ date,ncase,ndeath,gender,area,country,type,death
 12/08/2020,29,0,unknown,north,ireland,confirmed,covid
 12/08/2020,40,1,unknown,unknown,ireland,confirmed,covid
 12/08/2020,-3,0,unknown,unknown,ireland, denotified, denotified
-13/08/2020,0,0,unknown,north,ireland,confirmed,covid
+13/08/2020,8,0,unknown,north,ireland,confirmed,covid
 13/08/2020,92,0,unknown,unknown,ireland,confirmed,covid
 13/08/2020,-1,0,unknown,unknown,ireland, denotified, denotified
+14/08/2020,74,0,unknown,north,ireland,confirmed,covid
+14/08/2020,67,0,unknown,unknown,ireland,confirmed,covid
+14/08/2020,-1,0,unknown,unknown,ireland, denotified, denotified
+15/08/2020,65,0,unknown,north,ireland,confirmed,covid
+15/08/2020,200,0,unknown,unknown,ireland,confirmed,covid
+15/08/2020,-4,0,unknown,unknown,ireland, denotified, denotified

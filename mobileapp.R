@@ -20,8 +20,8 @@ library(wesanderson)
 library(zoo)
 
 # Data dates
-daily_date = "13/08/2020"
-lag_date = "11/08/2020"
+daily_date = "15/08/2020"
+lag_date = "13/08/2020"
 maxdays = 180
 
 # use round away from zero form of rounding (sometimes called banker's rounding)

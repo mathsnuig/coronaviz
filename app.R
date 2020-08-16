@@ -21,8 +21,8 @@ library(tidyr)
 library(wesanderson)
 
 # Data dates
-daily_date = "13/08/2020"
-lag_date = "11/08/2020"
+daily_date = "15/08/2020"
+lag_date = "13/08/2020"
 maxdays = 180
 
 # use round away from zero form of rounding (sometimes called banker's rounding)
@@ -124,8 +124,8 @@ body <- dashboardBody(
                                  "advice ", target="_blank"),
                    paste0("before interpreting the data")),
                 valueBoxOutput("CasesBox"),
-                valueBoxOutput("SevenBox"),
                 valueBoxOutput("FourteenBox"),
+                valueBoxOutput("SevenBox"),
                 fluidRow(),
                 valueBoxOutput("MortBox"),
                 valueBoxOutput("HospBox"),
@@ -519,14 +519,14 @@ server <- function(input, output) {
       )
     })
     
-    ## 7 day incidence box
-    output$SevenBox <- renderValueBox({
+    ## 14 day incidence box
+    output$FourteenBox <- renderValueBox({
       dat <- dataIreland() %>%
-        filter(date > as.Date(daily_date,format="%d/%m/%Y")-7)
-      valueBox(paste0(round(1e5*sum(dat$ncase,na.rm=TRUE)/dat$pop[1],1)), "cases per 100,000 over the past week",
+        filter(date > as.Date(daily_date,format="%d/%m/%Y")-14)
+      valueBox(paste0(round(1e5*sum(dat$ncase,na.rm=TRUE)/dat$pop[1],1)), "cases per 100,000 over the past two weeks",
                color = "red"
       )
-    })  
+    })     
     
     ## hosp box
     output$HospBox <- renderValueBox({
@@ -537,15 +537,14 @@ server <- function(input, output) {
       )
     })
  
-    
-    ## 14 day incidence box
-    output$FourteenBox <- renderValueBox({
+    ## 7 day incidence box
+    output$SevenBox <- renderValueBox({
       dat <- dataIreland() %>%
-        filter(date > as.Date(daily_date,format="%d/%m/%Y")-14)
-      valueBox(paste0(round(1e5*sum(dat$ncase,na.rm=TRUE)/dat$pop[1],1)), "cases per 100,000 over the past two weeks",
+        filter(date > as.Date(daily_date,format="%d/%m/%Y")-7)
+      valueBox(paste0(round(1e5*sum(dat$ncase,na.rm=TRUE)/dat$pop[1],1)), "cases per 100,000 over the past week",
                color = "purple"
       )
-    }) 
+    })  
     
     ## icu box
     output$ICUBox <- renderValueBox({
@@ -1047,7 +1046,7 @@ server <- function(input, output) {
                 dataCounty()[i, "county"], '</p><p>') 
       })
 
-      cutoff <- quantile(counties$Period_cases_per100k, probs = c(0.25,0.5,0.9))             
+      cutoff <- quantile(counties$Period_cases_per100k, probs = c(0.25,0.5,0.85))             
       
        counties <- counties  %>%
          mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
@@ -1144,7 +1143,7 @@ server <- function(input, output) {
         geom_line(aes(y=roll)) + theme_bw() + 
         labs(y="New cases (per 100,000)", title = "Seven day rolling average of daily cases (per 100,000)")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "7 days")
+        scale_x_date(date_breaks = "7 days", limits = c(as.Date(input$countydates[2],format = "%d/%m/%Y")-7,as.Date(input$countydates[2],format = "%d/%m/%Y")))
       ggplotly(g, tooltip = c("date","county","New_cases_per100k","New_cases"))
     })
     
