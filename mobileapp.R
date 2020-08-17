@@ -20,8 +20,8 @@ library(wesanderson)
 library(zoo)
 
 # Data dates
-daily_date = "15/08/2020"
-lag_date = "13/08/2020"
+daily_date = "17/08/2020"
+lag_date = "15/08/2020"
 maxdays = 180
 
 # use round away from zero form of rounding (sometimes called banker's rounding)
@@ -70,6 +70,8 @@ ui = f7Page(
            paste0("before interpreting the data")),
         infoBoxOutput("CasesBox"),
         infoBoxOutput("MortBox"),
+        infoBoxOutput("FourteenBox"),
+        infoBoxOutput("SevenBox"),
         h4("Recent cases with seven day rolling average"),
         plotOutput("recentplot", width = "90%", height = 400),
         sliderInput("recent", "Choose how many days to display", value = 30, min = 7, max = 200),
@@ -109,6 +111,7 @@ ui = f7Page(
            tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
                   "HSE Health Protection Surveillance Centre", target="_blank")),
         leafletOutput("map", width = "90%", height = 550),
+        DTOutput("countytable", width = "90%"),
         f7SmartSelect("county", "Counties to compare",
                       choices = c("Carlow","Cavan","Clare","Cork","Donegal","Dublin",
                                   "Galway","Kerry","Kildare","Kilkenny","Laois","Leitrim","Limerick",
@@ -267,6 +270,32 @@ server <- function(input, output) {
         icon = icon("list")
       )
     })
+    
+    ## 14 day incidence box
+    output$FourteenBox <- renderInfoBox({
+      dat <- dataIreland() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        filter(date > as.Date(daily_date,format="%d/%m/%Y")-14)
+      infoBox(
+        paste0(round(1e5*sum(dat$ncase,na.rm=TRUE)/dat$pop[1],1)), 
+        "incidence per 100k in the past 14 days",
+        color = "red",
+        icon = icon("list")
+      )
+    })
+    
+    ## 7 day incidence box
+    output$SevenBox <- renderInfoBox({
+      dat <- dataIreland() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
+        filter(date > as.Date(daily_date,format="%d/%m/%Y")-7)
+      infoBox(
+        paste0(round(1e5*sum(dat$ncase,na.rm=TRUE)/dat$pop[1],1)), 
+        "incidence per 100k in the past 7 days",
+        color = "purple",
+        icon = icon("list")
+      )
+    })  
 
 
     ### detailed data
@@ -277,7 +306,7 @@ server <- function(input, output) {
                ncases = as.character(ncase),
                ncases = ifelse(ncases == "< = 5","5",ncases),
                ncases = as.numeric(ncases),
-               pop = case_when(county == "Carlow" ~ 24272,
+               pop = case_when(county == "Carlow" ~ 56932,
                                county == "Cavan" ~ 76176,
                                county == "Clare" ~ 118817,
                                county == "Donegal" ~159192,
@@ -361,15 +390,15 @@ server <- function(input, output) {
                                       county=="Louth"|county=="Meath"|
                                       county=="Offaly"|county=="Westmeath"|
                                       county=="Wexford"|county=="Wicklow" ~ "Leinster",
-                                      county=="Clare"|county=="Cork"|
+                                    county=="Clare"|county=="Cork"|
                                       county=="Kerry"|county=="Limerick"|
                                       county=="Tipperary"|county=="Waterford" ~ "Munster",
-                                      county=="Galway"|county=="Leitrim"|
+                                    county=="Galway"|county=="Leitrim"|
                                       county=="Mayo"|county=="Roscommon"|
                                       county=="Sligo" ~ "Connacht",
-                                      county=="Donegal"|county=="Cavan"|
+                                    county=="Donegal"|county=="Cavan"|
                                       county=="Monaghan" ~ "Ulster (ROI)"),
-               cases_per100k = round(1e5*ncases/pop,0))
+               Total_cases_per100k = 1e5*ncases/pop)
     })
     dataStats <- reactive({
       read.csv("data/corona_stats.csv") %>%
@@ -660,20 +689,54 @@ server <- function(input, output) {
 
     
     ## Plot detailed data
+    ### Table
+    output$countytable <- renderDT({
+      counties <- dataCounty() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        filter(date >= as.Date(lag_date,format = "%d/%m/%Y")-14) %>%
+        filter(date <= as.Date(lag_date,format = "%d/%m/%Y")) %>%
+        group_by(county) %>% 
+        mutate(New_cases = c(NA,diff(ncases)),
+               New_cases = ifelse(New_cases < 0, 0, New_cases),
+               Cases = max(ncases)-min(ncases)) %>%
+        mutate(Incidence_per100k = round(1e5*Cases/pop,0),
+               Population = pop,
+               Days = 14) %>%
+        filter(date == as.Date(lag_date,format = "%d/%m/%Y")) %>%
+        select(date, county, Incidence_per100k, Days, Cases, Population) %>%
+        arrange(desc(Incidence_per100k))
+      datatable(counties, escape = FALSE, options = list(pageLength = 26))
+    })
+    
     ### Map
     output$map <-  renderLeaflet({
+      counties <- dataCounty() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        filter(date >= as.Date(lag_date,format = "%d/%m/%Y")-14) %>%
+        filter(date <= as.Date(lag_date,format = "%d/%m/%Y")) %>%
+        group_by(county) %>% 
+        mutate(New_cases = c(NA,diff(ncases)),
+               New_cases = ifelse(New_cases < 0, 0, New_cases),
+               Period_cases = max(ncases)-min(ncases)) %>%
+        mutate(Period_cases_per100k = round(1e5*Period_cases/pop,0),
+               Period_length = 14)
       
-      labs <- lapply(seq(nrow(dataCounty())), function(i) {
-        paste0( '<p>', dataCounty()[i, "cases_per100k"],' cases/100k in ', dataCounty()[i, "county"], '</p><p>') 
+      
+      labs <- lapply(seq(nrow(counties)), function(i) {
+        paste0( '<p>', counties[i, "Period_cases_per100k"],' cases/100k over last 14 days in ', 
+                dataCounty()[i, "county"], '</p><p>') 
       })
       
-      counties <- dataCounty()  %>%
+      cutoff <- quantile(counties$Period_cases_per100k, probs = c(0.25,0.5,0.85))             
+      
+      counties <- counties  %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
-        filter(date == max(date)) %>%
-        mutate(case_groups = case_when(cases_per100k < 200 ~ "1",
-                                       cases_per100k >= 200 & cases_per100k < 350 ~ "2",
-                                       cases_per100k >= 350 & cases_per100k < 500 ~ "3",
-                                       cases_per100k >= 500 ~ "4"))
+        mutate(case_groups = case_when(Period_cases_per100k < cutoff[1] ~ "1",
+                                       Period_cases_per100k >=  cutoff[1] & 
+                                         Period_cases_per100k < cutoff[2] ~ "2",
+                                       Period_cases_per100k >= cutoff[2] & 
+                                         Period_cases_per100k < cutoff[3] ~ "3",
+                                       Period_cases_per100k >= cutoff[3] ~ "4"))
       
       pal <- colorFactor('YlOrRd', counties$case_groups)
       
@@ -688,11 +751,12 @@ server <- function(input, output) {
         addCircleMarkers(lng= ~long, 
                          lat= ~lat, 
                          layerId = ~county,
-                         radius = ~cases_per100k/25,
+                         radius = ~6*log(Period_cases_per100k+1),
                          color = ~pal(case_groups),
                          label = lapply(labs, htmltools::HTML),
                          fillOpacity = 0.9)
     })
+    
 
     ## new county scaled
     output$newcountyscaled <- renderPlot({

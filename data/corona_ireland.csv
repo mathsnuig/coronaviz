@@ -460,3 +460,7 @@ date,ncase,ndeath,gender,area,country,type,death
 15/08/2020,65,0,unknown,north,ireland,confirmed,covid
 15/08/2020,200,0,unknown,unknown,ireland,confirmed,covid
 15/08/2020,-4,0,unknown,unknown,ireland, denotified, denotified
+16/08/2020,27,0,unknown,north,ireland,confirmed,covid
+16/08/2020,66,0,unknown,unknown,ireland,confirmed,covid
+17/08/2020,39,0,unknown,north,ireland,confirmed,covid
+17/08/2020,56,0,unknown,unknown,ireland,confirmed,covid

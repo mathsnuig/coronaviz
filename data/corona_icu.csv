@@ -765,3 +765,8 @@ date,time,ncase,type
 15/08/2020,18:30,5,ventilated_confirmed
 15/08/2020,18:30,1,ventilated_suspected
 15/08/2020,20:00,16,hospitalised
+16/08/2020,18:30,8,icu_confirmed
+16/08/2020,18:30,7,icu_suspected
+16/08/2020,18:30,5,ventilated_confirmed
+16/08/2020,18:30,3,ventilated_suspected
+16/08/2020,20:00,19,hospitalised

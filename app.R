@@ -21,8 +21,8 @@ library(tidyr)
 library(wesanderson)
 
 # Data dates
-daily_date = "15/08/2020"
-lag_date = "13/08/2020"
+daily_date = "17/08/2020"
+lag_date = "15/08/2020"
 maxdays = 180
 
 # use round away from zero form of rounding (sometimes called banker's rounding)
@@ -247,6 +247,9 @@ body <- dashboardBody(
                 fluidRow(box(title = "Map of cases by county (ROI only)", width = 12,
                              leafletOutput("map", width = "70%", height = 600)
                              )),
+                fluidRow(box(title = "County incidence per 100,000 league table (ROI only)", width = 12,
+                             DTOutput("countytable", width = "70%")
+                )),
                   selectInput("county", "Counties to compare",
                               choices = c("Carlow","Cavan","Clare","Cork","Donegal","Dublin",
                                           "Galway","Kerry","Kildare","Kilkenny","Laois","Leitrim","Limerick",
@@ -394,7 +397,7 @@ server <- function(input, output) {
                ncases = as.character(ncase),
                ncases = ifelse(ncases == "< = 5","5",ncases),
                ncases = as.numeric(ncases),
-               pop = case_when(county == "Carlow" ~ 24272,
+               pop = case_when(county == "Carlow" ~ 56932,
                                county == "Cavan" ~ 76176,
                                county == "Clare" ~ 118817,
                                county == "Donegal" ~159192,
@@ -1026,6 +1029,26 @@ server <- function(input, output) {
 
     #################### Detailed data tab ############
 
+    ### Table
+    output$countytable <- renderDT({
+      counties <- dataCounty() %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        filter(date >= as.Date(input$countydates[1],format = "%d/%m/%Y")) %>%
+        filter(date <= as.Date(input$countydates[2],format = "%d/%m/%Y")) %>%
+        group_by(county) %>% 
+        mutate(New_cases = c(NA,diff(ncases)),
+               New_cases = ifelse(New_cases < 0, 0, New_cases),
+               Cases = max(ncases)-min(ncases)) %>%
+        mutate(Incidence_per100k = round(1e5*Cases/pop,0),
+               Population = pop,
+               Days = as.Date(input$countydates[2],format = "%d/%m/%Y") - 
+                 as.Date(input$countydates[1],format = "%d/%m/%Y")) %>%
+        filter(date == as.Date(input$countydates[2],format = "%d/%m/%Y")) %>%
+        select(date, county, Incidence_per100k, Days, Cases, Population) %>%
+        arrange(desc(Incidence_per100k))
+      datatable(counties, escape = FALSE, options = list(pageLength = 26))
+    })
+    
     ### Map
     output$map <-  renderLeaflet({
       counties <- dataCounty() %>%
