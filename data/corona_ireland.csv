@@ -454,7 +454,7 @@ date,ncase,ndeath,gender,area,country,type,death
 13/08/2020,8,0,unknown,north,ireland,confirmed,covid
 13/08/2020,92,0,unknown,unknown,ireland,confirmed,covid
 13/08/2020,-1,0,unknown,unknown,ireland, denotified, denotified
-14/08/2020,74,0,unknown,north,ireland,confirmed,covid
+14/08/2020,74,1,unknown,north,ireland,confirmed,covid
 14/08/2020,67,0,unknown,unknown,ireland,confirmed,covid
 14/08/2020,-1,0,unknown,unknown,ireland, denotified, denotified
 15/08/2020,65,0,unknown,north,ireland,confirmed,covid
@@ -464,3 +464,162 @@ date,ncase,ndeath,gender,area,country,type,death
 16/08/2020,66,0,unknown,unknown,ireland,confirmed,covid
 17/08/2020,39,0,unknown,north,ireland,confirmed,covid
 17/08/2020,56,0,unknown,unknown,ireland,confirmed,covid
+18/08/2020,41,0,unknown,north,ireland,confirmed,covid
+18/08/2020,190,1,unknown,unknown,ireland,confirmed,covid
+18/08/2020,-4,0,unknown,unknown,ireland, denotified, denotified
+19/08/2020,34,0,unknown,north,ireland,confirmed,covid
+19/08/2020,54,2,unknown,unknown,ireland,confirmed,covid
+19/08/2020,-6,-2,unknown,unknown,ireland, denotified, denotified
+20/08/2020,51,0,unknown,north,ireland,confirmed,covid
+20/08/2020,136,1,unknown,unknown,ireland,confirmed,covid
+20/08/2020,-7,0,unknown,unknown,ireland, denotified, denotified
+21/08/2020,20,0,unknown,north,ireland,confirmed,covid
+21/08/2020,79,0,unknown,unknown,ireland,confirmed,covid
+22/08/2020,71,0,unknown,north,ireland,confirmed,covid
+22/08/2020,156,2,unknown,unknown,ireland,confirmed,covid
+22/08/2020,-3,-1,unknown,unknown,ireland, denotified, denotified
+23/08/2020,119,0,unknown,north,ireland,confirmed,covid
+23/08/2020,61,0,unknown,unknown,ireland,confirmed,covid
+24/08/2020,10,0,unknown,north,ireland,confirmed,covid
+24/08/2020,147,0,unknown,unknown,ireland,confirmed,covid
+25/08/2020,47,0,unknown,north,ireland,confirmed,covid
+25/08/2020,92,0,unknown,unknown,ireland,confirmed,covid
+25/08/2020,-7,0,unknown,unknown,ireland, denotified, denotified
+26/08/2020,72,0,unknown,north,ireland,confirmed,covid
+26/08/2020,164,0,unknown,unknown,ireland,confirmed,covid
+26/08/2020,-2,0,unknown,unknown,ireland, denotified, denotified
+27/08/2020,69,0,unknown,north,ireland,confirmed,covid
+27/08/2020,93,0,unknown,unknown,ireland,confirmed,covid
+27/08/2020,-3,0,unknown,unknown,ireland, denotified, denotified
+28/08/2020,85,0,unknown,north,ireland,confirmed,covid
+28/08/2020,127,0,unknown,unknown,ireland,confirmed,covid
+28/08/2020,-2,0,unknown,unknown,ireland, denotified, denotified
+29/08/2020,89,0,unknown,north,ireland,confirmed,covid
+29/08/2020,142,0,unknown,unknown,ireland,confirmed,covid
+30/08/2020,49,0,unknown,north,ireland,confirmed,covid
+30/08/2020,42,0,unknown,unknown,ireland,confirmed,covid
+30/08/2020,-2,0,unknown,unknown,ireland, denotified, denotified
+31/08/2020,58,0,unknown,north,ireland,confirmed,covid
+31/08/2020,53,0,unknown,unknown,ireland,confirmed,covid
+31/08/2020,-2,0,unknown,unknown,ireland, denotified, denotified
+01/09/2020,49,0,unknown,north,ireland,confirmed,covid
+01/09/2020,217,0,unknown,unknown,ireland,confirmed,covid
+01/09/2020,-3,0,unknown,unknown,ireland, denotified, denotified
+02/09/2020,71,2,unknown,north,ireland,confirmed,covid
+02/09/2020,89,1,unknown,unknown,ireland,confirmed,covid
+02/09/2020,0,-1,unknown,unknown,ireland, denotified, denotified
+03/09/2020,77,1,unknown,north,ireland,confirmed,covid
+03/09/2020,95,0,unknown,unknown,ireland,confirmed,covid
+03/09/2020,-3,0,unknown,unknown,ireland, denotified, denotified
+04/09/2020,61,2,unknown,north,ireland,confirmed,covid
+04/09/2020,98,0,unknown,unknown,ireland,confirmed,covid
+04/09/2020,-1,0,unknown,unknown,ireland, denotified, denotified
+05/09/2020,118,0,unknown,north,ireland,confirmed,covid
+05/09/2020,231,0,unknown,unknown,ireland,confirmed,covid
+06/09/2020,106,0,unknown,north,ireland,confirmed,covid
+06/09/2020,138,0,unknown,unknown,ireland,confirmed,covid
+07/09/2020,141,1,unknown,north,ireland,confirmed,covid
+07/09/2020,102,0,unknown,unknown,ireland,confirmed,covid
+08/09/2020,40,2,unknown,north,ireland,confirmed,covid
+08/09/2020,307,1,unknown,unknown,ireland,confirmed,covid
+08/09/2020,-1,0,unknown,unknown,ireland, denotified, denotified
+09/09/2020,49,0,unknown,north,ireland,confirmed,covid
+09/09/2020,84,3,unknown,unknown,ireland,confirmed,covid
+10/09/2020,78,1,unknown,north,ireland,confirmed,covid
+10/09/2020,196,0,unknown,unknown,ireland,confirmed,covid
+11/09/2020,88,0,unknown,north,ireland,confirmed,covid
+11/09/2020,211,1,unknown,unknown,ireland,confirmed,covid
+11/09/2020,0,-1,unknown,unknown,ireland, denotified, denotified
+12/09/2020,104,0,unknown,north,ireland,confirmed,covid
+12/09/2020,159,2,unknown,unknown,ireland,confirmed,covid
+13/09/2020,87,0,unknown,north,ireland,confirmed,covid
+13/09/2020,255,1,unknown,unknown,ireland,confirmed,covid
+14/09/2020,109,2,unknown,north,ireland,confirmed,covid
+14/09/2020,208,0,unknown,unknown,ireland,confirmed,covid
+14/09/2020,-1,0,unknown,unknown,ireland, denotified, denotified
+15/09/2020,79,1,unknown,north,ireland,confirmed,covid
+15/09/2020,357,3,unknown,unknown,ireland,confirmed,covid
+16/09/2020,129,2,unknown,north,ireland,confirmed,covid
+16/09/2020,254,3,unknown,unknown,ireland,confirmed,covid
+16/09/2020,-4,-2,unknown,unknown,ireland, denotified, denotified
+17/09/2020,149,0,unknown,north,ireland,confirmed,covid
+17/09/2020,240,1,unknown,unknown,ireland,confirmed,covid
+17/09/2020,-16,0,unknown,unknown,ireland, denotified, denotified
+18/09/2020,163,2,unknown,north,ireland,confirmed,covid
+18/09/2020,253,3,unknown,unknown,ireland,confirmed,covid
+18/09/2020,-5,0,unknown,unknown,ireland, denotified, denotified
+19/09/2020,222,0,unknown,north,ireland,confirmed,covid
+19/09/2020,274,0,unknown,unknown,ireland,confirmed,covid
+19/09/2020,-7,0,unknown,unknown,ireland, denotified, denotified
+20/09/2020,176,0,unknown,north,ireland,confirmed,covid
+20/09/2020,396,0,unknown,unknown,ireland,confirmed,covid
+20/09/2020,-1,0,unknown,unknown,ireland, denotified, denotified
+21/09/2020,125,2,unknown,north,ireland,confirmed,covid
+21/09/2020,188,0,unknown,unknown,ireland,confirmed,covid
+22/09/2020,75,0,unknown,north,ireland,confirmed,covid
+22/09/2020,334,0,unknown,unknown,ireland,confirmed,covid
+22/09/2020,-11,0,unknown,unknown,ireland, denotified, denotified
+23/09/2020,220,0,unknown,north,ireland,confirmed,covid
+23/09/2020,234,2,unknown,unknown,ireland,confirmed,covid
+23/09/2020,-3,0,unknown,unknown,ireland, denotified, denotified
+24/09/2020,189,0,unknown,north,ireland,confirmed,covid
+24/09/2020,324,3,unknown,unknown,ireland,confirmed,covid
+24/09/2020,-5,0,unknown,unknown,ireland, denotified, denotified
+25/09/2020,273,0,unknown,north,ireland,confirmed,covid
+25/09/2020,326,0,unknown,unknown,ireland,confirmed,covid
+25/09/2020,-5,0,unknown,unknown,ireland, denotified, denotified
+26/09/2020,319,1,unknown,north,ireland,confirmed,covid
+26/09/2020,248,5,unknown,unknown,ireland,confirmed,covid
+26/09/2020,-3,0,unknown,unknown,ireland, denotified, denotified
+27/09/2020,187,0,unknown,north,ireland,confirmed,covid
+27/09/2020,430,0,unknown,unknown,ireland,confirmed,covid
+28/09/2020,220,0,unknown,north,ireland,confirmed,covid
+28/09/2020,390,0,unknown,unknown,ireland,confirmed,covid
+28/09/2020,-3,0,unknown,unknown,ireland, denotified, denotified
+29/09/2020,320,0,unknown,north,ireland,confirmed,covid
+29/09/2020,363,1,unknown,unknown,ireland,confirmed,covid
+30/09/2020,424,1,unknown,north,ireland,confirmed,covid
+30/09/2020,429,1,unknown,unknown,ireland,confirmed,covid
+30/09/2020,-14,0,unknown,unknown,ireland, denotified, denotified
+01/10/2020,259,2,unknown,north,ireland,confirmed,covid
+01/10/2020,442,4,unknown,unknown,ireland,confirmed,covid
+01/10/2020,0,-2,unknown,unknown,ireland, denotified, denotified
+02/10/2020,934,1,unknown,north,ireland,confirmed,covid
+02/10/2020,470,1,unknown,unknown,ireland,confirmed,covid
+02/10/2020,-4,-6,unknown,unknown,ireland, denotified, denotified
+03/10/2020,726,1,unknown,north,ireland,confirmed,covid
+03/10/2020,613,10,unknown,unknown,ireland,confirmed,covid
+03/10/2020,-8,-1,unknown,unknown,ireland, denotified, denotified
+04/10/2020,462,1,unknown,north,ireland,confirmed,covid
+04/10/2020,364,0,unknown,unknown,ireland,confirmed,covid
+05/10/2020,616,0,unknown,north,ireland,confirmed,covid
+05/10/2020,518,0,unknown,unknown,ireland,confirmed,covid
+05/10/2020,-1,0,unknown,unknown,ireland, denotified, denotified
+06/10/2020,669,1,unknown,north,ireland,confirmed,covid
+06/10/2020,432,1,unknown,unknown,ireland,confirmed,covid
+06/10/2020,-8,0,unknown,unknown,ireland, denotified, denotified
+07/10/2020,828,1,unknown,north,ireland,confirmed,covid
+07/10/2020,611,5,unknown,unknown,ireland,confirmed,covid
+08/10/2020,923,1,unknown,north,ireland,confirmed,covid
+08/10/2020,506,1,unknown,unknown,ireland,confirmed,covid
+08/10/2020,-4,0,unknown,unknown,ireland, denotified, denotified
+09/10/2020,1080,0,unknown,north,ireland,confirmed,covid
+09/10/2020,617,5,unknown,unknown,ireland,confirmed,covid
+09/10/2020,0,-1,unknown,unknown,ireland, denotified, denotified
+10/10/2020,902,0,unknown,north,ireland,confirmed,covid
+10/10/2020,1012,3,unknown,unknown,ireland,confirmed,covid
+10/10/2020,-1,0,unknown,unknown,ireland, denotified, denotified
+11/10/2020,1066,1,unknown,north,ireland,confirmed,covid
+11/10/2020,814,2,unknown,unknown,ireland,confirmed,covid
+12/10/2020,877,3,unknown,north,ireland,confirmed,covid
+12/10/2020,825,1,unknown,unknown,ireland,confirmed,covid
+12/10/2020,-2,0,unknown,unknown,ireland, denotified, denotified
+13/10/2020,863,7,unknown,north,ireland,confirmed,covid
+13/10/2020,811,3,unknown,unknown,ireland,confirmed,covid
+13/10/2020,-3,0,unknown,unknown,ireland, denotified, denotified
+14/10/2020,1217,4,unknown,north,ireland,confirmed,covid
+14/10/2020,1095,5,unknown,unknown,ireland,confirmed,covid
+14/10/2020,-11,0,unknown,unknown,ireland, denotified, denotified
+15/10/2020,763,4,unknown,north,ireland,confirmed,covid
+15/10/2020,0,0,unknown,unknown,ireland,confirmed,covid
+15/10/2020,0,0,unknown,unknown,ireland, denotified, denotified

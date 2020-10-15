@@ -21,13 +21,11 @@ library(tidyr)
 library(wesanderson)
 
 # Data dates
-daily_date = "17/08/2020"
-lag_date = "15/08/2020"
-maxdays = 180
+daily_date = "13/10/2020"
+lag_date = "11/10/2020"
+maxdays = 300
 
 # use round away from zero form of rounding (sometimes called banker's rounding)
-# what many of us learnt in school!
-# check out the "round" package to find out more than you ever wanted to know about the complexities of rounding
 round2 <- function(x, n = 0) (trunc((abs(x) * 10 ^ n) + 0.5) / 10 ^ n) * sign(x)
 
 # Any JS functions
@@ -77,8 +75,7 @@ sidebar <- dashboardSidebar(disable=FALSE,width='190px',
                             
                             tags$head(tags$style(HTML('.skin-black .wrapper {background-color: 	#ECF1F5;}'))),
                             
-                            #### ####
-                            
+                            ########
                             sidebarMenu(id = 'tabs', 
                                         selectInput("partition", "Area", 
                                                     choices = c("Republic of Ireland", "Island of Ireland"),
@@ -87,8 +84,6 @@ sidebar <- dashboardSidebar(disable=FALSE,width='190px',
                                         menuItem("Ireland", icon = icon("list"), tabName = "nphet"),
                                         menuItem("Worldwide", icon = icon("globe"), tabName = "compare")
                             )
-                            
-                            
                             
 )
 
@@ -135,7 +130,7 @@ body <- dashboardBody(
                     title = "Recent new cases and seven day rolling average", 
                     width = 12,
                     plotlyOutput("recentplot", width = "90%", height = 400),
-                    sliderInput("recent", "Choose how many days to display", value = 30, min = 7, max = 200)
+                    sliderInput("recent", "Choose how many days to display", value = 30, min = 7, max = maxdays)
                   )),
                 fluidRow(
                   tabBox(
@@ -170,14 +165,7 @@ body <- dashboardBody(
                                        choices = c("Confirmed cases only","Include suspected cases"),
                                        selected = "Confirmed cases only"),
                            plotlyOutput("dailyicu", width = "90%", height = 400),
-                           sliderInput("recent2", "Choose how many days to display", value = 30, min = 1, max = 100)),
-                  tabPanel("Testing", 
-                           plotlyOutput("tests", width = "90%", height = 400),
-                           h4("Official testing data are presented in the table below. 
-                              Positive percentage is calculated using ROI cases only, 
-                              excluding those from the German lab, and assuming that 
-                              testing and notification occur in the same week"),
-                           DTOutput("testdata", width = "90%")),
+                           sliderInput("recent2", "Choose how many days to display", value = 30, min = 1, max = maxdays)),
                   tabPanel("Daily data", DTOutput("dattable"))
                     )
                   ),
@@ -201,7 +189,6 @@ body <- dashboardBody(
                    paste0(") and "),
                    tags$a(href="https://www.ecdc.europa.eu/en/geographical-distribution-2019-ncov-cases",
                           "ECDC", target="_blank")),
-                #h3("Number of cases from other countries are scaled to reflect the Irish population. For example: ROI+NI (6.712 million people) is about 11% of Italy's population (60.48m), so 100 cases in Italy is equivalent to 11 cases in Ireland"),
                 fluidRow(
                   column(width=6,
                          uiOutput("country_choice")),
@@ -214,8 +201,7 @@ body <- dashboardBody(
                   title = "Compare cases",
                   width = 12, 
                   selected = "Cases per million",
-                  tabPanel("Cases per million", plotOutput("casecompare", width = "90%", height = 500))
-                  ,
+                  tabPanel("Cases per million", plotOutput("casecompare", width = "90%", height = 500)),
                   tabPanel("Animation (slow but it'll get there)", imageOutput("caseanim", width = "90%", height = 500))
                   )
                 ),
@@ -225,8 +211,6 @@ body <- dashboardBody(
                     width = 12,
                     selected = "Deaths per million",
                   tabPanel("Deaths per million", plotOutput("deathcompare", width = "90%", height = 500))
-                  # ,
-                  # tabPanel("Animation (slow but it'll get there)", imageOutput("deathanim", width = "90%", height = 500))
                   )
                 ),
                 h3(paste0("Developed by Dr. Andrew Simpkin "),
@@ -255,20 +239,17 @@ body <- dashboardBody(
                                           "Galway","Kerry","Kildare","Kilkenny","Laois","Leitrim","Limerick",
                                           "Longford","Louth","Mayo","Meath","Monaghan","Offaly","Roscommon",
                                           "Sligo","Tipperary","Waterford","Westmeath","Wexford","Wicklow"),
-                              selected = c("Cavan","Cork","Dublin","Galway","Limerick","Monaghan","Westmeath"),
+                              selected = c("Cavan","Cork","Donegal","Dublin","Galway","Kildare","Limerick",
+                                           "Monaghan","Offaly","Westmeath"),
                               multiple = TRUE), 
                 fluidRow(
                   tabBox(title = "Area data over time",
                     width = 12, 
-                    selected = "New cases per 100,000 (by county)",
-                    tabPanel("New cases per 100,000 (by county)", 
+                    selected = "Incidence per 100,000 (by county)",
+                    tabPanel("Incidence per 100,000 (by county)", 
                              plotlyOutput("newcounty", width = "90%", height = 500)),
-                    # tabPanel("New cases animated (slow but it'll get there)",
-                    #          imageOutput("animcounty")),
                     tabPanel("Cases per 100,000 (by county)", 
-                             plotlyOutput("cumulcounty", width = "90%", height = 500)),
-                    tabPanel("Cases per 100,000 (by province)", plotlyOutput("cumulprovince", width = "90%", height = 500))
-
+                             plotlyOutput("cumulcounty", width = "90%", height = 500))
                   )
                 ),
                 fluidRow(box(width = 12, title = "County data",
@@ -328,7 +309,7 @@ server <- function(input, output) {
     # Country comparison data
     dataCountry <- reactive({
       # Website and filename for European Centre for Disease Prevention and Control Covid-19 data
-      todaysdate = format(as.Date(Sys.time()) - 1, "%Y-%m-%d") # NZ is always ahead!
+      todaysdate = format(as.Date(Sys.time()-(16*60*60)), "%Y-%m-%d") # Updates ECDC around 16:00 each day
       ecdpcurl = paste("https://www.ecdc.europa.eu/sites/default/files/documents/COVID-19-geographic-disbtribution-worldwide-", todaysdate, ".xlsx", sep = "")
       ecdpcfn = rev(strsplit(ecdpcurl, "/")[[1]])[1]
       
@@ -489,7 +470,7 @@ server <- function(input, output) {
                                       county=="Sligo" ~ "Connacht",
                                     county=="Donegal"|county=="Cavan"|
                                       county=="Monaghan" ~ "Ulster (ROI)"),
-               Total_cases_per100k = 1e5*ncases/pop)
+               Total_cases_per100k = round(1e5*ncases/pop))
     })
     dataStats <- reactive({
       read.csv("data/corona_stats.csv") %>%
@@ -559,16 +540,6 @@ server <- function(input, output) {
     })
  
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
 
     ################### Time series plots ##############
@@ -755,107 +726,7 @@ server <- function(input, output) {
         scale_x_datetime(date_breaks = "3 days", date_labels = "%Y-%m-%d")
     })
     
-    ## testing
-    dataTest <- reactive({
-      tests <- c(397,1784,6636,
-                 17992,30213,42484,
-                 90646,111584,153954,
-                 214761,258808,295626,
-                 325795,348416, 367780,
-                 386572, 404989, 523277,
-                 574487)
-      dates <- as.Date(c("02/03/2020","09/03/2020", "17/03/2020", 
-                         "23/03/2020", "30/03/2020", "06/04/2020", 
-                         "13/04/2020", "20/04/2020", "27/04/2020", 
-                         "04/05/2020", "11/05/2020", "18/05/2020",
-                         "25/05/2020", "01/06/2020", "08/06/2020",
-                         "15/06/2020", "22/06/2020", "14/07/2020",
-                         "21/07/2020"),format="%d/%m/%Y")
-      tests_pw <- c(NA,diff(tests))
-      tests_pd <- c(80, 198, 606, 1892, 1746, 1753, 6880, 2991, 6053, 8687, 6292, 
-                    5260, 4310, 3232, 2766, 2685, 2631, 7037, 7304)
-      links <- c("https://bit.ly/2wpipR2", "https://bit.ly/2wpipR2", "https://bit.ly/3c83Twp", 
-                 "https://bit.ly/2XmjlAE", "https://bit.ly/2UVD7l9", "https://bit.ly/34rdXOu",
-                 "https://bit.ly/2XZeiXe", "https://bit.ly/34YHCyu", "https://bit.ly/3aHIk4J",
-                 "https://bit.ly/3c8kpwO", "https://bit.ly/2YWB6HJ", "https://bit.ly/2AJObtX",
-                 "https://bit.ly/3efuKYi", "https://bit.ly/3gWRqPo", "https://bit.ly/3d7l1CE",
-                 "https://bit.ly/3egfYkn", "https://bit.ly/3etmTqC", "https://bit.ly/3jpflYN",
-                 "https://bit.ly/2WKwB0Z")
-      refs <- paste0("<a href='",links,"' target='_blank'>",links,"</a>")
-      
-      # weekly tests
-      dat <- read.csv("data/corona_ireland.csv") %>% 
-        mutate(date = as.Date(date, format = "%d/%m/%Y")) %>%
-        filter(type !="german_lab") %>%
-        filter(area!="north")  %>%
-        mutate(week = case_when(date > dates[1] & date <= dates[2] ~ 1,
-                                date > dates[2] & date <= dates[3] ~ 2,
-                                date > dates[3] & date <= dates[4] ~ 3,
-                                date > dates[4] & date <= dates[5] ~ 4,
-                                date > dates[5] & date <= dates[6] ~ 5,
-                                date > dates[6] & date <= dates[7] ~ 6,
-                                date > dates[7] & date <= dates[8] ~ 7,
-                                date > dates[8] & date <= dates[9] ~ 8,
-                                date > dates[9] & date <= dates[10] ~ 9,
-                                date > dates[10] & date <= dates[11] ~ 10,
-                                date > dates[11] & date <= dates[12] ~ 11,
-                                date > dates[12] & date <= dates[13] ~ 12,
-                                date > dates[13] & date <= dates[14] ~ 13,
-                                date > dates[14] & date <= dates[15] ~ 14,
-                                date > dates[15] & date <= dates[16] ~ 15,
-                                date > dates[16] & date <= dates[17] ~ 16,
-                                date > dates[17] & date <= dates[18] ~ 17,
-                                date > dates[18] & date <= dates[19] ~ 18
-                                
-        )) %>%
-        group_by(week) %>%
-        summarise(new_cases = sum(ncase)) %>%
-        na.omit() 
-      
-      data.frame(date = as.Date(dates, format = "%d/%m/%Y"), 
-                 Total_tests = tests,
-                 Source = refs, 
-                 Tests_between_updates = tests_pw,
-                 Cases_between_updates = c(NA, as.vector(dat$new_cases)),
-                 Positive_percentage = round(100*c(NA, as.vector(dat$new_cases))/tests_pw,1),
-                 Daily_tests_between_updates = tests_pd)
-    })
-    
-    # table of data
-    output$testdata <- renderDT({
-      datatable(dataTest(), escape = FALSE, options = list(pageLength = 25))
-    })
-    
-    # bar plot of positive tests over week
-    output$tests <- renderPlotly({
-      
-      g = ggplot(dataTest(), aes(x=date,y=Positive_percentage,
-                                 label1 = Cases_between_updates, 
-                                 label2 = Tests_between_updates,
-                                 fill=as.factor(1))) + 
-        scale_fill_manual(values=wes_palette("GrandBudapest1", n=1))+
-        geom_col() + theme_bw() + labs(y="Positive test (%)") + theme(legend.position = "none") +
-        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "7 days") 
-      ggplotly(g, tooltip = c("date", "Cases_between_updates", "Tests_between_updates", "Positive_percentage"))
-      
-    })
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     
     
     ################### Comparison tabs ############
@@ -967,68 +838,14 @@ server <- function(input, output) {
       
     })
     
-    ## gganimate deaths
-    output$deathanim <- renderImage({
-      # as per https://shiny.rstudio.com/articles/progress.html#a-more-complex-progress-example
-      # but set max value to pre-determined total frame count
-      progress <- shiny::Progress$new(max = 100)
-      progress$set(message = "Rendering", value = 0)
-      on.exit(progress$close())
-      
-      updateShinyProgress <- function(detail) {    
-        progress$inc(1, detail = detail)
-      }
-      # A temp file to save the output.
-      # This file will be removed later by renderImage
-      outfile2 <- tempfile(fileext='.gif')
-      
-      # now make the animation
-      p = dataCountry() %>% 
-        filter(country %in% input$place) %>% 
-        mutate(pop = pop/1e6) %>%
-        group_by(country, date) %>%
-        summarise(Actual_new_deaths = sum(ndeath), Date = min(date), Country = country[1], Pop = mean(pop)) %>%
-        na.omit() %>%
-        mutate(New_deaths_per_million = round(Actual_new_deaths / Pop, 0)) %>%
-        filter(New_deaths_per_million > 0.1) %>%
-        mutate(Days = as.numeric(Date - min(Date)),
-               roll = rollmean(New_deaths_per_million, k=7, na.pad = TRUE, align = "right")) %>%
-        ggplot(aes(x = Days, y = New_deaths_per_million, color = country, fill = country)) +
-        geom_line(aes(y=roll)) + 
-        geom_point() + 
-        geom_text(data = . %>% mutate(Days = Days + 2),
-                  aes(y=roll,label = country), hjust = 0, size = 4) +
-        labs(title = "Seven day rolling average (line) and actual (points) deaths per million", 
-             x = "Days since 0.1 daily deaths (per million) first recorded", 
-             y = ifelse(input$log == TRUE, "Log deaths (per million of population)", "Deaths (per million of population)")) + 
-        theme_bw() + 
-        theme(axis.text.x = element_text(angle=45, hjust = 1), legend.position = "none") + 
-        transition_reveal(Days) +
-        scale_y_continuous(trans = ifelse(input$log == TRUE, "log10", "identity")) +
-        lims(x=c(0,maxdays))
-      
-      anim_save("outfile2.gif", animate(p)) # New
-      
-      # Return a list containing the filename
-      list(src = "outfile2.gif",
-           contentType = 'image/gif'
-           # width = 400,
-           # height = 300,
-           # alt = "This is alternate text"
-      )}, deleteFile = TRUE)
-    
-    
     
     #################### Data Tab  ###################
     output$dattable <- renderDT({
-      
       dataRaw() %>% mutate(date = as.Date(date,format = "%d/%m/%Y"))
-      
     })
 
 
     #################### Detailed data tab ############
-
     ### Table
     output$countytable <- renderDT({
       counties <- dataCounty() %>%
@@ -1051,6 +868,7 @@ server <- function(input, output) {
     
     ### Map
     output$map <-  renderLeaflet({
+      
       counties <- dataCounty() %>%
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
         filter(date >= as.Date(input$countydates[1],format = "%d/%m/%Y")) %>%
@@ -1099,36 +917,6 @@ server <- function(input, output) {
                            fillOpacity = 0.9)
       })
     
-    ## province time scaled
-    output$cumulprovince <- renderPlotly({
-      
-      g = dataCounty() %>%
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        filter(date >= as.Date(input$countydates[1],format = "%d/%m/%Y")) %>%
-        filter(date <= as.Date(input$countydates[2],format = "%d/%m/%Y")) %>%
-        group_by(date,province) %>%
-        summarise(Total_cases = sum(ncases), pop = sum(pop)) %>%
-        mutate(Cases_per100k = round2(1e5*Total_cases/pop,0)) %>%
-        ggplot(aes(x=date,y=Cases_per100k,color=province,group=province)) + 
-        geom_line() + geom_point() + theme_bw() + labs(y="Cases per 100,000 population")+
-        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "7 days")
-      ggplotly(g, tooltip = c("date", "province", "Cases_per100k", "Total_cases"))
-      
-    })    
-    
-    ## county time
-    ## county selector
-    output$county_choice <- renderUI({
-      selectInput("county", "Counties to compare",
-                   choices = c("Carlow","Cavan","Clare","Cork","Donegal","Dublin",
-                               "Galway","Kerry","Kildare","Kilkenny","Laois","Leitrim","Limerick",
-                               "Longford","Louth","Mayo","Meath","Monaghan","Offaly","Roscommon",
-                               "Sligo","Tipperary","Waterford","Westmeath","Wexford","Wicklow"),
-                   selected = "Westmeath",
-                   multiple = TRUE)
-    })
-    
     # county cumulative
     output$cumulcounty <- renderPlotly({
       
@@ -1143,7 +931,7 @@ server <- function(input, output) {
         summarise(Total_cases = sum(new_cases), pop = mean(pop)) %>%
         mutate(Cases_per100k = round2(1e5*Total_cases/pop,0)) %>%
         ggplot(aes(x=date,y=Cases_per100k,color=county,group=county)) + 
-        geom_line() + geom_point() + theme_bw() + labs(y="Cases per 100,000")+
+        geom_line() + theme_bw() + labs(y="Cases per 100,000")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
         scale_x_date(date_breaks = "7 days")
       ggplotly(g, tooltip = c("date", "county", "Cases_per100k", "Total_cases"))
@@ -1152,68 +940,27 @@ server <- function(input, output) {
     
     # new county
     output$newcounty <- renderPlotly({
+      ndays = as.Date(input$countydates[2],format = "%d/%m/%Y") - 
+              as.Date(input$countydates[1],format = "%d/%m/%Y")
       g = dataCounty() %>%
         filter(county %in% input$county) %>%
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        filter(date >= as.Date(input$countydates[1],format = "%d/%m/%Y")) %>%
-        filter(date <= as.Date(input$countydates[2],format = "%d/%m/%Y")) %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
         group_by(county) %>% 
-        mutate(New_cases = c(NA,diff(ncases)),
-               New_cases = ifelse(New_cases < 0, 0, New_cases),
-               New_cases_per100k = round2(1e5*New_cases/pop,0),
-               roll = rollmean(New_cases_per100k, k=7, na.pad = TRUE, align = "right")) %>%
-        ggplot(aes(x=date, y=New_cases_per100k, color = county, label1 = New_cases)) + 
-        geom_line(aes(y=roll)) + theme_bw() + 
-        labs(y="New cases (per 100,000)", title = "Seven day rolling average of daily cases (per 100,000)")+
+        mutate(New_cases = c(rep(NA,ndays), diff(ncases,lag=ndays)),
+               New_cases = ifelse(New_cases < 0, 0, New_cases)) %>%
+        mutate(Incidence_per100k = round(1e5*New_cases/pop,0)) %>%
+        ggplot(aes(x=date, y=Incidence_per100k, color = county, label1 = New_cases)) + 
+        geom_line() + theme_bw() + 
+        labs(y="Incidence per 100,000", title = paste0(ndays," day incidence per 100,000"))+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "7 days", limits = c(as.Date(input$countydates[2],format = "%d/%m/%Y")-7,as.Date(input$countydates[2],format = "%d/%m/%Y")))
-      ggplotly(g, tooltip = c("date","county","New_cases_per100k","New_cases"))
+        scale_x_date(date_breaks = "7 days")
+      ggplotly(g, tooltip = c("date","county","Incidence_per100k","New_cases"))
+      
     })
-    
-    # new county animation
-    output$animcounty <- renderImage({
-      progress <- shiny::Progress$new(max = 100)
-      progress$set(message = "Rendering", value = 0)
-      on.exit(progress$close())
-      
-      updateShinyProgress <- function(detail) {    
-        progress$inc(1, detail = detail)
-      }
-      outfile3 <- tempfile(fileext='.gif')
-      
-      # now make the animation
-      p = dataCounty() %>%
-        filter(county %in% input$county) %>%
-        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
-        group_by(county) %>% 
-        mutate(New_cases = c(NA,diff(ncases)),
-               New_cases = ifelse(New_cases < 0, 0, New_cases),
-               New_cases_per100k = round2(1e5*New_cases/pop,0),
-               roll = rollmean(New_cases_per100k, k=7, na.pad = TRUE, align = "right")) %>%
-        ggplot(aes(x=date, y=New_cases_per100k, color = county)) + 
-        geom_point() + 
-        geom_line(aes(y=roll)) + theme_bw() + 
-        labs(y="New cases (per 100,000)", title = "Seven day rolling average of daily cases (per 100,000)")+
-        geom_text(data = . %>% mutate(date = date + 2),
-                  aes(y=roll,label = county), hjust = 0, size = 4) +
-        theme(axis.text.x = element_text(angle=45, hjust = 1),
-              legend.position = "none") + 
-        scale_x_date(date_breaks = "7 days") + 
-        transition_reveal(date)
-
-      anim_save("outfile3.gif", animate(p)) # New
-      
-      # Return a list containing the filename
-      list(src = "outfile3.gif",
-           contentType = 'image/gif',
-           # width = 400,
-           height = 400
-           # alt = "This is alternate text"
-      )}, deleteFile = TRUE)
-      
     
     ## patient time raw
     output$patienttime <- renderPlotly({
+      
       g = dataStats() %>% 
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
         ggplot() + 
@@ -1224,12 +971,14 @@ server <- function(input, output) {
         theme_bw() + 
         labs(y="Cumulative Hospitalised and ICU patients")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "7 days")
+        scale_x_date(date_breaks = "3 days")
       ggplotly(g)
+      
     })
     
     ## patient time percentage
     output$patienttimepercent <- renderPlotly({
+      
       g = dataStats() %>% 
         mutate(date = as.Date(date,format = "%d/%m/%Y")) %>%
         mutate(ICU_percent = round(100*ICU/Cases,1),
@@ -1241,8 +990,9 @@ server <- function(input, output) {
         geom_line(aes(x=date,y=ICU_percent),color="red") + theme_bw() + 
         labs(y="Hospitalised and ICU patients (% of total cases)")+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "7 days")
+        scale_x_date(date_breaks = "3 days")
       ggplotly(g)
+      
     })
     
     ## new icu, death
@@ -1264,17 +1014,12 @@ server <- function(input, output) {
       ggplotly(g)
       
     })
-
     
-    ## Table weekly data
-    ### county
+    ## Table county data
     output$weekarea <- renderDT({
-
       dataCounty() %>% mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% arrange(desc(date))
-      
     })
   
-
 }
 
 # Run the application 
@@ -1282,4 +1027,3 @@ shinyApp(
     ui = dashboardPage(header, sidebar, body, skin = 'black'),
     server = server
 )
-
