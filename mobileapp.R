@@ -19,8 +19,8 @@ library(tidyr)
 library(wesanderson)
 
 # Data dates
-daily_date = "13/10/2020"
-lag_date = "11/10/2020"
+daily_date = "22/10/2020"
+lag_date = "20/10/2020"
 maxdays = 300
 
 # use round away from zero form of rounding (sometimes called banker's rounding)
@@ -453,7 +453,7 @@ server <- function(input, output) {
         summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
         na.omit() %>%
         mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases),
-               roll = rollmean(New_cases, k=7, na.pad = TRUE, align = "right"))  %>%
+               roll = rollmean(New_cases, k=7, na.pad = TRUE, align = "center"))  %>%
         ggplot(aes(x=Date,y=New_cases,label=Date,label1=Total_cases)) + 
         geom_point() + geom_line(aes(y=roll)) +
         theme(legend.position="none") + theme_bw() + labs(y="Daily New Cases")+

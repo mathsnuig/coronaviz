@@ -21,8 +21,8 @@ library(tidyr)
 library(wesanderson)
 
 # Data dates
-daily_date = "13/10/2020"
-lag_date = "11/10/2020"
+daily_date = "22/10/2020"
+lag_date = "20/10/2020"
 maxdays = 300
 
 # use round away from zero form of rounding (sometimes called banker's rounding)
@@ -226,35 +226,39 @@ body <- dashboardBody(
                    tags$a(href="https://www.hpsc.ie/a-z/respiratory/coronavirus/novelcoronavirus/casesinireland/epidemiologyofcovid-19inireland/", 
                           "(HSE Health Protection Surveillance Centre)", target="_blank")),
                
-                  dateRangeInput("countydates", "Date range for county comparisons", start = as.Date(lag_date, format = "%d/%m/%Y")-14, end = as.Date(lag_date, format = "%d/%m/%Y")),
-
-                fluidRow(box(title = "Map of cases by county (ROI only)", width = 12,
-                             leafletOutput("map", width = "70%", height = 600)
-                             )),
-                fluidRow(box(title = "County incidence per 100,000 league table (ROI only)", width = 12,
-                             DTOutput("countytable", width = "70%")
-                )),
-                  selectInput("county", "Counties to compare",
+                
+                    dateRangeInput("countydates", "Date range for incidence", start = as.Date(lag_date, format = "%d/%m/%Y")-14, end = as.Date(lag_date, format = "%d/%m/%Y")),
+                    selectInput("county", "Counties to compare",
                               choices = c("Carlow","Cavan","Clare","Cork","Donegal","Dublin",
                                           "Galway","Kerry","Kildare","Kilkenny","Laois","Leitrim","Limerick",
                                           "Longford","Louth","Mayo","Meath","Monaghan","Offaly","Roscommon",
                                           "Sligo","Tipperary","Waterford","Westmeath","Wexford","Wicklow"),
-                              selected = c("Cavan","Cork","Donegal","Dublin","Galway","Kildare","Limerick",
-                                           "Monaghan","Offaly","Westmeath"),
-                              multiple = TRUE), 
+                              selected = c("Dublin","Kildare"),
+                              multiple = TRUE),
                 fluidRow(
-                  tabBox(title = "Area data over time",
+                  tabBox(title = "County data",
+                    height = 800,
                     width = 12, 
-                    selected = "Incidence per 100,000 (by county)",
-                    tabPanel("Incidence per 100,000 (by county)", 
-                             plotlyOutput("newcounty", width = "90%", height = 500)),
-                    tabPanel("Cases per 100,000 (by county)", 
-                             plotlyOutput("cumulcounty", width = "90%", height = 500))
+                    selected = "Map",
+                    tabPanel("Map",
+                             leafletOutput("map", width = "70%", height = 700)),
+                    tabPanel("Incidence table",
+                             DTOutput("countytable", width = "70%")),
+                    tabPanel("Incidence over time", 
+                             plotlyOutput("newcounty", width = "90%", height = 700)),
+                    # tabPanel("Cases per 100,000 (by county)", 
+                    #          plotlyOutput("cumulcounty", width = "90%", height = 500)),
+                    tabPanel("Incidence animation",
+                             h5(paste0("This can take a minute to load. Choose your required counties and 
+                                       incidence dates outside this tab (e.g. with Map selected), 
+                                       otherwise this will try to make a new animation every time 
+                                       you select a new county!")),
+                             imageOutput("countyanim", width = "90%", height = 800))
                   )
                 ),
-                fluidRow(box(width = 12, title = "County data",
-                             column(10, DTOutput("weekarea"))
-                )),
+                # fluidRow(box(width = 12, title = "All county data",
+                #              column(10, DTOutput("weekarea"))
+                # )),
                 fluidRow(
                   tabBox(title = "Hospital and intensive care cases over time", 
                          width = 12,
@@ -552,7 +556,7 @@ server <- function(input, output) {
         summarise(ncases = sum(ncase), New_cases = sum(ncase), Date = min(date)) %>%
         na.omit() %>%
         mutate(ccases = cumsum(ncases), Total_cases= cumsum(ncases),
-               roll = rollmean(New_cases, k=7, na.pad = TRUE, align = "right"))  %>%
+               roll = rollmean(New_cases, k=7, na.pad = TRUE, align = "center"))  %>%
         ggplot(aes(x=Date,y=New_cases,label=Date,label1=Total_cases)) + 
         geom_point() + geom_line(aes(y=roll)) +
         theme(legend.position="none") + theme_bw() + labs(y="Daily New Cases")+
@@ -953,10 +957,56 @@ server <- function(input, output) {
         geom_line() + theme_bw() + 
         labs(y="Incidence per 100,000", title = paste0(ndays," day incidence per 100,000"))+
         theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
-        scale_x_date(date_breaks = "7 days")
+        scale_x_date(date_breaks = "7 days", limits = c(as.Date("12/03/2020",format = "%d/%m/%Y"),
+                                                        as.Date(lag_date,format = "%d/%m/%Y")+5))
       ggplotly(g, tooltip = c("date","county","Incidence_per100k","New_cases"))
       
     })
+    
+    ## gganimate cases
+    output$countyanim <- renderImage({
+      # as per https://shiny.rstudio.com/articles/progress.html#a-more-complex-progress-example
+      # but set max value to pre-determined total frame count
+      progress <- shiny::Progress$new(min = 0, max = 1000)
+      progress$set(message = "Loading animation (very slow - but worth it)", value = 0)
+      on.exit(progress$close())
+      
+      updateShinyProgress <- function(detail) {
+        progress$inc(10, detail = detail)
+      }
+
+      # A temp file to save the output.
+      # This file will be removed later by renderImage
+      outfile1 <- tempfile(fileext='.gif')
+      
+      # now make the animation
+      ndays = as.Date(input$countydates[2],format = "%d/%m/%Y") - 
+        as.Date(input$countydates[1],format = "%d/%m/%Y")
+      g = dataCounty() %>%
+        filter(county %in% input$county) %>%
+        mutate(date = as.Date(date,format = "%d/%m/%Y")) %>% 
+        group_by(county) %>% 
+        mutate(New_cases = c(rep(NA,ndays), diff(ncases,lag=ndays)),
+               New_cases = ifelse(New_cases < 0, 0, New_cases)) %>%
+        mutate(Incidence_per100k = round(1e5*New_cases/pop,0)) %>%
+        ggplot(aes(x=date, y=Incidence_per100k, color = county, label1 = New_cases)) + 
+        geom_text(aes(y=Incidence_per100k, label = county), hjust = 0, size = 4) +
+        geom_line() + theme_bw() + 
+        labs(y="Incidence per 100,000", title = paste0(ndays," day incidence per 100,000"))+
+        theme(axis.text.x = element_text(angle=45, hjust = 1)) + 
+        scale_x_date(date_breaks = "7 days", limits = c(as.Date("12/03/2020",format = "%d/%m/%Y"),
+                                                        as.Date(lag_date,format = "%d/%m/%Y")+15)) + 
+        transition_reveal(date)
+      
+      anim_save("outfile1.gif", animate(g)) # New
+      
+      # Return a list containing the filename
+      list(src = "outfile1.gif",
+           contentType = 'image/gif',
+           width = 700
+           # height = 300,
+           # alt = "This is alternate text"
+      )}, deleteFile = TRUE)
     
     ## patient time raw
     output$patienttime <- renderPlotly({

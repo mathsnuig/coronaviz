@@ -621,5 +621,23 @@ date,ncase,ndeath,gender,area,country,type,death
 14/10/2020,1095,5,unknown,unknown,ireland,confirmed,covid
 14/10/2020,-11,0,unknown,unknown,ireland, denotified, denotified
 15/10/2020,763,4,unknown,north,ireland,confirmed,covid
-15/10/2020,0,0,unknown,unknown,ireland,confirmed,covid
-15/10/2020,0,0,unknown,unknown,ireland, denotified, denotified
+15/10/2020,1205,3,unknown,unknown,ireland,confirmed,covid
+15/10/2020,-19,0,unknown,unknown,ireland, denotified, denotified
+16/10/2020,1299,2,unknown,north,ireland,confirmed,covid
+16/10/2020,1000,3,unknown,unknown,ireland,confirmed,covid
+16/10/2020,-26,0,unknown,unknown,ireland, denotified, denotified
+17/10/2020,1031,2,unknown,north,ireland,confirmed,covid
+17/10/2020,1276,8,unknown,unknown,ireland,confirmed,covid
+18/10/2020,1012,5,unknown,north,ireland,confirmed,covid
+18/10/2020,1283,3,unknown,unknown,ireland,confirmed,covid
+19/10/2020,821,6,unknown,north,ireland,confirmed,covid
+19/10/2020,1031,0,unknown,unknown,ireland,confirmed,covid
+20/10/2020,913,3,unknown,north,ireland,confirmed,covid
+20/10/2020,1269,13,unknown,unknown,ireland,confirmed,covid
+20/10/2020,-6,0,unknown,unknown,ireland, denotified, denotified
+21/10/2020,1039,5,unknown,north,ireland,confirmed,covid
+21/10/2020,1167,3,unknown,unknown,ireland,confirmed,covid
+21/10/2020,-1,0,unknown,unknown,ireland, denotified, denotified
+22/10/2020,1042,5,unknown,north,ireland,confirmed,covid
+22/10/2020,1066,3,unknown,unknown,ireland,confirmed,covid
+22/10/2020,-12,0,unknown,unknown,ireland, denotified, denotified
